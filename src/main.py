@@ -12,6 +12,8 @@ class UI(QtWidgets.QMainWindow):
         self._centralWidget = CentralWidget(self)
         self.setCentralWidget(self._centralWidget)
 
+
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')

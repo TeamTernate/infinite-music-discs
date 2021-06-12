@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5 import QtWidgets
 from enum import Enum
 
@@ -7,6 +7,8 @@ class ButtonType(Enum):
     IMAGE = 1
     TRACK = 2
     NEW_TRACK = 3
+
+
 
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
@@ -19,6 +21,9 @@ class GenerateButton(QtWidgets.QPushButton):
 
 #file selection button supporting file drag/drop
 class DragDropButton(QtWidgets.QPushButton):
+
+    fileChanged = pyqtSignal(list)
+    
     def __init__(self, text, btnType = ButtonType.IMAGE, parent = None):
         super(DragDropButton, self).__init__(text)
 
@@ -52,24 +57,31 @@ class DragDropButton(QtWidgets.QPushButton):
             }
         """)
 
+
+
     def mousePressEvent(self, event):
+        event.accept()
+        
         #set accepted file types based on button function
         if(self._type == ButtonType.IMAGE):
             fileTypeStr = "Image files (*.png)"
         else:
             fileTypeStr = "Music files (*.mp3, *.wav, *.ogg)"
 
-        #if this action creates a new track
-        if(self._type == ButtonType.NEW_TRACK):
-            #allow multiple files
-            f = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open file', '.', fileTypeStr)
-            self._parent.addDiscEntries(f[0])
+        f = []
 
-        #if this action modifies an existing track
+        #if this action creates a new track, allow multiple files
+        if(self._type == ButtonType.NEW_TRACK):
+            f = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open file', '.', fileTypeStr)
+            self.fileChanged.emit( f[0] )
+
+        #if this action modifies an existing track, update one file
         else:
-            #update one file
             f = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '.', fileTypeStr)
             self.setFile(f[0])
+
+            #wrap file string in a list to match signal type
+            self.fileChanged.emit([ f[0] ])
 
     def hasFile(self):
         return (self._file != None)
@@ -85,6 +97,8 @@ class DragDropButton(QtWidgets.QPushButton):
     def getFileNameFromPath(self, file):
         return file.split('/')[-1]
 
+
+
 #entry in list of tracks
 class DiscListEntry(QtWidgets.QFrame):
     def __init__(self, parent = None):
@@ -96,7 +110,8 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnTrack = DragDropButton("Track", ButtonType.TRACK, self)
         self._leTitle = QtWidgets.QLineEdit("Track Title", self)
         
-        self.setFrameShape(QtWidgets.QFrame.Box)
+        self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.setLineWidth(0)
         self.setMinimumSize(200, 75)
         
         layout.addWidget(self._btnIcon, 0, Qt.AlignLeft)
@@ -131,6 +146,8 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnTrack.setFile(fTrack)
         self._leTitle.setText(title)
 
+
+
 #blank entry in list of tracks
 class NewDiscEntry(QtWidgets.QFrame):
     def __init__(self, parent = None):
@@ -138,11 +155,14 @@ class NewDiscEntry(QtWidgets.QFrame):
 
         self._parent = parent
         
-        self.setFrameShape(QtWidgets.QFrame.Box)
+        self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.setLineWidth(0)
         self.setMinimumSize(200, 75)
+
+        self._addButton = DragDropButton("+", ButtonType.NEW_TRACK, self)
         
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(DragDropButton("+", ButtonType.NEW_TRACK, self), 1)
+        layout.addWidget(self._addButton, 1)
 
         arrowLayout = QtWidgets.QVBoxLayout()
         arrowLayout.addWidget(QtWidgets.QPushButton("^"), 0, Qt.AlignRight)
@@ -164,11 +184,7 @@ class NewDiscEntry(QtWidgets.QFrame):
             }
         """)
 
-    def addDiscEntry(self, fIcon, fTrack, title):
-        self._parent.addDiscEntry(fIcon, fTrack, title)
 
-    def addDiscEntries(self, fTrackList):
-        self._parent.addDiscEntries(fTrackList)
 
 #list of tracks
 class DiscList(QtWidgets.QWidget):
@@ -177,33 +193,47 @@ class DiscList(QtWidgets.QWidget):
 
         self._parent = parent
 
+        #create new track entry for adding new list entries
+        newDiscEntry = NewDiscEntry(self)
+        newDiscEntry._addButton.fileChanged.connect(self.addDiscEntries)
+
+        #child layout, contains all track entries + new track entry
         self._childLayout = QtWidgets.QVBoxLayout()
-        self._childLayout.addWidget(NewDiscEntry(self), 0, Qt.AlignTop)
+        self._childLayout.setContentsMargins(0, 0, 0, 0)
+        self._childLayout.addWidget(newDiscEntry, 0, Qt.AlignTop)
         self._childLayout.addStretch()
 
-        self._widget = QtWidgets.QListWidget(self)
-        self._widget.setLayout(self._childLayout)
+        #child widget, contains child layout
+        widget = QtWidgets.QWidget()
+        widget.setLayout(self._childLayout)
 
-        self._scrollArea = QtWidgets.QScrollArea()
-        self._scrollArea.setWidget(self._widget)
-        self._scrollArea.setWidgetResizable(True)
-        self._scrollArea.setVerticalScrollBarPolicy(2)
+        #scroll area, contains child widget and makes child widget scrollable
+        scrollArea = QtWidgets.QScrollArea(self)
+        scrollArea.setWidget(widget)
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
-        layout = QtWidgets.QVBoxLayout()
+        #layout, contains scroll area
+        layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self._scrollArea)
+        layout.addWidget(scrollArea)
 
         self.setLayout(layout)
 
+    #insert a new track object into the list of tracks
     def addDiscEntry(self, fIcon, fTrack, title):
         tmpEntry = DiscListEntry(self)
         tmpEntry.setEntry(fIcon, fTrack, title)
         
         self._childLayout.insertWidget(self._childLayout.count()-2, tmpEntry, 0, Qt.AlignTop)
 
+    #add multiple track objects to the list of tracks
     def addDiscEntries(self, fTrackList):
         for f in fTrackList:
             self.addDiscEntry('', f, "New Track")
+
+
 
 #primary container widget
 class CentralWidget(QtWidgets.QWidget):
