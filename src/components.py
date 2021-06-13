@@ -12,12 +12,21 @@ class ButtonType(Enum):
 
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
-    def __init__(self, text, parent = None):
-        super(GenerateButton, self).__init__(text)
+
+    generate = pyqtSignal()
+    
+    def __init__(self, parent = None):
+        super(GenerateButton, self).__init__("Generate Datapack")
 
         self._parent = parent
 
         self.setMinimumSize(200, 75)
+
+    def mousePressEvent(self, event):
+        event.accept()
+        self.generate.emit()
+
+
 
 #file selection button supporting file drag/drop
 class DragDropButton(QtWidgets.QPushButton):
@@ -128,7 +137,6 @@ class DiscListEntry(QtWidgets.QFrame):
         self.setStyleSheet("""
             DiscListEntry {
                 border: 2px solid black;
-                border-radius: 10px;
                 background-color: rgb(255, 255, 255);
 
                 padding-top: 1px;
@@ -139,7 +147,7 @@ class DiscListEntry(QtWidgets.QFrame):
         """)
 
     def getEntry(self):
-        return (self._btnIcon.getFile(), self._btnTrack.getFile(), self._leTitle.text())
+        return [self._btnIcon.getFile(), self._btnTrack.getFile(), self._leTitle.text()]
 
     def setEntry(self, fIcon, fTrack, title):
         self._btnIcon.setFile(fIcon)
@@ -174,7 +182,6 @@ class NewDiscEntry(QtWidgets.QFrame):
         self.setStyleSheet("""
             NewDiscEntry {
                 border: 2px solid black;
-                border-radius: 10px;
                 background-color: rgb(255, 255, 255);
 
                 padding-top: 1px;
@@ -199,6 +206,7 @@ class DiscList(QtWidgets.QWidget):
 
         #child layout, contains all track entries + new track entry
         self._childLayout = QtWidgets.QVBoxLayout()
+        self._childLayout.setSpacing(0)
         self._childLayout.setContentsMargins(0, 0, 0, 0)
         self._childLayout.addWidget(newDiscEntry, 0, Qt.AlignTop)
         self._childLayout.addStretch()
@@ -216,10 +224,23 @@ class DiscList(QtWidgets.QWidget):
 
         #layout, contains scroll area
         layout = QtWidgets.QVBoxLayout(self)
+        layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(scrollArea)
 
         self.setLayout(layout)
+
+    #get all stored track data
+    def getDiscEntries(self):
+        entries = []
+        
+        for i in range(self._childLayout.count()):
+            e = self._childLayout.itemAt(i).widget()
+
+            if(type(e) == DiscListEntry):
+                entries.append(e.getEntry())
+
+        return entries
 
     #insert a new track object into the list of tracks
     def addDiscEntry(self, fIcon, fTrack, title):
@@ -241,8 +262,27 @@ class CentralWidget(QtWidgets.QWidget):
         super(CentralWidget, self).__init__()
         
         layout = QtWidgets.QVBoxLayout()
+        layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(DiscList())
-        layout.addWidget(GenerateButton("Generate Datapack"), 0, Qt.AlignBottom)
+
+        #list of music disc tracks
+        self._discList = DiscList()
+        layout.addWidget(self._discList)
+
+        #button to generate datapack/resourcepack
+        btnGen = GenerateButton()
+        btnGen.generate.connect(self.generatePacks)
+        layout.addWidget(btnGen, 0, Qt.AlignBottom)
         
         self.setLayout(layout)
+
+    def generatePacks(self):
+        #self._settings.getUserSettings()
+        discEntries = self._discList.getDiscEntries()
+
+        #generator.validate()
+        #generator.generate_datapack()
+        #generator.generate_resourcepack()
+
+
+
