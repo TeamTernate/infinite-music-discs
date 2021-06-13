@@ -34,22 +34,20 @@ class DragDropButton(QtWidgets.QPushButton):
 
     fileChanged = pyqtSignal(list)
     
-    def __init__(self, pixmap, pixmap_hover, pixmap_pressed, btnType = ButtonType.IMAGE, parent = None):
+    def __init__(self, btnType = ButtonType.IMAGE, parent = None):
         super(DragDropButton, self).__init__(parent)
 
         self._parent = parent
-        
-        self.pixmap = QtGui.QPixmap(pixmap)
-        self.pixmap_hover = QtGui.QPixmap(pixmap_hover)
-        self.pixmap_pressed = QtGui.QPixmap(pixmap_pressed)
 
-        self._file = None
-        self._fileName = ""
+        self._file = ''
+        self._fileName = ''
         self._type = btnType
 
+        self.setMinimumSize(50, 50)
+
         self._img = QtWidgets.QLabel()
-        self._img.setPixmap(QtGui.QPixmap("../data/image-empty.png").scaled(self.frameGeometry().width(), self.frameGeometry().height(), Qt.KeepAspectRatio))
         self._img.setScaledContents(True)
+        self.setImage(self._file)
 
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0)
@@ -58,70 +56,21 @@ class DragDropButton(QtWidgets.QPushButton):
 
         self.setLayout(layout)
 
-        self.setMinimumSize(50, 50)
-
-        self.pressed.connect(self.update)
-        self.released.connect(self.update)
-
         self.setStyleSheet("""
             DragDropButton {
-                border: 5px solid rgb(0, 134, 63);
+                border: 2px solid rgb(0, 134, 63);
+                background-color: rgb(225, 225, 225);
             }
 
             DragDropButton:on {
-                border: 5px solid rgb(0, 52, 25);
+                border: 2px solid rgb(0, 52, 25);
             }
 
             DragDropButton:hover {
-                border: 5px solid rgb(51, 178, 45);
+                border: 2px solid rgb(51, 178, 45);
             }
         """)
-
-    """
-    def paintEvent(self, event):
-        pix = self.pixmap_hover if self.underMouse() else self.pixmap
-        if self.isDown():
-            pix = self.pixmap_pressed
-        
-        painter = QtGui.QPainter(self)
-
-        drawRect = event.rect()
-        drawRect.adjust(5, 5, -5, -5)
-
-        painter.drawPixmap(event.rect(), QtGui.QPixmap("../data/slot.png").scaled(50, 50, Qt.KeepAspectRatio))
-
-        #draw background icon
-        if(self._type == ButtonType.IMAGE):
-            if(".png" in self._file):
-                painter.drawPixmap(drawRect, QtGui.QPixmap(self._file))
-            else:
-                painter.drawPixmap(drawRect, QtGui.QPixmap("../data/image-empty.png").scaled(50, 50, Qt.KeepAspectRatio))
-
-        elif(self._type == ButtonType.TRACK):
-            if(".ogg" in self._file):
-                painter.drawPixmap(drawRect, QtGui.QPixmap("../data/track-mp3.png").scaled(50, 50, Qt.KeepAspectRatio))
-            elif(".mp3" in self._file):
-                painter.drawPixmap(drawRect, QtGui.QPixmap("../data/track-mp3.png").scaled(50, 50, Qt.KeepAspectRatio))
-            elif(".wav" in self._file):
-                painter.drawPixmap(drawRect, QtGui.QPixmap("../data/track-wav.png").scaled(50, 50, Qt.KeepAspectRatio))
-            else:
-                pass
-                
-
-        #draw CSS stylesheet
-        styleOption = QtWidgets.QStyleOption()
-        styleOption.initFrom(self)
-        self.style().drawPrimitive(QtWidgets.QStyle.PE_Widget, styleOption, painter, self)
-        
-        #painter.drawPixmap(event.rect(), pix)
-    """
     
-    def enterEvent(self, event):
-        self.update()
-
-    def leaveEvent(self, event):
-        self.update()
-
     def mousePressEvent(self, event):
         event.accept()
         
@@ -136,11 +85,19 @@ class DragDropButton(QtWidgets.QPushButton):
         #if this action creates a new track, allow multiple files
         if(self._type == ButtonType.NEW_TRACK):
             f = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open file', '.', fileTypeStr)
+
+            if(f[0] == []):
+                return
+            
             self.fileChanged.emit( f[0] )
 
         #if this action modifies an existing track, update one file
         else:
             f = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '.', fileTypeStr)
+            
+            if(f[0] == ''):
+                return
+            
             self.setFile(f[0])
 
             #wrap file string in a list to match signal type
@@ -155,11 +112,37 @@ class DragDropButton(QtWidgets.QPushButton):
     def setFile(self, file):
         self._file = file
         self._fileName = self.getFileNameFromPath(self._file)
-        self.setText(self._fileName)
+        self.setImage(self._file)
 
     def getFileNameFromPath(self, file):
         return file.split('/')[-1]
 
+    def setImage(self, file):
+        if(self._type == ButtonType.IMAGE):
+            if(".png" in self._file):
+                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap(self._file)))
+            else:
+                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/image-empty.png")))
+        
+        elif(self._type == ButtonType.TRACK):
+            if(".ogg" in self._file):
+                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-ogg.png")))
+            elif(".mp3" in self._file):
+                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-mp3.png")))
+            elif(".wav" in self._file):
+                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-wav.png")))
+            else:
+                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-empty.png")))
+        
+        elif(self._type == ButtonType.NEW_TRACK):
+            #self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/image-empty-2.png")))
+            pass
+        
+        else:
+            pass
+
+    def getScaledImage(self, pixmap):
+        return pixmap.scaled(self.frameGeometry().width(), self.frameGeometry().height(), Qt.KeepAspectRatio)
 
 
 #entry in list of tracks
@@ -169,8 +152,8 @@ class DiscListEntry(QtWidgets.QFrame):
 
         layout = QtWidgets.QHBoxLayout()
 
-        self._btnIcon = DragDropButton("image-empty.png", "demise.png", "demise.png", ButtonType.IMAGE, self)
-        self._btnTrack = DragDropButton("icons8-audio-file-52.png", "demise.png", "demise.png", ButtonType.TRACK, self)
+        self._btnIcon = DragDropButton(ButtonType.IMAGE, self)
+        self._btnTrack = DragDropButton(ButtonType.TRACK, self)
         self._leTitle = QtWidgets.QLineEdit("Track Title", self)
         
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -221,7 +204,7 @@ class NewDiscEntry(QtWidgets.QFrame):
         self.setLineWidth(0)
         self.setMinimumSize(200, 75)
 
-        self._addButton = DragDropButton("demise.png", "demise.png", "demise.png", ButtonType.NEW_TRACK, self)
+        self._addButton = DragDropButton(ButtonType.NEW_TRACK, self)
         
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self._addButton, 1)
@@ -333,6 +316,8 @@ class CentralWidget(QtWidgets.QWidget):
     def generatePacks(self):
         #self._settings.getUserSettings()
         discEntries = self._discList.getDiscEntries()
+
+        print(discEntries)
 
         #generator.validate()
         #generator.generate_datapack()
