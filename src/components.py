@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, QSize, pyqtSignal
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from enum import Enum
@@ -8,6 +8,8 @@ class ButtonType(Enum):
     IMAGE = 1
     TRACK = 2
     NEW_TRACK = 3
+    ARROW_UP = 4
+    ARROW_DOWN = 5
 
 
 
@@ -29,6 +31,33 @@ class GenerateButton(QtWidgets.QPushButton):
 
 
 
+#button for reordering track list elements
+class ArrowButton(QtWidgets.QPushButton):
+
+    pressed = pyqtSignal()
+    
+    def __init__(self, btnType = ButtonType.ARROW_UP, parent = None):
+        super(ArrowButton, self).__init__()
+
+        self._parent = parent
+
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+
+        self._type = btnType
+        if(self._type == ButtonType.ARROW_UP):
+            self.setText("^")
+        else:
+            self.setText("v")
+
+    def mousePressEvent(self, event):
+        event.accept()
+        self.pressed.emit()
+
+    def sizeHint(self):
+        return QSize(25, 25)
+
+
+
 #file selection button supporting file drag/drop
 class DragDropButton(QtWidgets.QPushButton):
 
@@ -40,10 +69,9 @@ class DragDropButton(QtWidgets.QPushButton):
         self._parent = parent
 
         self._file = ''
-        self._fileName = ''
         self._type = btnType
 
-        self.setMinimumSize(50, 50)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
 
         self._img = QtWidgets.QLabel()
         self._img.setScaledContents(True)
@@ -68,8 +96,12 @@ class DragDropButton(QtWidgets.QPushButton):
 
             DragDropButton:hover {
                 border: 2px solid rgb(51, 178, 45);
+                background-color: rgb(240, 240, 240);
             }
         """)
+
+    def sizeHint(self):
+        return(QSize(50, 50))
     
     def mousePressEvent(self, event):
         event.accept()
@@ -111,11 +143,7 @@ class DragDropButton(QtWidgets.QPushButton):
 
     def setFile(self, file):
         self._file = file
-        self._fileName = self.getFileNameFromPath(self._file)
         self.setImage(self._file)
-
-    def getFileNameFromPath(self, file):
-        return file.split('/')[-1]
 
     def setImage(self, file):
         if(self._type == ButtonType.IMAGE):
@@ -135,6 +163,7 @@ class DragDropButton(QtWidgets.QPushButton):
                 self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-empty.png")))
         
         elif(self._type == ButtonType.NEW_TRACK):
+            self.setText("+")
             #self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/image-empty-2.png")))
             pass
         
@@ -142,7 +171,8 @@ class DragDropButton(QtWidgets.QPushButton):
             pass
 
     def getScaledImage(self, pixmap):
-        return pixmap.scaled(self.frameGeometry().width(), self.frameGeometry().height(), Qt.KeepAspectRatio)
+        return pixmap.scaled(self._img.frameGeometry().width(), self._img.frameGeometry().height(), Qt.KeepAspectRatio)
+
 
 
 #entry in list of tracks
@@ -155,21 +185,33 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnIcon = DragDropButton(ButtonType.IMAGE, self)
         self._btnTrack = DragDropButton(ButtonType.TRACK, self)
         self._leTitle = QtWidgets.QLineEdit("Track Title", self)
+        self._lblIName = QtWidgets.QLabel("internal name", self)
         
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.setLineWidth(0)
-        self.setMinimumSize(200, 75)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         
         layout.addWidget(self._btnIcon, 0, Qt.AlignLeft)
         layout.addWidget(self._btnTrack, 0, Qt.AlignLeft)
-        layout.addWidget(self._leTitle, 1, Qt.AlignCenter)
+
+        txtLayout = QtWidgets.QVBoxLayout()
+        txtLayout.addWidget(self._leTitle, 1, Qt.AlignLeft)
+        txtLayout.addWidget(self._lblIName, 1, Qt.AlignLeft)
+        txtLayout.setSpacing(0)
+        txtLayout.setContentsMargins(0, 0, 0, 0)
+        layout.addLayout(txtLayout)
+
+        layout.addStretch(1)
 
         arrowLayout = QtWidgets.QVBoxLayout()
-        arrowLayout.addWidget(QtWidgets.QPushButton("^"), 0, Qt.AlignRight)
-        arrowLayout.addWidget(QtWidgets.QPushButton("v"), 0, Qt.AlignRight)
+        arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_UP), 0, Qt.AlignRight)
+        arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_DOWN), 0, Qt.AlignRight)
+        arrowLayout.setSpacing(0)
+        arrowLayout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(arrowLayout)
 
         self.setLayout(layout)
+
+        self._btnTrack.fileChanged.connect(self.setTitle)
 
         self.setStyleSheet("""
             DiscListEntry {
@@ -183,13 +225,25 @@ class DiscListEntry(QtWidgets.QFrame):
             }
         """)
 
+    def sizeHint(self):
+        return QSize(200, 75)
+
     def getEntry(self):
-        return [self._btnIcon.getFile(), self._btnTrack.getFile(), self._leTitle.text()]
+        return [self._btnIcon.getFile(), self._btnTrack.getFile(), self._leTitle.text(), self._lblIName.text()]
 
     def setEntry(self, fIcon, fTrack, title):
         self._btnIcon.setFile(fIcon)
         self._btnTrack.setFile(fTrack)
-        self._leTitle.setText(title)
+
+        self.setTitle([ fTrack ])
+
+    def setTitle(self, fFileList):
+        filename = fFileList[0].split('/')[-1].split('.')[0]
+        internal_name = ''.join([i for i in filename.lower() if i.isalpha()])
+        
+        self._leTitle.setText(filename)
+        self._lblIName.setText(internal_name)
+        pass
 
 
 
@@ -201,8 +255,7 @@ class NewDiscEntry(QtWidgets.QFrame):
         self._parent = parent
         
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.setLineWidth(0)
-        self.setMinimumSize(200, 75)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
         self._addButton = DragDropButton(ButtonType.NEW_TRACK, self)
         
@@ -210,9 +263,14 @@ class NewDiscEntry(QtWidgets.QFrame):
         layout.addWidget(self._addButton, 1)
 
         arrowLayout = QtWidgets.QVBoxLayout()
-        arrowLayout.addWidget(QtWidgets.QPushButton("^"), 0, Qt.AlignRight)
-        arrowLayout.addWidget(QtWidgets.QPushButton("v"), 0, Qt.AlignRight)
+        arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_UP), 0, Qt.AlignRight)
+        arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_DOWN), 0, Qt.AlignRight)
+        arrowLayout.setSpacing(0)
+        arrowLayout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(arrowLayout)
+
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         self.setLayout(layout)
 
@@ -227,6 +285,9 @@ class NewDiscEntry(QtWidgets.QFrame):
                 padding-bottom: 1px;
             }
         """)
+
+    def sizeHint(self):
+        return QSize(200, 75)
 
 
 

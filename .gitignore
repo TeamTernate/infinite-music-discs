@@ -1,1 +1,7 @@
+bin/*
+src/*.png
+src/*.mp3
+src/*.wav
+src/*.ogg
+
 *.pyc
