@@ -182,6 +182,7 @@ class DiscListEntry(QtWidgets.QFrame):
 
         layout = QtWidgets.QHBoxLayout()
 
+        #child widgets
         self._btnIcon = DragDropButton(ButtonType.IMAGE, self)
         self._btnTrack = DragDropButton(ButtonType.TRACK, self)
         self._leTitle = QtWidgets.QLineEdit("Track Title", self)
@@ -189,19 +190,32 @@ class DiscListEntry(QtWidgets.QFrame):
         
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        
-        layout.addWidget(self._btnIcon, 0, Qt.AlignLeft)
-        layout.addWidget(self._btnTrack, 0, Qt.AlignLeft)
 
+        #container layout for icon button
+        iconLayout = QtWidgets.QVBoxLayout()
+        iconLayout.addWidget(self._btnIcon, 0, Qt.AlignLeft)
+        iconLayout.setContentsMargins(10, 10, 5, 10)
+        layout.addLayout(iconLayout)
+
+        #container layout for track button
+        trackLayout = QtWidgets.QVBoxLayout()
+        trackLayout.addWidget(self._btnTrack, 0, Qt.AlignLeft)
+        trackLayout.setContentsMargins(10, 10, 5, 10)
+        layout.addLayout(trackLayout)
+
+        layout.addStretch(1)
+
+        #container layout for track title and internal name labels
         txtLayout = QtWidgets.QVBoxLayout()
         txtLayout.addWidget(self._leTitle, 1, Qt.AlignLeft)
         txtLayout.addWidget(self._lblIName, 1, Qt.AlignLeft)
         txtLayout.setSpacing(0)
-        txtLayout.setContentsMargins(0, 0, 0, 0)
+        txtLayout.setContentsMargins(0, 10, 0, 10)
         layout.addLayout(txtLayout)
 
         layout.addStretch(1)
 
+        #container layout for arrow buttons
         arrowLayout = QtWidgets.QVBoxLayout()
         arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_UP), 0, Qt.AlignRight)
         arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_DOWN), 0, Qt.AlignRight)
@@ -209,6 +223,8 @@ class DiscListEntry(QtWidgets.QFrame):
         arrowLayout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(arrowLayout)
 
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
         self._btnTrack.fileChanged.connect(self.setTitle)
@@ -378,7 +394,18 @@ class CentralWidget(QtWidgets.QWidget):
         #self._settings.getUserSettings()
         discEntries = self._discList.getDiscEntries()
 
-        print(discEntries)
+        texture_files =     []
+        track_files =       []
+        titles =            []
+        internal_names =    []
+
+        for e in discEntries:
+            texture_files.append(e[0])
+            track_files.append(e[1])
+            titles.append(e[2])
+            internal_names.append(e[3])
+
+        print(texture_files, track_files, titles, internal_names)
 
         #generator.validate()
         #generator.generate_datapack()
