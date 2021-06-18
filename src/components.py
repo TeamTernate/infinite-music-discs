@@ -187,7 +187,7 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnTrack = DragDropButton(ButtonType.TRACK, self)
         self._leTitle = QtWidgets.QLineEdit("Track Title", self)
         self._lblIName = QtWidgets.QLabel("internal name", self)
-        
+
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
@@ -203,17 +203,13 @@ class DiscListEntry(QtWidgets.QFrame):
         trackLayout.setContentsMargins(10, 10, 5, 10)
         layout.addLayout(trackLayout)
 
-        layout.addStretch(1)
-
         #container layout for track title and internal name labels
         txtLayout = QtWidgets.QVBoxLayout()
-        txtLayout.addWidget(self._leTitle, 1, Qt.AlignLeft)
-        txtLayout.addWidget(self._lblIName, 1, Qt.AlignLeft)
+        txtLayout.addWidget(self._leTitle, 1)
+        txtLayout.addWidget(self._lblIName, 1)
         txtLayout.setSpacing(0)
-        txtLayout.setContentsMargins(0, 10, 0, 10)
+        txtLayout.setContentsMargins(10, 10, 10, 10)
         layout.addLayout(txtLayout)
-
-        layout.addStretch(1)
 
         #container layout for arrow buttons
         arrowLayout = QtWidgets.QVBoxLayout()
