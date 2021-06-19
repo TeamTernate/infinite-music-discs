@@ -252,12 +252,12 @@ class DiscListEntry(QtWidgets.QFrame):
     def listReorderEvent(self, count):
         index = self.getIndex()
         
-        if(index == 0):
+        if(index <= 0):
             self._btnUpArrow.setDisabled(True)
         else:
             self._btnUpArrow.setDisabled(False)
 
-        if(index == count-2):
+        if(index >= count-3):
             self._btnDownArrow.setDisabled(True)
         else:
             self._btnDownArrow.setDisabled(False)
@@ -391,7 +391,7 @@ class DiscList(QtWidgets.QWidget):
     def discMoveDownEvent(self, index):
         if(index == self._childLayout.count()-2):
             pass
-        
+
         #move entry down
         tmpEntry = self._childLayout.itemAt(index).widget()
         self._childLayout.removeWidget(tmpEntry)
@@ -419,8 +419,7 @@ class DiscList(QtWidgets.QWidget):
         tmpEntry.setEntry(fIcon, fTrack, title)
 
         #insert into list
-        count = self._childLayout.count()
-        self._childLayout.insertWidget(count-2, tmpEntry, 0, Qt.AlignTop)
+        self._childLayout.insertWidget(self._childLayout.count()-2, tmpEntry, 0, Qt.AlignTop)
 
         #bind button events
         tmpEntry._btnUpArrow.pressed.connect(self.discMoveUpEvent)
@@ -428,7 +427,7 @@ class DiscList(QtWidgets.QWidget):
 
         #trigger reorder event
         self.reordered.connect(tmpEntry.listReorderEvent)
-        self.reordered.emit(count)
+        self.reordered.emit(self._childLayout.count())
 
     #add multiple track objects to the list of tracks
     def addDiscEntries(self, fTrackList):
