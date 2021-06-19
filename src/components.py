@@ -459,6 +459,8 @@ class CentralWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def generatePacks(self):
+        #TODO: launch separate thread to not lock up UI
+
         #self._settings.getUserSettings()
         discEntries = self._discList.getDiscEntries()
 
@@ -473,16 +475,23 @@ class CentralWidget(QtWidgets.QWidget):
             titles.append(e[2])
             internal_names.append(e[3])
 
-        #print(texture_files, track_files, titles, internal_names)
         status = 0
         status = generator.validate(texture_files, track_files, titles, internal_names)
+        if status > 0:
+            return
+
+        status = generator.convert_to_ogg(track_files, internal_names)
         if status > 0:
             return
 
         status = generator.generate_datapack(texture_files, track_files, titles, internal_names)
         if status > 0:
             return
-        
-        #generator.generate_resourcepack()
+
+        status = generator.generate_resourcepack(texture_files, track_files, titles, internal_names)
+        if status > 0:
+            return
+
+        print("Done!")
 
 

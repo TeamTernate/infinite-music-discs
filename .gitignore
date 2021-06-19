@@ -7,4 +7,6 @@ src/*.ogg
 src/custom_music_discs_dp/*
 src/custom_music_discs_rp/*
 
+src/tmp/*
+
 *.pyc

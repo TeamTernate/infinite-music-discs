@@ -10,6 +10,7 @@ import os
 import json
 import shutil
 import sys
+import pyffmpeg
 
 datapack_name = 'custom_music_discs_dp'
 resourcepack_name = 'custom_music_discs_rp'
@@ -17,6 +18,7 @@ resourcepack_name = 'custom_music_discs_rp'
 datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
 
+tmp_path = 'imd-tmp'    #TODO: use tempfile module
 pack_format = 7
 
 
@@ -31,8 +33,16 @@ def validate(texture_files, track_files, titles, internal_names):
         return 1
 
     for i in range(len(texture_files)):
+        #image files still exist
+        if(not os.path.isfile(texture_files[i])):
+            return 1
+
         #images are all .png
         if(not ( '.png' in texture_files[i] )):
+            return 1
+
+        #track files still exist
+        if(not os.path.isfile(track_files[i])):
             return 1
 
         #tracks are all .mp3, .wav, .ogg
@@ -46,7 +56,46 @@ def validate(texture_files, track_files, titles, internal_names):
         #internal names are all lowercase
         if(not internal_names[i].islower()):
             return 1
-        
+
+    return 0
+
+
+
+def convert_to_ogg(track_files, internal_names, cleanup_tmp=False):
+    #FFmpeg object
+    ffmpeg = pyffmpeg.FFmpeg()
+
+    #create temp work directory
+    shutil.rmtree(tmp_path, ignore_errors=True)
+    os.makedirs(tmp_path)
+
+    for i, track in enumerate(track_files):
+        #skip files already in .ogg format
+        if '.ogg' in track:
+            continue
+
+        #rename file so FFmpeg can process it
+        track_ext = track.split('/')[-1].split('.')[-1]
+        tmp_track = os.path.join(tmp_path, internal_names[i] + '.' + track_ext)
+
+        out_name = internal_names[i] + '.ogg'
+        out_track = os.path.join(tmp_path, out_name)
+
+        #copy file to temp work directory and convert
+        shutil.copyfile(track, tmp_track)
+        ffmpeg.convert(tmp_track, out_track)
+
+        #exit if file was not converted successfully
+        if not os.path.isfile(out_track):
+            return 1
+
+        #change file reference to new converted file
+        track_files[i] = out_track
+
+    #usually won't clean up temp work directory here, wait until resource pack generation
+    if cleanup_tmp:
+        shutil.rmtree(tmp_path, ignore_errors=True)
+
     return 0
 
 
@@ -153,6 +202,75 @@ def generate_datapack(texture_files, track_files, titles, internal_names):
     creeper_normentries = [{'type':'minecraft:item','functions':[{'function':'minecraft:set_count', 'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}}, {'function':'minecraft:looting_enchant', 'count':{'min':0.0, 'max':1.0}}], 'name':'minecraft:gunpowder'}]
     creeper.write(json.dumps({'type':'minecraft:entity', 'pools':[{'rolls':1, 'entries':creeper_normentries}, {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{'condition':'minecraft:entity_properties', 'predicate':{'type':'#minecraft:skeletons'}, 'entity':'killer'}]}]}, indent=4))
     creeper.close()
+
+    #copy pack.png
+    try:
+        shutil.copyfile('pack.png', os.path.join(datapack_name, 'pack.png'))
+    except IOError:
+        print("Warning: No pack.png found. Your datapack will not have an icon.")
+    
+    return 0
+
+
+
+def generate_resourcepack(texture_files, track_files, titles, internal_names, cleanup_tmp=True):
+    #build resourcepack directory tree
+    shutil.rmtree(resourcepack_name, ignore_errors=True)
+    os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
+    os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
+    os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
+    
+    #write 'pack.mcmeta'
+    pack = open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w')
+    pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(resourcepack_desc % len(internal_names))}}, indent=4))
+    pack.close()
+    
+    #write 'sounds.json'
+    pack = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w')
+    pack.write('{')
+    
+    for i, name in enumerate(internal_names):
+        pack.write('\n"music_disc.{}": '.format(name))
+        pack.write(json.dumps({'sounds': [{'name': 'records/{}'.format(name), 'stream':True}]}, indent=4))
+        
+        if i < len(internal_names)-1:
+            pack.write(',\n')
+    
+    pack.write('\n}')
+    pack.close()
+    
+    #write 'music_disc_11.json'
+    music_disc_11 = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'), 'w')
+    
+    json_list = []
+    for i, name in enumerate(internal_names):
+        i+=1
+        
+        json_list.append({'predicate': {'custom_model_data':i}, 'model': 'item/music_disc_{}'.format(name)})
+    
+    music_disc_11.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_11'}, 'overrides': json_list}, indent=4))
+    music_disc_11.close()
+    
+    #write 'music_disc_*.json' files
+    for name in internal_names:
+        music_disc = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_%s.json' % name), 'w')
+        music_disc.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_{}'.format(name)}}, indent=4))
+        music_disc.close()
+    
+    #copy sound and texture files
+    for i, name in enumerate(internal_names):
+        shutil.copyfile(track_files[i], os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records', '%s.ogg' % name))
+        shutil.copyfile(texture_files[i], os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item', 'music_disc_%s.png' % name))
+    
+    #copy pack.png
+    try:
+        shutil.copyfile('pack.png', os.path.join(resourcepack_name, 'pack.png'))
+    except IOError:
+        print("Warning: No pack.png found. Your resourcepack will not have an icon.")
+
+    #cleanup temp work directory
+    if cleanup_tmp:
+        shutil.rmtree(tmp_path, ignore_errors=True)
     
     return 0
 
