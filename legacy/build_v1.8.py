@@ -5,7 +5,7 @@
 #Script, datapack design, and resourcepack design by link2_thepast
 #
 #Script v1.3
-#Datapack v1.7
+#Datapack v1.8
 
 import os
 import json
@@ -85,7 +85,7 @@ os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
 
 #write 'pack.mcmeta'
 pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w')
-pack.write(json.dumps({'pack':{'pack_format':4, 'description':(datapack_desc % len(name_list))}}, indent=4))
+pack.write(json.dumps({'pack':{'pack_format':7, 'description':(datapack_desc % len(name_list))}}, indent=4))
 pack.close()
 
 #write 'load.json'
@@ -104,7 +104,7 @@ setup_load = open(os.path.join(datapack_name, 'data', datapack_name, 'functions'
 setup_load.writelines(['scoreboard objectives add usedDisc minecraft.used:minecraft.music_disc_11\n',
                        'scoreboard objectives add heldDisc dummy\n',
                        '\n',
-                       'tellraw @a {"text":"Custom Music Discs v1.7 by link2_thepast","color":"yellow"}\n'])
+                       'tellraw @a {"text":"Custom Music Discs v1.8 by link2_thepast","color":"yellow"}\n'])
 setup_load.close()
 
 #write 'detect_play_tick.mcfunction'
@@ -153,7 +153,7 @@ set_disc_track = open(os.path.join(datapack_name, 'data', datapack_name, 'functi
 for i, track in enumerate(track_list):
     i+=1
     
-    set_disc_track.write('execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run replaceitem entity @s weapon.mainhand minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}\n' % (i, i, track.replace('"', '')))
+    set_disc_track.write('execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run item replace entity @s weapon.mainhand with minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}\n' % (i, i, track.replace('"', '')))
 
 set_disc_track.close()
 
@@ -189,7 +189,7 @@ os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', '
 
 #write 'pack.mcmeta'
 pack = open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w')
-pack.write(json.dumps({'pack':{'pack_format':6, 'description':(resourcepack_desc % len(name_list))}}, indent=4))
+pack.write(json.dumps({'pack':{'pack_format':7, 'description':(resourcepack_desc % len(name_list))}}, indent=4))
 pack.close()
 
 #write 'sounds.json'
