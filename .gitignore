@@ -4,4 +4,7 @@ src/*.mp3
 src/*.wav
 src/*.ogg
 
+src/custom_music_discs_dp/*
+src/custom_music_discs_rp/*
+
 *.pyc

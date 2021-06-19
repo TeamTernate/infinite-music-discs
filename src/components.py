@@ -474,10 +474,15 @@ class CentralWidget(QtWidgets.QWidget):
             internal_names.append(e[3])
 
         #print(texture_files, track_files, titles, internal_names)
+        status = 0
+        status = generator.validate(texture_files, track_files, titles, internal_names)
+        if status > 0:
+            return
 
-        print( generator.validate(texture_files, track_files, titles, internal_names) )
-        #generator.generate_datapack()
+        status = generator.generate_datapack(texture_files, track_files, titles, internal_names)
+        if status > 0:
+            return
+        
         #generator.generate_resourcepack()
-
 
 
