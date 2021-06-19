@@ -34,7 +34,7 @@ class GenerateButton(QtWidgets.QPushButton):
 #button for reordering track list elements
 class ArrowButton(QtWidgets.QPushButton):
 
-    pressed = pyqtSignal()
+    pressed = pyqtSignal(int)
     
     def __init__(self, btnType = ButtonType.ARROW_UP, parent = None):
         super(ArrowButton, self).__init__()
@@ -51,7 +51,9 @@ class ArrowButton(QtWidgets.QPushButton):
 
     def mousePressEvent(self, event):
         event.accept()
-        self.pressed.emit()
+
+        index = self._parent.getIndex()
+        self.pressed.emit(index)
 
     def sizeHint(self):
         return QSize(25, 25)
@@ -60,7 +62,7 @@ class ArrowButton(QtWidgets.QPushButton):
 
 #file selection button supporting file drag/drop
 class DragDropButton(QtWidgets.QPushButton):
-
+    
     fileChanged = pyqtSignal(list)
     
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
@@ -180,6 +182,8 @@ class DiscListEntry(QtWidgets.QFrame):
     def __init__(self, parent = None):
         super(DiscListEntry, self).__init__()
 
+        self._parent = parent
+
         layout = QtWidgets.QHBoxLayout()
 
         #child widgets
@@ -187,6 +191,8 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnTrack = DragDropButton(ButtonType.TRACK, self)
         self._leTitle = QtWidgets.QLineEdit("Track Title", self)
         self._lblIName = QtWidgets.QLabel("internal name", self)
+        self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
+        self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
 
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -213,8 +219,8 @@ class DiscListEntry(QtWidgets.QFrame):
 
         #container layout for arrow buttons
         arrowLayout = QtWidgets.QVBoxLayout()
-        arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_UP), 0, Qt.AlignRight)
-        arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_DOWN), 0, Qt.AlignRight)
+        arrowLayout.addWidget(self._btnUpArrow, 0, Qt.AlignRight)
+        arrowLayout.addWidget(self._btnDownArrow, 0, Qt.AlignRight)
         arrowLayout.setSpacing(0)
         arrowLayout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(arrowLayout)
@@ -227,7 +233,10 @@ class DiscListEntry(QtWidgets.QFrame):
 
         self.setStyleSheet("""
             DiscListEntry {
-                border: 2px solid black;
+                border-top: 2px solid lightgray;
+                border-left: 2px solid lightgray;
+                border-bottom: 2px solid gray;
+                border-right: 2px solid gray;
                 background-color: rgb(255, 255, 255);
 
                 padding-top: 1px;
@@ -239,6 +248,22 @@ class DiscListEntry(QtWidgets.QFrame):
 
     def sizeHint(self):
         return QSize(200, 75)
+
+    def listReorderEvent(self, count):
+        index = self.getIndex()
+        
+        if(index == 0):
+            self._btnUpArrow.setDisabled(True)
+        else:
+            self._btnUpArrow.setDisabled(False)
+
+        if(index == count-2):
+            self._btnDownArrow.setDisabled(True)
+        else:
+            self._btnDownArrow.setDisabled(False)
+
+    def getIndex(self):
+        return self._parent._childLayout.indexOf(self)
 
     def getEntry(self):
         return [self._btnIcon.getFile(), self._btnTrack.getFile(), self._leTitle.text(), self._lblIName.text()]
@@ -269,14 +294,19 @@ class NewDiscEntry(QtWidgets.QFrame):
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
-        self._addButton = DragDropButton(ButtonType.NEW_TRACK, self)
+        self._btnAdd = DragDropButton(ButtonType.NEW_TRACK, self)
+        self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
+        self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
+
+        self._btnUpArrow.setDisabled(True)
+        self._btnDownArrow.setDisabled(True)
         
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self._addButton, 1)
+        layout.addWidget(self._btnAdd, 1)
 
         arrowLayout = QtWidgets.QVBoxLayout()
-        arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_UP), 0, Qt.AlignRight)
-        arrowLayout.addWidget(ArrowButton(ButtonType.ARROW_DOWN), 0, Qt.AlignRight)
+        arrowLayout.addWidget(self._btnUpArrow, 0, Qt.AlignRight)
+        arrowLayout.addWidget(self._btnDownArrow, 0, Qt.AlignRight)
         arrowLayout.setSpacing(0)
         arrowLayout.setContentsMargins(0, 0, 0, 0)
         layout.addLayout(arrowLayout)
@@ -288,7 +318,10 @@ class NewDiscEntry(QtWidgets.QFrame):
 
         self.setStyleSheet("""
             NewDiscEntry {
-                border: 2px solid black;
+                border-top: 1px solid gray;
+                border-left: 2px solid gray;
+                border-bottom: 2px solid lightgray;
+                border-right: 2px solid lightgray;
                 background-color: rgb(255, 255, 255);
 
                 padding-top: 1px;
@@ -305,6 +338,9 @@ class NewDiscEntry(QtWidgets.QFrame):
 
 #list of tracks
 class DiscList(QtWidgets.QWidget):
+    
+    reordered = pyqtSignal(int)
+    
     def __init__(self, parent = None):
         super(DiscList, self).__init__()
 
@@ -312,7 +348,7 @@ class DiscList(QtWidgets.QWidget):
 
         #create new track entry for adding new list entries
         newDiscEntry = NewDiscEntry(self)
-        newDiscEntry._addButton.fileChanged.connect(self.addDiscEntries)
+        newDiscEntry._btnAdd.fileChanged.connect(self.addDiscEntries)
 
         #child layout, contains all track entries + new track entry
         self._childLayout = QtWidgets.QVBoxLayout()
@@ -340,6 +376,30 @@ class DiscList(QtWidgets.QWidget):
 
         self.setLayout(layout)
 
+    def discMoveUpEvent(self, index):
+        if(index == 0):
+            pass
+        
+        #move entry up
+        tmpEntry = self._childLayout.itemAt(index).widget()
+        self._childLayout.removeWidget(tmpEntry)
+        self._childLayout.insertWidget(index-1, tmpEntry, 0, Qt.AlignTop)
+
+        #trigger reorder event
+        self.reordered.emit(self._childLayout.count())
+
+    def discMoveDownEvent(self, index):
+        if(index == self._childLayout.count()-2):
+            pass
+        
+        #move entry down
+        tmpEntry = self._childLayout.itemAt(index).widget()
+        self._childLayout.removeWidget(tmpEntry)
+        self._childLayout.insertWidget(index+1, tmpEntry, 0, Qt.AlignTop)
+
+        #trigger reorder event
+        self.reordered.emit(self._childLayout.count())
+
     #get all stored track data
     def getDiscEntries(self):
         entries = []
@@ -354,10 +414,21 @@ class DiscList(QtWidgets.QWidget):
 
     #insert a new track object into the list of tracks
     def addDiscEntry(self, fIcon, fTrack, title):
+        #add new entry
         tmpEntry = DiscListEntry(self)
         tmpEntry.setEntry(fIcon, fTrack, title)
-        
-        self._childLayout.insertWidget(self._childLayout.count()-2, tmpEntry, 0, Qt.AlignTop)
+
+        #insert into list
+        count = self._childLayout.count()
+        self._childLayout.insertWidget(count-2, tmpEntry, 0, Qt.AlignTop)
+
+        #bind button events
+        tmpEntry._btnUpArrow.pressed.connect(self.discMoveUpEvent)
+        tmpEntry._btnDownArrow.pressed.connect(self.discMoveDownEvent)
+
+        #trigger reorder event
+        self.reordered.connect(tmpEntry.listReorderEvent)
+        self.reordered.emit(count)
 
     #add multiple track objects to the list of tracks
     def addDiscEntries(self, fTrackList):
