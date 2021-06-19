@@ -1,3 +1,5 @@
+import generator
+
 from PyQt5.QtCore import Qt, QSize, pyqtSignal
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -471,9 +473,9 @@ class CentralWidget(QtWidgets.QWidget):
             titles.append(e[2])
             internal_names.append(e[3])
 
-        print(texture_files, track_files, titles, internal_names)
+        #print(texture_files, track_files, titles, internal_names)
 
-        #generator.validate()
+        print( generator.validate(texture_files, track_files, titles, internal_names) )
         #generator.generate_datapack()
         #generator.generate_resourcepack()
 
