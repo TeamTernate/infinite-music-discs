@@ -1,9 +1,15 @@
-import generator
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#Infinite Music Discs datapack + resourcepack GUI components module
+#Generation tool, datapack design, and resourcepack design by link2_thepast
 
 from PyQt5.QtCore import Qt, QSize, pyqtSignal
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from enum import Enum
+
+import generator
 
 #typedefs
 class ButtonType(Enum):
@@ -14,6 +20,10 @@ class ButtonType(Enum):
     ARROW_DOWN = 5
 
 
+
+#dummy child of QFrame for CSS inheritance purposes
+class QContainerFrame(QtWidgets.QFrame):
+    pass
 
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
@@ -75,37 +85,56 @@ class DragDropButton(QtWidgets.QPushButton):
         self._file = ''
         self._type = btnType
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
+        #icon object
         self._img = QtWidgets.QLabel()
         self._img.setScaledContents(True)
         self.setImage(self._file)
 
+        #child QFrame, for CSS styling purposes
+        childFrame = QContainerFrame()
+        childLayout = QtWidgets.QVBoxLayout()
+        childLayout.setSpacing(0)
+        childLayout.setContentsMargins(5, 5, 5, 5)
+        childLayout.addWidget(self._img)
+        childFrame.setLayout(childLayout)
+
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(5, 5, 5, 5)
-        layout.addWidget(self._img)
+        layout.addWidget(childFrame)
 
         self.setLayout(layout)
 
+        #PyQt does not implement outline according to CSS standards, so
+        #   two nested QWidgets are necessary to allow double border
         self.setStyleSheet("""
             DragDropButton {
-                border: 2px solid rgb(0, 134, 63);
-                background-color: rgb(225, 225, 225);
-            }
-
-            DragDropButton:on {
-                border: 2px solid rgb(0, 52, 25);
+                background-color: rgb(255, 255, 255);
+                border: 5px solid white;
+                /* border: 2px solid rgb(0, 134, 63); */
             }
 
             DragDropButton:hover {
-                border: 2px solid rgb(51, 178, 45);
+                /* border: 2px solid rgb(51, 178, 45); */
+            }
+
+            QContainerFrame {
+                border-top: 2px solid gray;
+                border-left: 2px solid gray;
+                border-bottom: 2px solid lightgray;
+                border-right: 2px solid lightgray;
+                background-color: rgb(225, 225, 225);
+            }
+
+            QContainerFrame:hover {
                 background-color: rgb(240, 240, 240);
             }
         """)
 
     def sizeHint(self):
-        return(QSize(50, 50))
+        return(QSize(75, 75))
     
     def mousePressEvent(self, event):
         event.accept()
@@ -180,7 +209,7 @@ class DragDropButton(QtWidgets.QPushButton):
 
 
 #entry in list of tracks
-class DiscListEntry(QtWidgets.QFrame):
+class DiscListEntry(QContainerFrame):
     def __init__(self, parent = None):
         super(DiscListEntry, self).__init__()
 
@@ -197,18 +226,20 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
 
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        #sizePolicy.setHeightForWidth(True)
+        self.setSizePolicy(sizePolicy)
 
         #container layout for icon button
         iconLayout = QtWidgets.QVBoxLayout()
         iconLayout.addWidget(self._btnIcon, 0, Qt.AlignLeft)
-        iconLayout.setContentsMargins(10, 10, 5, 10)
+        iconLayout.setContentsMargins(5, 5, 0, 5)
         layout.addLayout(iconLayout)
 
         #container layout for track button
         trackLayout = QtWidgets.QVBoxLayout()
         trackLayout.addWidget(self._btnTrack, 0, Qt.AlignLeft)
-        trackLayout.setContentsMargins(10, 10, 5, 10)
+        trackLayout.setContentsMargins(5, 5, 0, 5)
         layout.addLayout(trackLayout)
 
         #container layout for track title and internal name labels
@@ -249,7 +280,7 @@ class DiscListEntry(QtWidgets.QFrame):
         """)
 
     def sizeHint(self):
-        return QSize(200, 75)
+        return QSize(350, 87.5)
 
     def listReorderEvent(self, count):
         index = self.getIndex()
@@ -287,14 +318,16 @@ class DiscListEntry(QtWidgets.QFrame):
 
 
 #blank entry in list of tracks
-class NewDiscEntry(QtWidgets.QFrame):
+class NewDiscEntry(QContainerFrame):
     def __init__(self, parent = None):
         super(NewDiscEntry, self).__init__()
 
         self._parent = parent
         
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        sizePolicy.setHeightForWidth(True)
+        self.setSizePolicy(sizePolicy)
 
         self._btnAdd = DragDropButton(ButtonType.NEW_TRACK, self)
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
@@ -334,7 +367,10 @@ class NewDiscEntry(QtWidgets.QFrame):
         """)
 
     def sizeHint(self):
-        return QSize(200, 75)
+        return QSize(350, 87.5)
+
+    def heightForWidth(self, width):
+        return width * 0.375
 
 
 
