@@ -4,7 +4,7 @@
 #Infinite Music Discs datapack + resourcepack GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-from PyQt5.QtCore import Qt, QSize, pyqtSignal
+from PyQt5.QtCore import Qt, QFileInfo, QSize, pyqtSignal
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from enum import Enum
@@ -19,6 +19,64 @@ class ButtonType(Enum):
     ARROW_UP = 4
     ARROW_DOWN = 5
 
+CSS_SHEET_DDB = """
+DragDropButton {
+    background-color: rgb(255, 255, 255);
+    border: 5px solid white;
+}
+"""
+
+CSS_SHEET_DDB_HOVER = """
+DragDropButton {
+    background-color: rgb(255, 255, 255);
+    border: 5px solid rgb(51, 178, 45);
+}
+"""
+
+CSS_SHEET_DDB_QCF = """
+QContainerFrame {
+    border-top: 2px solid gray;
+    border-left: 2px solid gray;
+    border-bottom: 2px solid lightgray;
+    border-right: 2px solid lightgray;
+    
+    background-color: rgb(225, 225, 225);
+}
+
+QContainerFrame:hover {
+    background-color: rgb(240, 240, 240);
+}
+"""
+
+CSS_SHEET_DISCENTRY = """
+DiscListEntry {
+    border-top: 2px solid lightgray;
+    border-left: 2px solid lightgray;
+    border-bottom: 2px solid gray;
+    border-right: 2px solid gray;
+    background-color: rgb(255, 255, 255);
+
+    padding-top: 1px;
+    padding-left: 1px;
+    padding-right: 1px;
+    padding-bottom: 1px;
+}
+"""
+
+CSS_SHEET_NEWENTRY = """
+NewDiscEntry {
+    border-top: 1px solid gray;
+    border-left: 2px solid gray;
+    border-bottom: 2px solid lightgray;
+    border-right: 2px solid lightgray;
+    background-color: rgb(255, 255, 255);
+
+    padding-top: 1px;
+    padding-left: 1px;
+    padding-right: 1px;
+    padding-bottom: 1px;
+}
+"""
 
 
 #dummy child of QFrame for CSS inheritance purposes
@@ -86,6 +144,7 @@ class DragDropButton(QtWidgets.QPushButton):
         self._type = btnType
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.setAcceptDrops(True)
 
         #icon object
         self._img = QtWidgets.QLabel()
@@ -109,29 +168,8 @@ class DragDropButton(QtWidgets.QPushButton):
 
         #PyQt does not implement outline according to CSS standards, so
         #   two nested QWidgets are necessary to allow double border
-        self.setStyleSheet("""
-            DragDropButton {
-                background-color: rgb(255, 255, 255);
-                border: 5px solid white;
-                /* border: 2px solid rgb(0, 134, 63); */
-            }
-
-            DragDropButton:hover {
-                /* border: 2px solid rgb(51, 178, 45); */
-            }
-
-            QContainerFrame {
-                border-top: 2px solid gray;
-                border-left: 2px solid gray;
-                border-bottom: 2px solid lightgray;
-                border-right: 2px solid lightgray;
-                background-color: rgb(225, 225, 225);
-            }
-
-            QContainerFrame:hover {
-                background-color: rgb(240, 240, 240);
-            }
-        """)
+        self.setStyleSheet(CSS_SHEET_DDB)
+        childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
 
     def sizeHint(self):
         return(QSize(75, 75))
@@ -167,6 +205,59 @@ class DragDropButton(QtWidgets.QPushButton):
 
             #wrap file string in a list to match signal type
             self.fileChanged.emit([ f[0] ])
+
+    def dragEnterEvent(self, event):
+        if not event.mimeData().hasUrls():
+            event.ignore()
+            return
+
+        for u in event.mimeData().urls():
+            u = u.toLocalFile()
+            u = QFileInfo(u).completeSuffix()
+
+            if(self._type == ButtonType.IMAGE and not u == 'png'):
+                event.ignore()
+                return
+
+            if(self._type == ButtonType.TRACK and not (u == 'mp3' or u == 'wav' or u == 'ogg') ):
+                event.ignore()
+                return
+
+            if(self._type == ButtonType.NEW_TRACK and not (u == 'png' or u == 'mp3' or u == 'wav' or u == 'ogg') ):
+                event.ignore()
+                return
+
+        event.accept()
+
+        #emit to signal here, highlight buttons below
+
+        self.setStyleSheet(CSS_SHEET_DDB_HOVER)
+
+    def dragLeaveEvent(self, event):
+        event.accept()
+
+        self.setStyleSheet(CSS_SHEET_DDB)
+
+    def dropEvent(self, event):
+        if not event.mimeData().hasUrls():
+            event.ignore()
+            return
+
+        event.accept()
+
+        f = event.mimeData().urls()
+        for i, u in enumerate(f):
+            f[i] = u.toLocalFile()
+
+        if(self._type == ButtonType.NEW_TRACK):
+            self.fileChanged.emit(f)
+
+        else:
+            self.setFile(f[0])
+            
+            #emit to signal, populate buttons below with excess files
+
+        self.setStyleSheet(CSS_SHEET_DDB)
 
     def hasFile(self):
         return (self._file != None)
@@ -264,20 +355,7 @@ class DiscListEntry(QContainerFrame):
 
         self._btnTrack.fileChanged.connect(self.setTitle)
 
-        self.setStyleSheet("""
-            DiscListEntry {
-                border-top: 2px solid lightgray;
-                border-left: 2px solid lightgray;
-                border-bottom: 2px solid gray;
-                border-right: 2px solid gray;
-                background-color: rgb(255, 255, 255);
-
-                padding-top: 1px;
-                padding-left: 1px;
-                padding-right: 1px;
-                padding-bottom: 1px;
-            }
-        """)
+        self.setStyleSheet(CSS_SHEET_DISCENTRY)
 
     def sizeHint(self):
         return QSize(350, 87.5)
@@ -351,20 +429,7 @@ class NewDiscEntry(QContainerFrame):
 
         self.setLayout(layout)
 
-        self.setStyleSheet("""
-            NewDiscEntry {
-                border-top: 1px solid gray;
-                border-left: 2px solid gray;
-                border-bottom: 2px solid lightgray;
-                border-right: 2px solid lightgray;
-                background-color: rgb(255, 255, 255);
-
-                padding-top: 1px;
-                padding-left: 1px;
-                padding-right: 1px;
-                padding-bottom: 1px;
-            }
-        """)
+        self.setStyleSheet(CSS_SHEET_NEWENTRY)
 
     def sizeHint(self):
         return QSize(350, 87.5)
@@ -470,7 +535,10 @@ class DiscList(QtWidgets.QWidget):
     #add multiple track objects to the list of tracks
     def addDiscEntries(self, fTrackList):
         for f in fTrackList:
-            self.addDiscEntry('', f, "New Track")
+            if '.png' in f:
+                self.addDiscEntry(f, '', "New Track")
+            else:
+                self.addDiscEntry('', f, "New Track")
 
 
 
