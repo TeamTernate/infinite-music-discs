@@ -4,7 +4,7 @@
 #Infinite Music Discs datapack + resourcepack GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-from PyQt5.QtCore import Qt, QFileInfo, QSize, pyqtSignal
+from PyQt5.QtCore import Qt, QFileInfo, QSize, QObject, QThread, pyqtSignal
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from enum import Enum
@@ -77,6 +77,7 @@ NewDiscEntry {
     padding-bottom: 1px;
 }
 """
+
 
 
 #dummy child of QFrame for CSS inheritance purposes
@@ -556,15 +557,13 @@ class CentralWidget(QtWidgets.QWidget):
         layout.addWidget(self._discList)
 
         #button to generate datapack/resourcepack
-        btnGen = GenerateButton()
-        btnGen.generate.connect(self.generatePacks)
-        layout.addWidget(btnGen, 0, Qt.AlignBottom)
+        self._btnGen = GenerateButton()
+        self._btnGen.generate.connect(self.generatePacks)
+        layout.addWidget(self._btnGen, 0, Qt.AlignBottom)
         
         self.setLayout(layout)
 
     def generatePacks(self):
-        #TODO: launch separate thread to not lock up UI
-
         #self._settings.getUserSettings()
         discEntries = self._discList.getDiscEntries()
 
@@ -579,23 +578,73 @@ class CentralWidget(QtWidgets.QWidget):
             titles.append(e[2])
             internal_names.append(e[3])
 
+        #launch worker thread to generate packs
+        #   FFmpeg conversion is slow, don't want to lock up UI
+        self._thread = QThread()
+        self._worker = GeneratePackWorker(texture_files, track_files, titles, internal_names)
+        self._worker.moveToThread(self._thread)
+
+        self._thread.started.connect(self._worker.generate)
+        self._worker.finished.connect(self._thread.quit)
+        self._worker.finished.connect(self._thread.deleteLater)
+        self._worker.finished.connect(self._worker.deleteLater)
+
+        self._thread.start()
+
+        self._btnGen.setEnabled(False)
+        self._thread.finished.connect(
+            lambda: self._btnGen.setEnabled(True)
+        )
+
+
+
+#worker object that generates the datapack/resourcepack in a separate QThread
+class GeneratePackWorker(QObject):
+    finished = pyqtSignal()
+    progress = pyqtSignal(int)
+
+    def __init__(self, texture_files, track_files, titles, internal_names):
+        super(GeneratePackWorker, self).__init__()
+        
+        self._texture_files = texture_files
+        self._track_files = track_files
+        self._titles = titles
+        self._internal_names = internal_names
+    
+    def generate(self):
         status = 0
-        status = generator.validate(texture_files, track_files, titles, internal_names)
+        status = generator.validate(self._texture_files,
+                                    self._track_files,
+                                    self._titles,
+                                    self._internal_names)
         if status > 0:
+            self.finished.emit()
             return
 
-        status = generator.convert_to_ogg(track_files, internal_names)
+        status = generator.convert_to_ogg(self._track_files,
+                                          self._internal_names)
         if status > 0:
+            self.finished.emit()
             return
 
-        status = generator.generate_datapack(texture_files, track_files, titles, internal_names)
+        status = generator.generate_datapack(self._texture_files,
+                                             self._track_files,
+                                             self._titles,
+                                             self._internal_names)
         if status > 0:
+            self.finished.emit()
             return
 
-        status = generator.generate_resourcepack(texture_files, track_files, titles, internal_names)
+        status = generator.generate_resourcepack(self._texture_files,
+                                                 self._track_files,
+                                                 self._titles,
+                                                 self._internal_names)
         if status > 0:
+            self.finished.emit()
             return
 
-        print("Done!")
+        print("Successfully generated datapack and resourcepack!")
+        
+        self.finished.emit()
 
 
