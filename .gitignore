@@ -8,5 +8,6 @@ src/custom_music_discs_dp/*
 src/custom_music_discs_rp/*
 
 src/tmp/*
+src/imd-tmp/*
 
 *.pyc

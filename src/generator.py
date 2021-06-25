@@ -61,36 +61,38 @@ def validate(texture_files, track_files, titles, internal_names):
 
 
 
-def convert_to_ogg(track_files, internal_names, cleanup_tmp=False):
+def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False):
     #FFmpeg object
     ffmpeg = pyffmpeg.FFmpeg()
 
     #create temp work directory
-    shutil.rmtree(tmp_path, ignore_errors=True)
-    os.makedirs(tmp_path)
+    if create_tmp:
+        shutil.rmtree(tmp_path, ignore_errors=True)
+        os.makedirs(tmp_path)
 
-    for i, track in enumerate(track_files):
-        #skip files already in .ogg format
-        if '.ogg' in track:
-            continue
+    track = track_file[0]
 
-        #rename file so FFmpeg can process it
-        track_ext = track.split('/')[-1].split('.')[-1]
-        tmp_track = os.path.join(tmp_path, internal_names[i] + '.' + track_ext)
+    #skip files already in .ogg format
+    if '.ogg' in track:
+        return 0
 
-        out_name = internal_names[i] + '.ogg'
-        out_track = os.path.join(tmp_path, out_name)
+    #rename file so FFmpeg can process it
+    track_ext = track.split('/')[-1].split('.')[-1]
+    tmp_track = os.path.join(tmp_path, internal_name + '.' + track_ext)
 
-        #copy file to temp work directory and convert
-        shutil.copyfile(track, tmp_track)
-        ffmpeg.convert(tmp_track, out_track)
+    out_name = internal_name + '.ogg'
+    out_track = os.path.join(tmp_path, out_name)
 
-        #exit if file was not converted successfully
-        if not os.path.isfile(out_track):
-            return 1
+    #copy file to temp work directory and convert
+    shutil.copyfile(track, tmp_track)
+    ffmpeg.convert(tmp_track, out_track)
 
-        #change file reference to new converted file
-        track_files[i] = out_track
+    #exit if file was not converted successfully
+    if not os.path.isfile(out_track):
+        return 1
+
+    #change file reference to new converted file
+    track_file[0] = out_track
 
     #usually won't clean up temp work directory here, wait until resource pack generation
     if cleanup_tmp:

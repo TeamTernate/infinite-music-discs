@@ -601,7 +601,9 @@ class CentralWidget(QtWidgets.QWidget):
 #worker object that generates the datapack/resourcepack in a separate QThread
 class GeneratePackWorker(QObject):
     finished = pyqtSignal()
+    min_prog = pyqtSignal(int)
     progress = pyqtSignal(int)
+    max_prog = pyqtSignal(int)
 
     def __init__(self, texture_files, track_files, titles, internal_names):
         super(GeneratePackWorker, self).__init__()
@@ -612,7 +614,14 @@ class GeneratePackWorker(QObject):
         self._internal_names = internal_names
 
     def generate(self):
+        #total steps = validate + num track conversions + generate dp + generate rp
+        self.min_prog.emit(0)
+        self.progress.emit(0)
+        self.max_prog.emit(len(self._track_files) + 3)
+
         status = 0
+        progress = 0
+
         status = generator.validate(self._texture_files,
                                     self._track_files,
                                     self._titles,
@@ -621,11 +630,23 @@ class GeneratePackWorker(QObject):
             self.finished.emit()
             return
 
-        status = generator.convert_to_ogg(self._track_files,
-                                          self._internal_names)
-        if status > 0:
-            self.finished.emit()
-            return
+        progress += 1
+        self.progress.emit(progress)
+
+        for i in range(len(self._track_files)):
+            #wrap string in list to allow C-style passing by reference
+            wrapper = [ self._track_files[i] ]
+            status = generator.convert_to_ogg(wrapper,
+                                              self._internal_names[i],
+                                              (i == 0))
+            if status > 0:
+                self.finished.emit()
+                return
+
+            #extract modified string from wrapper list
+            self._track_files[i] = wrapper[0]
+            progress += 1
+            self.progress.emit(progress)
 
         status = generator.generate_datapack(self._texture_files,
                                              self._track_files,
@@ -635,6 +656,9 @@ class GeneratePackWorker(QObject):
             self.finished.emit()
             return
 
+        progress += 1
+        self.progress.emit(progress)
+
         status = generator.generate_resourcepack(self._texture_files,
                                                  self._track_files,
                                                  self._titles,
@@ -642,6 +666,9 @@ class GeneratePackWorker(QObject):
         if status > 0:
             self.finished.emit()
             return
+
+        progress += 1
+        self.progress.emit(progress)
 
         print("Successfully generated datapack and resourcepack!")
         
