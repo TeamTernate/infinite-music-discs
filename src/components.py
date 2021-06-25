@@ -580,14 +580,14 @@ class CentralWidget(QtWidgets.QWidget):
 
         #launch worker thread to generate packs
         #   FFmpeg conversion is slow, don't want to lock up UI
-        self._thread = QThread()
+        self._thread = QThread(self)
         self._worker = GeneratePackWorker(texture_files, track_files, titles, internal_names)
         self._worker.moveToThread(self._thread)
 
         self._thread.started.connect(self._worker.generate)
-        self._worker.finished.connect(self._thread.quit)
-        self._worker.finished.connect(self._thread.deleteLater)
         self._worker.finished.connect(self._worker.deleteLater)
+        self._worker.destroyed.connect(self._thread.quit)
+        self._thread.finished.connect(self._thread.deleteLater)
 
         self._thread.start()
 
@@ -605,12 +605,12 @@ class GeneratePackWorker(QObject):
 
     def __init__(self, texture_files, track_files, titles, internal_names):
         super(GeneratePackWorker, self).__init__()
-        
+
         self._texture_files = texture_files
         self._track_files = track_files
         self._titles = titles
         self._internal_names = internal_names
-    
+
     def generate(self):
         status = 0
         status = generator.validate(self._texture_files,
