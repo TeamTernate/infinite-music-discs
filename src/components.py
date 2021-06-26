@@ -28,6 +28,7 @@ class FileExt():
 class Assets():
     ICON_ICON_EMPTY =   '../data/image-empty.png'
     ICON_TRACK_EMPTY =  '../data/track-empty.png'
+    ICON_NEW_DISC =     '../data/new-disc.png'
     ICON_MP3 =          '../data/track-mp3.png'
     ICON_WAV =          '../data/track-wav.png'
     ICON_OGG =          '../data/track-ogg.png'
@@ -61,6 +62,43 @@ QContainerFrame:hover {
 }
 """
 
+CSS_SHEET_DDB_QCF_HOVER = """
+QContainerFrame {
+    border-top: 2px solid rgb(100, 128, 100);
+    border-left: 2px solid rgb(100, 128, 100);
+    border-bottom: 2px solid rgb(190, 211, 190);
+    border-right: 2px solid rgb(190, 211, 190);
+    
+    background-color: rgb(195, 240, 195);
+}
+"""
+
+CSS_SHEET_NDB = """
+NewDiscButton {
+    border-top: 2px solid gray;
+    border-left: 2px solid gray;
+    border-bottom: 2px solid lightgray;
+    border-right: 2px solid lightgray;
+    
+    background-color: rgb(225, 225, 225);
+}
+
+NewDiscButton:hover {
+    background-color: rgb(240, 240, 240);
+}
+"""
+
+CSS_SHEET_NDB_HOVER = """
+NewDiscButton {
+    border-top: 2px solid gray;
+    border-left: 2px solid gray;
+    border-bottom: 2px solid lightgray;
+    border-right: 2px solid lightgray;
+    
+    background-color: rgb(195, 240, 195);
+}
+"""
+
 CSS_SHEET_DISCENTRY = """
 DiscListEntry {
     border-top: 2px solid lightgray;
@@ -78,12 +116,6 @@ DiscListEntry {
 
 CSS_SHEET_NEWENTRY = """
 NewDiscEntry {
-    border-top: 1px solid gray;
-    border-left: 2px solid gray;
-    border-bottom: 2px solid lightgray;
-    border-right: 2px solid lightgray;
-    background-color: rgb(255, 255, 255);
-
     padding-top: 1px;
     padding-left: 1px;
     padding-right: 1px;
@@ -107,7 +139,10 @@ class GenerateButton(QtWidgets.QPushButton):
 
         self._parent = parent
 
-        self.setMinimumSize(200, 75)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+
+    def sizeHint(self):
+        return QSize(350, 87.5)
 
     def mousePressEvent(self, event):
         event.accept()
@@ -133,14 +168,14 @@ class ArrowButton(QtWidgets.QPushButton):
         else:
             self.setText("v")
 
+    def sizeHint(self):
+        return QSize(25, 25)
+
     def mousePressEvent(self, event):
         event.accept()
 
         index = self._parent.getIndex()
         self.pressed.emit(index)
-
-    def sizeHint(self):
-        return QSize(25, 25)
 
 
 
@@ -148,7 +183,7 @@ class ArrowButton(QtWidgets.QPushButton):
 class DragDropButton(QtWidgets.QPushButton):
     
     fileChanged = pyqtSignal(list)
-    
+
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
         super(DragDropButton, self).__init__(parent)
 
@@ -164,26 +199,6 @@ class DragDropButton(QtWidgets.QPushButton):
         self._img = QtWidgets.QLabel()
         self._img.setScaledContents(True)
         self.setImage(self._file)
-
-        #child QFrame, for CSS styling purposes
-        childFrame = QContainerFrame()
-        childLayout = QtWidgets.QVBoxLayout()
-        childLayout.setSpacing(0)
-        childLayout.setContentsMargins(5, 5, 5, 5)
-        childLayout.addWidget(self._img)
-        childFrame.setLayout(childLayout)
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(0)
-        layout.setContentsMargins(5, 5, 5, 5)
-        layout.addWidget(childFrame)
-
-        self.setLayout(layout)
-
-        #PyQt does not implement outline according to CSS standards, so
-        #   two nested QWidgets are necessary to allow double border
-        self.setStyleSheet(CSS_SHEET_DDB)
-        childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
 
     def sizeHint(self):
         return(QSize(75, 75))
@@ -270,6 +285,7 @@ class DragDropButton(QtWidgets.QPushButton):
             imgPath = assetDict.get(f, Assets.ICON_TRACK_EMPTY)
         elif(self._type == ButtonType.NEW_TRACK):
             self.setText('+')
+            #imgPath = assetDict.get(f, Assets.ICON_NEW_DISC)
         else:
             pass
 
@@ -292,6 +308,26 @@ class FileButton(DragDropButton):
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
         super(FileButton, self).__init__(btnType, parent)
 
+        #child QFrame, for CSS styling purposes
+        self._childFrame = QContainerFrame()
+        childLayout = QtWidgets.QVBoxLayout()
+        childLayout.setSpacing(0)
+        childLayout.setContentsMargins(5, 5, 5, 5)
+        childLayout.addWidget(self._img)
+        self._childFrame.setLayout(childLayout)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(5, 5, 5, 5)
+        layout.addWidget(self._childFrame)
+
+        self.setLayout(layout)
+
+        #PyQt does not implement outline according to CSS standards, so
+        #   two nested QWidgets are necessary to allow double border
+        self.setStyleSheet(CSS_SHEET_DDB)
+        self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
+
     def dragEnterEvent(self, event):
         super(FileButton, self).dragEnterEvent(event)
         if not event.isAccepted():
@@ -299,10 +335,12 @@ class FileButton(DragDropButton):
 
         #emit to signal here, highlight buttons below
         self.setStyleSheet(CSS_SHEET_DDB_HOVER)
+        self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF_HOVER)
 
     def dragLeaveEvent(self, event):
         super(FileButton, self).dragLeaveEvent(event)
         self.setStyleSheet(CSS_SHEET_DDB)
+        self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
 
     def dropEvent(self, event):
         super(FileButton, self).dropEvent(event)
@@ -318,22 +356,36 @@ class FileButton(DragDropButton):
         #emit to signal, populate buttons below with excess files
 
         self.setStyleSheet(CSS_SHEET_DDB)
+        self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
 
 
 class NewDiscButton(DragDropButton):
     def __init__(self, parent = None):
         super(NewDiscButton, self).__init__(ButtonType.NEW_TRACK, parent)
 
+        self._img.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(5, 5, 5, 5)
+        layout.addStretch(1)
+        layout.addWidget(self._img)
+        layout.addStretch(1)
+
+        self.setLayout(layout)
+
+        self.setStyleSheet(CSS_SHEET_NDB)
+
     def dragEnterEvent(self, event):
         super(NewDiscButton, self).dragEnterEvent(event)
         if not event.isAccepted():
             return
 
-        #self.setStyleSheet(CSS_SHEET_DDB_HOVER)
+        self.setStyleSheet(CSS_SHEET_NDB_HOVER)
 
     def dragLeaveEvent(self, event):
         super(NewDiscButton, self).dragLeaveEvent(event)
-        #self.setStyleSheet(CSS_SHEET_DDB)
+        self.setStyleSheet(CSS_SHEET_NDB)
 
     def dropEvent(self, event):
         super(NewDiscButton, self).dropEvent(event)
@@ -346,7 +398,7 @@ class NewDiscButton(DragDropButton):
 
         self.fileChanged.emit(f)
 
-        #self.setStyleSheet(CSS_SHEET_DDB)
+        self.setStyleSheet(CSS_SHEET_NDB)
 
 
 
