@@ -33,6 +33,13 @@ class Assets():
     ICON_WAV =          '../data/track-wav.png'
     ICON_OGG =          '../data/track-ogg.png'
 
+CSS_SHEET_SUBTITLE = """
+QLabel {
+    color: gray;
+    font-style: italic;
+}
+"""
+
 CSS_SHEET_DDB = """
 DragDropButton {
     background-color: rgb(255, 255, 255);
@@ -354,6 +361,7 @@ class FileButton(DragDropButton):
         self.setFile(f[0])
             
         #emit to signal, populate buttons below with excess files
+        self.fileChanged.emit([ f[0] ])
 
         self.setStyleSheet(CSS_SHEET_DDB)
         self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
@@ -457,8 +465,10 @@ class DiscListEntry(QContainerFrame):
         self.setLayout(layout)
 
         self._btnTrack.fileChanged.connect(self.setTitle)
+        self._leTitle.textChanged.connect(self.setSubtitle)
 
         self.setStyleSheet(CSS_SHEET_DISCENTRY)
+        self._lblIName.setStyleSheet(CSS_SHEET_SUBTITLE)
 
     def sizeHint(self):
         return QSize(350, 87.5)
@@ -490,11 +500,11 @@ class DiscListEntry(QContainerFrame):
 
     def setTitle(self, fFileList):
         filename = fFileList[0].split('/')[-1].split('.')[0]
-        internal_name = ''.join([i for i in filename.lower() if i.isalpha()])
-        
         self._leTitle.setText(filename)
+
+    def setSubtitle(self, title):
+        internal_name = ''.join([i for i in title.lower() if i.isalpha()])
         self._lblIName.setText(internal_name)
-        pass
 
 
 
