@@ -11,13 +11,26 @@ from enum import Enum
 
 import generator
 
-#typedefs
+#typedefs and constants
 class ButtonType(Enum):
     IMAGE = 1
     TRACK = 2
     NEW_TRACK = 3
     ARROW_UP = 4
     ARROW_DOWN = 5
+
+class FileExt():
+    PNG = 'png'
+    MP3 = 'mp3'
+    WAV = 'wav'
+    OGG = 'ogg'
+
+class Assets():
+    ICON_ICON_EMPTY =   '../data/image-empty.png'
+    ICON_TRACK_EMPTY =  '../data/track-empty.png'
+    ICON_MP3 =          '../data/track-mp3.png'
+    ICON_WAV =          '../data/track-wav.png'
+    ICON_OGG =          '../data/track-ogg.png'
 
 CSS_SHEET_DDB = """
 DragDropButton {
@@ -216,49 +229,19 @@ class DragDropButton(QtWidgets.QPushButton):
             u = u.toLocalFile()
             u = QFileInfo(u).completeSuffix()
 
-            if(self._type == ButtonType.IMAGE and not u == 'png'):
+            if(self.supportsFiletype(u)):
+                event.accept()
+            else:
                 event.ignore()
-                return
-
-            if(self._type == ButtonType.TRACK and not (u == 'mp3' or u == 'wav' or u == 'ogg') ):
-                event.ignore()
-                return
-
-            if(self._type == ButtonType.NEW_TRACK and not (u == 'png' or u == 'mp3' or u == 'wav' or u == 'ogg') ):
-                event.ignore()
-                return
-
-        event.accept()
-
-        #emit to signal here, highlight buttons below
-
-        self.setStyleSheet(CSS_SHEET_DDB_HOVER)
 
     def dragLeaveEvent(self, event):
         event.accept()
 
-        self.setStyleSheet(CSS_SHEET_DDB)
-
     def dropEvent(self, event):
-        if not event.mimeData().hasUrls():
-            event.ignore()
-            return
-
-        event.accept()
-
-        f = event.mimeData().urls()
-        for i, u in enumerate(f):
-            f[i] = u.toLocalFile()
-
-        if(self._type == ButtonType.NEW_TRACK):
-            self.fileChanged.emit(f)
-
+        if event.mimeData().hasUrls():
+            event.accept()
         else:
-            self.setFile(f[0])
-            
-            #emit to signal, populate buttons below with excess files
-
-        self.setStyleSheet(CSS_SHEET_DDB)
+            event.ignore()
 
     def hasFile(self):
         return (self._file != None)
@@ -271,32 +254,99 @@ class DragDropButton(QtWidgets.QPushButton):
         self.setImage(self._file)
 
     def setImage(self, file):
+        f = QFileInfo(file).completeSuffix()
+
+        assetDict = {
+            FileExt.PNG: self._file,
+            FileExt.OGG: Assets.ICON_OGG,
+            FileExt.MP3: Assets.ICON_MP3,
+            FileExt.WAV: Assets.ICON_WAV
+        }
+
+        imgPath = ''
         if(self._type == ButtonType.IMAGE):
-            if(".png" in self._file):
-                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap(self._file)))
-            else:
-                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/image-empty.png")))
-        
+            imgPath = assetDict.get(f, Assets.ICON_ICON_EMPTY)
         elif(self._type == ButtonType.TRACK):
-            if(".ogg" in self._file):
-                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-ogg.png")))
-            elif(".mp3" in self._file):
-                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-mp3.png")))
-            elif(".wav" in self._file):
-                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-wav.png")))
-            else:
-                self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/track-empty.png")))
-        
+            imgPath = assetDict.get(f, Assets.ICON_TRACK_EMPTY)
         elif(self._type == ButtonType.NEW_TRACK):
-            self.setText("+")
-            #self._img.setPixmap(self.getScaledImage(QtGui.QPixmap("../data/image-empty-2.png")))
-            pass
-        
+            self.setText('+')
         else:
             pass
 
+        self._img.setPixmap(self.getScaledImage(QtGui.QPixmap(imgPath)))
+
     def getScaledImage(self, pixmap):
         return pixmap.scaled(self._img.frameGeometry().width(), self._img.frameGeometry().height(), Qt.KeepAspectRatio)
+
+    def supportsFiletype(self, ext):
+        if(self._type == ButtonType.IMAGE):
+            return ( ext in [ FileExt.PNG ] )
+        if(self._type == ButtonType.TRACK):
+            return ( ext in [ FileExt.MP3, FileExt.WAV, FileExt.OGG ] )
+        if(self._type == ButtonType.NEW_TRACK):
+            return ( ext in [ FileExt.MP3, FileExt.WAV, FileExt.OGG, FileExt.PNG ] )
+
+
+
+class FileButton(DragDropButton):
+    def __init__(self, btnType = ButtonType.IMAGE, parent = None):
+        super(FileButton, self).__init__(btnType, parent)
+
+    def dragEnterEvent(self, event):
+        super(FileButton, self).dragEnterEvent(event)
+        if not event.isAccepted():
+            return
+
+        #emit to signal here, highlight buttons below
+        self.setStyleSheet(CSS_SHEET_DDB_HOVER)
+
+    def dragLeaveEvent(self, event):
+        super(FileButton, self).dragLeaveEvent(event)
+        self.setStyleSheet(CSS_SHEET_DDB)
+
+    def dropEvent(self, event):
+        super(FileButton, self).dropEvent(event)
+        if not event.isAccepted():
+            return
+        
+        f = event.mimeData().urls()
+        for i, u in enumerate(f):
+            f[i] = u.toLocalFile()
+
+        self.setFile(f[0])
+            
+        #emit to signal, populate buttons below with excess files
+
+        self.setStyleSheet(CSS_SHEET_DDB)
+
+
+class NewDiscButton(DragDropButton):
+    def __init__(self, parent = None):
+        super(NewDiscButton, self).__init__(ButtonType.NEW_TRACK, parent)
+
+    def dragEnterEvent(self, event):
+        super(NewDiscButton, self).dragEnterEvent(event)
+        if not event.isAccepted():
+            return
+
+        #self.setStyleSheet(CSS_SHEET_DDB_HOVER)
+
+    def dragLeaveEvent(self, event):
+        super(NewDiscButton, self).dragLeaveEvent(event)
+        #self.setStyleSheet(CSS_SHEET_DDB)
+
+    def dropEvent(self, event):
+        super(NewDiscButton, self).dropEvent(event)
+        if not event.isAccepted():
+            return
+        
+        f = event.mimeData().urls()
+        for i, u in enumerate(f):
+            f[i] = u.toLocalFile()
+
+        self.fileChanged.emit(f)
+
+        #self.setStyleSheet(CSS_SHEET_DDB)
 
 
 
@@ -310,8 +360,8 @@ class DiscListEntry(QContainerFrame):
         layout = QtWidgets.QHBoxLayout()
 
         #child widgets
-        self._btnIcon = DragDropButton(ButtonType.IMAGE, self)
-        self._btnTrack = DragDropButton(ButtonType.TRACK, self)
+        self._btnIcon = FileButton(ButtonType.IMAGE, self)
+        self._btnTrack = FileButton(ButtonType.TRACK, self)
         self._leTitle = QtWidgets.QLineEdit("Track Title", self)
         self._lblIName = QtWidgets.QLabel("internal name", self)
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
@@ -408,7 +458,7 @@ class NewDiscEntry(QContainerFrame):
         sizePolicy.setHeightForWidth(True)
         self.setSizePolicy(sizePolicy)
 
-        self._btnAdd = DragDropButton(ButtonType.NEW_TRACK, self)
+        self._btnAdd = NewDiscButton(self)
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
         self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
 
