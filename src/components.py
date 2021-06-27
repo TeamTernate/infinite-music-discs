@@ -222,38 +222,9 @@ class DragDropButton(QtWidgets.QPushButton):
 
     def sizeHint(self):
         return(QSize(75, 75))
-    
+
     def mousePressEvent(self, event):
         event.accept()
-        
-        #set accepted file types based on button function
-        if(self._type == ButtonType.IMAGE):
-            fileTypeStr = "Image files (*.png)"
-        else:
-            fileTypeStr = "Music files (*.mp3; *.wav; *.ogg)"
-
-        f = []
-
-        #if this action creates a new track, allow multiple files
-        if(self._type == ButtonType.NEW_TRACK):
-            f = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open file', '.', fileTypeStr)
-
-            if(f[0] == []):
-                return
-            
-            self.fileChanged.emit( f[0] )
-
-        #if this action modifies an existing track, update one file
-        else:
-            f = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '.', fileTypeStr)
-            
-            if(f[0] == ''):
-                return
-            
-            self.setFile(f[0])
-
-            #wrap file string in a list to match signal type
-            self.fileChanged.emit([ f[0] ])
 
     def dragEnterEvent(self, event):
         if not event.mimeData().hasUrls():
@@ -348,6 +319,25 @@ class FileButton(DragDropButton):
         self.setStyleSheet(CSS_SHEET_DDB)
         self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
 
+    def mousePressEvent(self, event):
+        super(FileButton, self).mousePressEvent(event)
+
+        #set accepted file types based on button function
+        if(self._type == ButtonType.IMAGE):
+            fileTypeStr = "Image files (*.png)"
+        else:
+            fileTypeStr = "Music files (*.mp3; *.wav; *.ogg)"
+
+        f = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '.', fileTypeStr)
+
+        if(f[0] == ''):
+            return
+
+        self.setFile(f[0])
+
+        #wrap file string in a list to match signal type
+        self.fileChanged.emit([ f[0] ])
+
     def dragEnterEvent(self, event):
         super(FileButton, self).dragEnterEvent(event)
         if not event.isAccepted():
@@ -396,6 +386,20 @@ class NewDiscButton(DragDropButton):
         self.setLayout(layout)
 
         self.setStyleSheet(CSS_SHEET_NDB)
+
+    def mousePressEvent(self, event):
+        super(NewDiscButton, self).mousePressEvent(event)
+
+        #new disc button only accepts music files on click
+        fileTypeStr = "Music files (*.mp3; *.wav; *.ogg)"
+
+        #allow multiple files
+        f = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open file', '.', fileTypeStr)
+
+        if(f[0] == []):
+            return
+
+        self.fileChanged.emit( f[0] )
 
     def dragEnterEvent(self, event):
         super(NewDiscButton, self).dragEnterEvent(event)
