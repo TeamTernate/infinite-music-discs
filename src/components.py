@@ -136,6 +136,19 @@ NewDiscEntry {
 class QContainerFrame(QtWidgets.QFrame):
     pass
 
+#Child of QLineEdit with text autoselect on click
+class QFocusLineEdit(QtWidgets.QLineEdit):
+    def focusInEvent(self, event):
+        self._wasFocused = False
+
+    def mousePressEvent(self, event):
+        super(QFocusLineEdit, self).mousePressEvent(event)
+
+        if not self._wasFocused:
+            self.selectAll()
+
+        self._wasFocused = True
+
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
 
@@ -422,7 +435,7 @@ class DiscListEntry(QContainerFrame):
         #child widgets
         self._btnIcon = FileButton(ButtonType.IMAGE, self)
         self._btnTrack = FileButton(ButtonType.TRACK, self)
-        self._leTitle = QtWidgets.QLineEdit("Track Title", self)
+        self._leTitle = QFocusLineEdit("Track Title", self)
         self._lblIName = QtWidgets.QLabel("internal name", self)
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
         self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
