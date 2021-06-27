@@ -34,8 +34,10 @@ class Assets():
     ICON_OGG =          '../data/track-ogg.png'
 
 class StyleProperties():
-    DRAG_HELD = "drag_held"
-    ALPHA =     "alpha"
+    DRAG_HELD = 'drag_held'
+    ALPHA =     'alpha'
+
+MAX_DRAW_MULTI_DRAGDROP = 10
 
 CSS_SHEET_SUBTITLE = """
 QLabel {
@@ -167,6 +169,8 @@ NewDiscEntry {
 class QContainerFrame(QtWidgets.QFrame):
     pass
 
+
+
 #Child of QLineEdit with text autoselect on click
 class QFocusLineEdit(QtWidgets.QLineEdit):
     def focusInEvent(self, event):
@@ -179,6 +183,8 @@ class QFocusLineEdit(QtWidgets.QLineEdit):
             self.selectAll()
 
         self._wasFocused = True
+
+
 
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
@@ -266,10 +272,11 @@ class DragDropButton(QtWidgets.QPushButton):
             u = u.toLocalFile()
             u = QFileInfo(u).completeSuffix()
 
-            if(self.supportsFiletype(u)):
+            if(self.supportsFileType(u)):
                 event.accept()
-            else:
-                event.ignore()
+                return
+
+        event.ignore()
 
     def dragLeaveEvent(self, event):
         event.accept()
@@ -320,7 +327,20 @@ class DragDropButton(QtWidgets.QPushButton):
     def getScaledImage(self, pixmap):
         return pixmap.scaled(self._img.frameGeometry().width(), self._img.frameGeometry().height(), Qt.KeepAspectRatio)
 
-    def supportsFiletype(self, ext):
+    def getFilesFromEvent(self, event):
+        urls = event.mimeData().urls()
+        f = []
+
+        for u in urls:
+            uf = u.toLocalFile()
+            uext = QFileInfo(uf).completeSuffix()
+
+            if self.supportsFileType(uext):
+                f.append(uf)
+
+        return f
+
+    def supportsFileType(self, ext):
         if(self._type == ButtonType.IMAGE):
             return ( ext in [ FileExt.PNG ] )
         if(self._type == ButtonType.TRACK):
@@ -331,6 +351,11 @@ class DragDropButton(QtWidgets.QPushButton):
 
 
 class FileButton(DragDropButton):
+
+    multiDragEnter = pyqtSignal(int, int)
+    multiDragLeave = pyqtSignal(int, int)
+    multiDrop = pyqtSignal(int, list)
+
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
         super(FileButton, self).__init__(btnType, parent)
 
@@ -379,36 +404,70 @@ class FileButton(DragDropButton):
         if not event.isAccepted():
             return
 
-        #emit to signal here, highlight buttons below
-
-        self.setProperty(StyleProperties.DRAG_HELD, True)
-        self._childFrame.setProperty(StyleProperties.DRAG_HELD, True)
-        self.repolish(self)
-        self.repolish(self._childFrame)
+        f = self.getFilesFromEvent(event)
+        self.multiDragEnter.emit(self._parent.getIndex(), len(f))
 
     def dragLeaveEvent(self, event):
         super(FileButton, self).dragLeaveEvent(event)
 
-        self.setProperty(StyleProperties.DRAG_HELD, False)
-        self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
-        self.repolish(self)
-        self.repolish(self._childFrame)
+        self.multiDragLeave.emit(self._parent.getIndex(), MAX_DRAW_MULTI_DRAGDROP)
 
     def dropEvent(self, event):
         super(FileButton, self).dropEvent(event)
         if not event.isAccepted():
             return
-        
-        f = event.mimeData().urls()
-        for i, u in enumerate(f):
-            f[i] = u.toLocalFile()
 
-        self.setFile(f[0])
-            
-        #emit to signal, populate buttons below with excess files
-        self.fileChanged.emit([ f[0] ])
+        f = self.getFilesFromEvent(event)
+        self.multiDrop.emit(self._parent.getIndex(), f)
 
+    def multiDragEnterEvent(self, initIndex, count):
+        #check if this element should be highlighted
+        selfIndex = self._parent.getIndex()
+        if(selfIndex < initIndex):
+            return
+        if(selfIndex >= initIndex + min(MAX_DRAW_MULTI_DRAGDROP, count)):
+            return
+
+        #update styling
+        self.setProperty(StyleProperties.DRAG_HELD, True)
+        self.setProperty(StyleProperties.ALPHA, MAX_DRAW_MULTI_DRAGDROP - (selfIndex - initIndex))
+        self._childFrame.setProperty(StyleProperties.DRAG_HELD, True)
+        self.repolish(self)
+        self.repolish(self._childFrame)
+
+    def multiDragLeaveEvent(self, initIndex, count):
+        #check if this element should be highlighted
+        selfIndex = self._parent.getIndex()
+        if(selfIndex < initIndex):
+            return
+        if(selfIndex >= initIndex + min(MAX_DRAW_MULTI_DRAGDROP, count)):
+            return
+
+        #reset styling
         self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.setProperty(StyleProperties.ALPHA, 10)
+        self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
+        self.repolish(self)
+        self.repolish(self._childFrame)
+
+    def multiDropEvent(self, initIndex, files):
+        #check if this element should be highlighted
+        #   allow all files to drop, instead of restricting like outline render
+        selfIndex = self._parent.getIndex()
+        if(selfIndex < initIndex):
+            return
+        if(selfIndex >= initIndex + len(files)):
+            return
+
+        #save file
+        deltaIndex = selfIndex - initIndex
+
+        self.setFile(files[deltaIndex])
+        self.fileChanged.emit([ files[deltaIndex] ])
+
+        #reset styling
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.setProperty(StyleProperties.ALPHA, 10)
         self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
         self.repolish(self)
         self.repolish(self._childFrame)
@@ -531,6 +590,22 @@ class DiscListEntry(QContainerFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
+        #bind signals for multi drag-drop operation
+        self._btnIcon.multiDragEnter.connect(self._parent.icon_multiDragEnter)
+        self._btnIcon.multiDragLeave.connect(self._parent.icon_multiDragLeave)
+        self._btnIcon.multiDrop.connect(self._parent.icon_multiDrop)
+        self._parent.icon_multiDragEnter.connect(self._btnIcon.multiDragEnterEvent)
+        self._parent.icon_multiDragLeave.connect(self._btnIcon.multiDragLeaveEvent)
+        self._parent.icon_multiDrop.connect(self._btnIcon.multiDropEvent)
+
+        self._btnTrack.multiDragEnter.connect(self._parent.track_multiDragEnter)
+        self._btnTrack.multiDragLeave.connect(self._parent.track_multiDragLeave)
+        self._btnTrack.multiDrop.connect(self._parent.track_multiDrop)
+        self._parent.track_multiDragEnter.connect(self._btnTrack.multiDragEnterEvent)
+        self._parent.track_multiDragLeave.connect(self._btnTrack.multiDragLeaveEvent)
+        self._parent.track_multiDrop.connect(self._btnTrack.multiDropEvent)
+
+        #bind other signals
         self._btnTrack.fileChanged.connect(self.setTitle)
         self._leTitle.textChanged.connect(self.setSubtitle)
 
@@ -623,7 +698,15 @@ class NewDiscEntry(QContainerFrame):
 class DiscList(QtWidgets.QWidget):
     
     reordered = pyqtSignal(int)
-    
+
+    icon_multiDragEnter = pyqtSignal(int, int)
+    icon_multiDragLeave = pyqtSignal(int, int)
+    icon_multiDrop = pyqtSignal(int, list)
+
+    track_multiDragEnter = pyqtSignal(int, int)
+    track_multiDragLeave = pyqtSignal(int, int)
+    track_multiDrop = pyqtSignal(int, list)
+
     def __init__(self, parent = None):
         super(DiscList, self).__init__()
 
