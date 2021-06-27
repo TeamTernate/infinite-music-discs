@@ -33,6 +33,10 @@ class Assets():
     ICON_WAV =          '../data/track-wav.png'
     ICON_OGG =          '../data/track-ogg.png'
 
+class StyleProperties():
+    DRAG_HELD = "drag_held"
+    ALPHA =     "alpha"
+
 CSS_SHEET_SUBTITLE = """
 QLabel {
     color: gray;
@@ -40,21 +44,52 @@ QLabel {
 }
 """
 
-CSS_SHEET_DDB = """
+CSS_SHEET_DRAGDROPBUTTON = """
 DragDropButton {
     background-color: rgb(255, 255, 255);
     border: 5px solid white;
 }
-"""
 
-CSS_SHEET_DDB_HOVER = """
-DragDropButton {
-    background-color: rgb(255, 255, 255);
+DragDropButton[drag_held="true"] {
     border: 5px solid rgb(51, 178, 45);
 }
-"""
 
-CSS_SHEET_DDB_QCF = """
+DragDropButton[alpha="9"] {
+    border: 5px solid rgba(51, 178, 45, 0.9);
+}
+
+DragDropButton[alpha="8"] {
+    border: 5px solid rgba(51, 178, 45, 0.8);
+}
+
+DragDropButton[alpha="7"] {
+    border: 5px solid rgba(51, 178, 45, 0.7);
+}
+
+DragDropButton[alpha="6"] {
+    border: 5px solid rgba(51, 178, 45, 0.6);
+}
+
+DragDropButton[alpha="5"] {
+    border: 5px solid rgba(51, 178, 45, 0.5);
+}
+
+DragDropButton[alpha="4"] {
+    border: 5px solid rgba(51, 178, 45, 0.4);
+}
+
+DragDropButton[alpha="3"] {
+    border: 5px solid rgba(51, 178, 45, 0.3);
+}
+
+DragDropButton[alpha="2"] {
+    border: 5px solid rgba(51, 178, 45, 0.2);
+}
+
+DragDropButton[alpha="1"] {
+    border: 5px solid rgba(51, 178, 45, 0.1);
+}
+
 QContainerFrame {
     border-top: 2px solid gray;
     border-left: 2px solid gray;
@@ -64,13 +99,7 @@ QContainerFrame {
     background-color: rgb(225, 225, 225);
 }
 
-QContainerFrame:hover {
-    background-color: rgb(240, 240, 240);
-}
-"""
-
-CSS_SHEET_DDB_QCF_HOVER = """
-QContainerFrame {
+QContainerFrame[drag_held="true"] {
     border-top: 2px solid rgb(100, 128, 100);
     border-left: 2px solid rgb(100, 128, 100);
     border-bottom: 2px solid rgb(190, 211, 190);
@@ -78,9 +107,13 @@ QContainerFrame {
     
     background-color: rgb(195, 240, 195);
 }
+
+QContainerFrame:hover {
+    background-color: rgb(240, 240, 240);
+}
 """
 
-CSS_SHEET_NDB = """
+CSS_SHEET_NEWDISCBUTTON = """
 NewDiscButton {
     border-top: 2px solid gray;
     border-left: 2px solid gray;
@@ -93,10 +126,8 @@ NewDiscButton {
 NewDiscButton:hover {
     background-color: rgb(240, 240, 240);
 }
-"""
 
-CSS_SHEET_NDB_HOVER = """
-NewDiscButton {
+NewDiscButton:hover[drag_held="true"] {
     border-top: 2px solid gray;
     border-left: 2px solid gray;
     border-bottom: 2px solid lightgray;
@@ -249,6 +280,10 @@ class DragDropButton(QtWidgets.QPushButton):
         else:
             event.ignore()
 
+    def repolish(self, obj):
+        obj.style().unpolish(obj)
+        obj.style().polish(obj)
+
     def hasFile(self):
         return (self._file != None)
 
@@ -316,8 +351,9 @@ class FileButton(DragDropButton):
 
         #PyQt does not implement outline according to CSS standards, so
         #   two nested QWidgets are necessary to allow double border
-        self.setStyleSheet(CSS_SHEET_DDB)
-        self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
+        self.setStyleSheet(CSS_SHEET_DRAGDROPBUTTON)
 
     def mousePressEvent(self, event):
         super(FileButton, self).mousePressEvent(event)
@@ -344,13 +380,19 @@ class FileButton(DragDropButton):
             return
 
         #emit to signal here, highlight buttons below
-        self.setStyleSheet(CSS_SHEET_DDB_HOVER)
-        self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF_HOVER)
+
+        self.setProperty(StyleProperties.DRAG_HELD, True)
+        self._childFrame.setProperty(StyleProperties.DRAG_HELD, True)
+        self.repolish(self)
+        self.repolish(self._childFrame)
 
     def dragLeaveEvent(self, event):
         super(FileButton, self).dragLeaveEvent(event)
-        self.setStyleSheet(CSS_SHEET_DDB)
-        self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
+
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
+        self.repolish(self)
+        self.repolish(self._childFrame)
 
     def dropEvent(self, event):
         super(FileButton, self).dropEvent(event)
@@ -366,8 +408,11 @@ class FileButton(DragDropButton):
         #emit to signal, populate buttons below with excess files
         self.fileChanged.emit([ f[0] ])
 
-        self.setStyleSheet(CSS_SHEET_DDB)
-        self._childFrame.setStyleSheet(CSS_SHEET_DDB_QCF)
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
+        self.repolish(self)
+        self.repolish(self._childFrame)
+
 
 
 class NewDiscButton(DragDropButton):
@@ -385,7 +430,8 @@ class NewDiscButton(DragDropButton):
 
         self.setLayout(layout)
 
-        self.setStyleSheet(CSS_SHEET_NDB)
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.setStyleSheet(CSS_SHEET_NEWDISCBUTTON)
 
     def mousePressEvent(self, event):
         super(NewDiscButton, self).mousePressEvent(event)
@@ -406,11 +452,14 @@ class NewDiscButton(DragDropButton):
         if not event.isAccepted():
             return
 
-        self.setStyleSheet(CSS_SHEET_NDB_HOVER)
+        self.setProperty(StyleProperties.DRAG_HELD, True)
+        self.repolish(self)
 
     def dragLeaveEvent(self, event):
         super(NewDiscButton, self).dragLeaveEvent(event)
-        self.setStyleSheet(CSS_SHEET_NDB)
+
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.repolish(self)
 
     def dropEvent(self, event):
         super(NewDiscButton, self).dropEvent(event)
@@ -423,7 +472,8 @@ class NewDiscButton(DragDropButton):
 
         self.fileChanged.emit(f)
 
-        self.setStyleSheet(CSS_SHEET_NDB)
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.repolish(self)
 
 
 
