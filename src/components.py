@@ -163,6 +163,26 @@ NewDiscEntry {
 }
 """
 
+CSS_SHEET_TABS = """
+QTabWidget::pane {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+
+    border-top: 0px solid white;
+    border-left: 0px solid white;
+    border-bottom: 0px solid white;
+    border-right: 0px solid white;
+}
+
+QTabWidget::tab-bar {
+}
+
+QTabWidget::tab {
+}
+"""
+
 
 
 #dummy child of QFrame for CSS inheritance purposes
@@ -826,20 +846,31 @@ class DiscList(QtWidgets.QWidget):
 class CentralWidget(QtWidgets.QWidget):
     def __init__(self, parent = None):
         super(CentralWidget, self).__init__()
-        
+
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
 
         #list of music disc tracks
         self._discList = DiscList()
-        layout.addWidget(self._discList)
+        self._discList.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+
+        #generation settings
+
+        #tabs to switch between track list and settings
+        tabs = QtWidgets.QTabWidget()
+        tabs.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+        tabs.setStyleSheet(CSS_SHEET_TABS)
+
+        tabs.addTab(self._discList, "Tracks")
+        #tabs.addTab(self._settings, "Settings")
+        layout.addWidget(tabs, 0)
 
         #button to generate datapack/resourcepack
         self._btnGen = GenerateButton()
         self._btnGen.generate.connect(self.generatePacks)
         layout.addWidget(self._btnGen, 0, Qt.AlignBottom)
-        
+
         self.setLayout(layout)
 
     def generatePacks(self):
