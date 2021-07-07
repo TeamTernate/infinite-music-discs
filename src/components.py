@@ -26,20 +26,52 @@ class FileExt():
     OGG = 'ogg'
 
 class Assets():
-    ICON_ICON_EMPTY =   '../data/image-empty.png'
-    ICON_TRACK_EMPTY =  '../data/track-empty.png'
-    ICON_NEW_DISC =     '../data/new-disc.png'
-    ICON_MP3 =          '../data/track-mp3.png'
-    ICON_WAV =          '../data/track-wav.png'
-    ICON_OGG =          '../data/track-ogg.png'
+    ICON_ICON_EMPTY =       '../data/image-empty.png'
+    ICON_TRACK_EMPTY =      '../data/track-empty.png'
+    ICON_NEW_DISC =         '../data/new-disc.png'
+    ICON_MP3 =              '../data/track-mp3.png'
+    ICON_WAV =              '../data/track-wav.png'
+    ICON_OGG =              '../data/track-ogg.png'
+    ICON_ARROW_UP =         '../data/arrow-up.png'
+    ICON_ARROW_DOWN =       '../data/arrow-down.png'
+    ICON_ARROW_UP_DIS =     '../data/arrow-up-disabled.png'
+    ICON_ARROW_DOWN_DIS =   '../data/arrow-down-disabled.png'
 
 class StyleProperties():
     DRAG_HELD = 'drag_held'
     ALPHA =     'alpha'
+    DISABLED =  'disabled'
 
 MAX_DRAW_MULTI_DRAGDROP = 10
 
-CSS_SHEET_SUBTITLE = """
+CSS_SHEET_ARROWBUTTON = """
+ArrowButton {
+    border: 0px solid white;
+    background-color: rgb(48, 48, 48);
+}
+
+ArrowButton:hover {
+    background-color: rgb(100, 100, 100);
+}
+"""
+
+CSS_SHEET_TRACKNAME = """
+QLineEdit {
+    padding-left: 10px;
+    padding-right: 10px;
+
+    color: lightgray;
+    font-size: 16px;
+    border-radius: 4px;
+
+    background-color: rgb(33, 33, 33);
+}
+
+QLineEdit:focus {
+    color: white;
+    border: 1px solid lightgray;
+}
+
 QLabel {
     color: gray;
     font-style: italic;
@@ -48,8 +80,8 @@ QLabel {
 
 CSS_SHEET_DRAGDROPBUTTON = """
 DragDropButton {
-    background-color: rgb(255, 255, 255);
-    border: 5px solid white;
+    background-color: rgb(48, 48, 48);
+    border: 5px solid rgb(48, 48, 48);
 }
 
 DragDropButton[drag_held="true"] {
@@ -93,73 +125,88 @@ DragDropButton[alpha="1"] {
 }
 
 QContainerFrame {
-    border-top: 2px solid gray;
-    border-left: 2px solid gray;
-    border-bottom: 2px solid lightgray;
-    border-right: 2px solid lightgray;
-    
-    background-color: rgb(225, 225, 225);
+    border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(33,33,33), stop:1 rgba(0,0,0,0));
+    border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(33,33,33), stop:1 rgba(0,0,0,0));
+
+    background-color: rgb(33, 33, 33);
 }
 
-QContainerFrame[drag_held="true"] {
-    border-top: 2px solid rgb(100, 128, 100);
-    border-left: 2px solid rgb(100, 128, 100);
-    border-bottom: 2px solid rgb(190, 211, 190);
-    border-right: 2px solid rgb(190, 211, 190);
-    
-    background-color: rgb(195, 240, 195);
+QContainerFrame:hover[drag_held="true"] {
+    background-color: rgb(70, 70, 70);
 }
 
 QContainerFrame:hover {
-    background-color: rgb(240, 240, 240);
+    background-color: rgb(70, 70, 70);
 }
 """
 
 CSS_SHEET_NEWDISCBUTTON = """
 NewDiscButton {
-    border-top: 2px solid gray;
-    border-left: 2px solid gray;
-    border-bottom: 2px solid lightgray;
-    border-right: 2px solid lightgray;
-    
-    background-color: rgb(225, 225, 225);
+    border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(25,25,25), stop:1 rgba(0,0,0,0));
+    border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(25,25,25), stop:1 rgba(0,0,0,0));
+
+    font-size: 48px;
+    color: gray;
+    background-color: rgb(33, 33, 33);
 }
 
 NewDiscButton:hover {
-    background-color: rgb(240, 240, 240);
+    color:lightgray;
+    background-color: rgb(70, 70, 70);
 }
 
 NewDiscButton:hover[drag_held="true"] {
-    border-top: 2px solid gray;
-    border-left: 2px solid gray;
-    border-bottom: 2px solid lightgray;
-    border-right: 2px solid lightgray;
-    
-    background-color: rgb(195, 240, 195);
 }
 """
 
 CSS_SHEET_DISCENTRY = """
 DiscListEntry {
-    border-top: 2px solid lightgray;
-    border-left: 2px solid lightgray;
-    border-bottom: 2px solid gray;
-    border-right: 2px solid gray;
-    background-color: rgb(255, 255, 255);
-
     padding-top: 1px;
     padding-left: 1px;
     padding-right: 1px;
     padding-bottom: 1px;
+
+    border-bottom: 2px solid rgb(79, 79, 79);
+
+    background-color: rgb(48, 48, 48);
 }
 """
 
 CSS_SHEET_NEWENTRY = """
 NewDiscEntry {
-    padding-top: 1px;
-    padding-left: 1px;
-    padding-right: 1px;
-    padding-bottom: 1px;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+
+    background-color: rgb(48, 48, 48);
+}
+"""
+
+CSS_SHEET_DISCLIST = """
+QScrollArea {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+
+    border-top: 0px solid white;
+    border-left: 0px solid white;
+    border-bottom: 0px solid white;
+    border-right: 0px solid white;
+}
+
+#ChildWidget {
+    background-color: rgb(48, 48, 48);
+}
+"""
+
+CSS_SHEET_SETTINGS = """
+SettingsList {
 }
 """
 
@@ -174,12 +221,98 @@ QTabWidget::pane {
     border-left: 0px solid white;
     border-bottom: 0px solid white;
     border-right: 0px solid white;
+
+    background-color: rgb(33, 33, 33);
 }
 
 QTabWidget::tab-bar {
 }
 
-QTabWidget::tab {
+QTabBar {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+
+    border-top: 0px solid white;
+    border-left: 0px solid white;
+    border-bottom: 0px solid white;
+    border-right: 0px solid white;
+
+    background-color: rgb(33, 33, 33);
+}
+
+QTabBar::tab {
+    font-weight: normal;
+    font-size: 16px;
+    color: lightgray;
+    background-color: rgb(33, 33, 33);
+}
+
+QTabBar::tab:selected {
+    font-weight: bold;
+    color: white;
+}
+
+QTabBar::tab:hover {
+    color: white;
+}
+"""
+
+CSS_SHEET_SCROLLBAR = """
+QScrollBar:vertical {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+
+    border-top: 0px solid white;
+    border-left: 0px solid white;
+    border-bottom: 0px solid white;
+    border-right: 0px solid white;
+
+    background-color: rgb(33, 33, 33);
+}
+
+QScrollBar::handle:vertical {
+    background-color: rgb(79, 79, 79);
+    min-height: 0px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: rgb(100, 100, 100);
+}
+
+QScrollBar::add-line:vertical {
+    border: none;
+    background: none;
+    width: 0px;
+    height: 0px;
+}
+
+QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+    width: 0px;
+    height: 0px;
+}
+"""
+
+CSS_SHEET_CENTRAL = """
+CentralWidget {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+
+    border-top: 0px solid white;
+    border-left: 0px solid white;
+    border-bottom: 0px solid white;
+    border-right: 0px solid white;
+}
+
+DiscList {
+    background-color: rgb(48, 48, 48);
 }
 """
 
@@ -240,10 +373,17 @@ class ArrowButton(QtWidgets.QPushButton):
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
 
         self._type = btnType
-        if(self._type == ButtonType.ARROW_UP):
-            self.setText("^")
-        else:
-            self.setText("v")
+
+        self._img = QtWidgets.QLabel(self)
+        self.setImage(self._type, False)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self._img)
+
+        self.setLayout(layout)
+        self.setStyleSheet(CSS_SHEET_ARROWBUTTON)
 
     def sizeHint(self):
         return QSize(25, 25)
@@ -253,6 +393,25 @@ class ArrowButton(QtWidgets.QPushButton):
 
         index = self._parent.getIndex()
         self.pressed.emit(index)
+
+    def setImage(self, btnType, disabled):
+        if(btnType == ButtonType.ARROW_UP):
+            if disabled:
+                self._img.setPixmap(QtGui.QPixmap(Assets.ICON_ARROW_UP_DIS))
+            else:
+                self._img.setPixmap(QtGui.QPixmap(Assets.ICON_ARROW_UP))
+        else:
+            if disabled:
+                self._img.setPixmap(QtGui.QPixmap(Assets.ICON_ARROW_DOWN_DIS))
+            else:
+                self._img.setPixmap(QtGui.QPixmap(Assets.ICON_ARROW_DOWN))
+
+    def setDisabled(self, disabled):
+        super(ArrowButton, self).setDisabled(disabled)
+        self.setImage(self._type, disabled)
+
+        #button may have moved away from mouse, force clear hover state
+        self.setAttribute(Qt.WA_UnderMouse, False)
 
 
 
@@ -306,6 +465,9 @@ class DragDropButton(QtWidgets.QPushButton):
             event.accept()
         else:
             event.ignore()
+
+        #button may have moved away from mouse, force clear hover state
+        self.setAttribute(Qt.WA_UnderMouse, False)
 
     def repolish(self, obj):
         obj.style().unpolish(obj)
@@ -591,6 +753,7 @@ class DiscListEntry(QContainerFrame):
         layout.addLayout(trackLayout)
 
         #container layout for track title and internal name labels
+        self._leTitle.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
         txtLayout = QtWidgets.QVBoxLayout()
         txtLayout.addWidget(self._leTitle, 1)
         txtLayout.addWidget(self._lblIName, 1)
@@ -630,7 +793,8 @@ class DiscListEntry(QContainerFrame):
         self._leTitle.textChanged.connect(self.setSubtitle)
 
         self.setStyleSheet(CSS_SHEET_DISCENTRY)
-        self._lblIName.setStyleSheet(CSS_SHEET_SUBTITLE)
+        self._leTitle.setStyleSheet(CSS_SHEET_TRACKNAME)
+        self._lblIName.setStyleSheet(CSS_SHEET_TRACKNAME)
 
     def sizeHint(self):
         return QSize(350, 87.5)
@@ -691,14 +855,6 @@ class NewDiscEntry(QContainerFrame):
         
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self._btnAdd, 1)
-
-        arrowLayout = QtWidgets.QVBoxLayout()
-        arrowLayout.addWidget(self._btnUpArrow, 0, Qt.AlignRight)
-        arrowLayout.addWidget(self._btnDownArrow, 0, Qt.AlignRight)
-        arrowLayout.setSpacing(0)
-        arrowLayout.setContentsMargins(0, 0, 0, 0)
-        layout.addLayout(arrowLayout)
-
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -745,6 +901,7 @@ class DiscList(QtWidgets.QWidget):
 
         #child widget, contains child layout
         widget = QtWidgets.QWidget()
+        widget.setObjectName("ChildWidget")
         widget.setLayout(self._childLayout)
 
         #scroll area, contains child widget and makes child widget scrollable
@@ -753,6 +910,7 @@ class DiscList(QtWidgets.QWidget):
         scrollArea.setWidgetResizable(True)
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollArea.setStyleSheet(CSS_SHEET_SCROLLBAR)
 
         #layout, contains scroll area
         layout = QtWidgets.QVBoxLayout(self)
@@ -761,6 +919,8 @@ class DiscList(QtWidgets.QWidget):
         layout.addWidget(scrollArea)
 
         self.setLayout(layout)
+
+        self.setStyleSheet(CSS_SHEET_DISCLIST)
 
         self.icon_multiDrop.connect(self.addExcessEntries)
         self.track_multiDrop.connect(self.addExcessEntries)
@@ -842,6 +1002,12 @@ class DiscList(QtWidgets.QWidget):
 
 
 
+class SettingsList(QtWidgets.QWidget):
+    def __init__(self, parent = None):
+        super(SettingsList, self).__init__(parent)
+
+
+
 #primary container widget
 class CentralWidget(QtWidgets.QWidget):
     def __init__(self, parent = None):
@@ -856,14 +1022,16 @@ class CentralWidget(QtWidgets.QWidget):
         self._discList.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
 
         #generation settings
+        self._settingsList = SettingsList()
 
         #tabs to switch between track list and settings
         tabs = QtWidgets.QTabWidget()
         tabs.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
         tabs.setStyleSheet(CSS_SHEET_TABS)
+        tabs.setDocumentMode(True)  #todo: do this differently
 
-        tabs.addTab(self._discList, "Tracks")
-        #tabs.addTab(self._settings, "Settings")
+        tabs.addTab(self._discList, "    Tracks    ")
+        tabs.addTab(self._settingsList, "    Settings    ")
         layout.addWidget(tabs, 0)
 
         #button to generate datapack/resourcepack
@@ -872,6 +1040,8 @@ class CentralWidget(QtWidgets.QWidget):
         layout.addWidget(self._btnGen, 0, Qt.AlignBottom)
 
         self.setLayout(layout)
+
+        self.setStyleSheet(CSS_SHEET_CENTRAL)
 
     def generatePacks(self):
         #self._settings.getUserSettings()
