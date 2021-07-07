@@ -5,7 +5,10 @@
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
 import sys
+import ctypes
+import platform
 from PyQt5 import QtWidgets
+from PyQt5 import QtGui
 
 from components import CentralWidget
 
@@ -14,6 +17,7 @@ class UI(QtWidgets.QMainWindow):
         super().__init__()
 
         self.setWindowTitle("IMD Datapack Generator")
+        self.setWindowIcon(QtGui.QIcon('../data/jukebox_256.png'))
 
         self._centralWidget = CentralWidget(self)
         self.setCentralWidget(self._centralWidget)
@@ -27,7 +31,20 @@ def except_hook(cls, exception, traceback):
 
 if __name__ == "__main__":
     sys.excepthook = except_hook
-    
+
+    sys_os = platform.system()
+    if sys_os == 'Windows':
+        app_id = 'teamternate.imd.imd_gui.01'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+
+    elif sys_os == 'Darwin':
+        #macOS behavior here
+        pass
+
+    elif sys_os == 'Linux':
+        #linux behavior here
+        pass
+
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     
