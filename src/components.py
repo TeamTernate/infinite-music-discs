@@ -51,7 +51,7 @@ ArrowButton {
 }
 
 ArrowButton:hover {
-    background-color: rgb(100, 100, 100);
+    background-color: rgb(96, 96, 96);
 }
 """
 
@@ -64,7 +64,7 @@ QLineEdit {
     font-size: 16px;
     border-radius: 4px;
 
-    background-color: rgb(33, 33, 33);
+    background-color: rgb(32, 32, 32);
 }
 
 QLineEdit:focus {
@@ -126,37 +126,37 @@ DragDropButton[alpha="1"] {
 
 QContainerFrame {
     border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
-    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(33,33,33), stop:1 rgba(0,0,0,0));
+    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
     border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
-    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(33,33,33), stop:1 rgba(0,0,0,0));
+    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
 
-    background-color: rgb(33, 33, 33);
+    background-color: rgb(32, 32, 32);
 }
 
 QContainerFrame:hover[drag_held="true"] {
-    background-color: rgb(70, 70, 70);
+    background-color: rgb(72, 72, 72);
 }
 
 QContainerFrame:hover {
-    background-color: rgb(70, 70, 70);
+    background-color: rgb(72, 72, 72);
 }
 """
 
 CSS_SHEET_NEWDISCBUTTON = """
 NewDiscButton {
     border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
-    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(25,25,25), stop:1 rgba(0,0,0,0));
+    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(24,24,24), stop:1 rgba(0,0,0,0));
     border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
-    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(25,25,25), stop:1 rgba(0,0,0,0));
+    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(24,24,24), stop:1 rgba(0,0,0,0));
 
     font-size: 48px;
     color: gray;
-    background-color: rgb(33, 33, 33);
+    background-color: rgb(32, 32, 32);
 }
 
 NewDiscButton:hover {
     color:lightgray;
-    background-color: rgb(70, 70, 70);
+    background-color: rgb(72, 72, 72);
 }
 
 NewDiscButton:hover[drag_held="true"] {
@@ -170,7 +170,7 @@ DiscListEntry {
     padding-right: 1px;
     padding-bottom: 1px;
 
-    border-bottom: 2px solid rgb(79, 79, 79);
+    border-bottom: 2px solid rgb(72, 72, 72);
 
     background-color: rgb(48, 48, 48);
 }
@@ -222,7 +222,7 @@ QTabWidget::pane {
     border-bottom: 0px solid white;
     border-right: 0px solid white;
 
-    background-color: rgb(33, 33, 33);
+    background-color: rgb(32, 32, 32);
 }
 
 QTabWidget::tab-bar {
@@ -239,14 +239,14 @@ QTabBar {
     border-bottom: 0px solid white;
     border-right: 0px solid white;
 
-    background-color: rgb(33, 33, 33);
+    background-color: rgb(32, 32, 32);
 }
 
 QTabBar::tab {
     font-weight: normal;
     font-size: 16px;
     color: lightgray;
-    background-color: rgb(33, 33, 33);
+    background-color: rgb(32, 32, 32);
 }
 
 QTabBar::tab:selected {
@@ -271,16 +271,16 @@ QScrollBar:vertical {
     border-bottom: 0px solid white;
     border-right: 0px solid white;
 
-    background-color: rgb(33, 33, 33);
+    background-color: rgb(32, 32, 32);
 }
 
 QScrollBar::handle:vertical {
-    background-color: rgb(79, 79, 79);
+    background-color: rgb(72, 72, 72);
     min-height: 0px;
 }
 
 QScrollBar::handle:vertical:hover {
-    background-color: rgb(100, 100, 100);
+    background-color: rgb(96, 96, 96);
 }
 
 QScrollBar::add-line:vertical {
