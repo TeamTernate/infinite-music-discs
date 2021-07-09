@@ -206,7 +206,20 @@ QScrollArea {
 """
 
 CSS_SHEET_SETTINGS = """
-SettingsList {
+QScrollArea {
+    padding-top: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+
+    border-top: 0px solid white;
+    border-left: 0px solid white;
+    border-bottom: 0px solid white;
+    border-right: 0px solid white;
+}
+
+#ChildWidget {
+    background-color: rgb(48, 48, 48);
 }
 """
 
@@ -1006,6 +1019,37 @@ class SettingsList(QtWidgets.QWidget):
     def __init__(self, parent = None):
         super(SettingsList, self).__init__(parent)
 
+        self._parent = parent
+
+        #child layout, contains settings entries
+        self._childLayout = QtWidgets.QVBoxLayout()
+        self._childLayout.setSpacing(0)
+        self._childLayout.setContentsMargins(0, 0, 0, 0)
+        self._childLayout.addStretch()
+
+        #child widget, contains child layout
+        widget = QtWidgets.QWidget()
+        widget.setObjectName("ChildWidget")
+        widget.setLayout(self._childLayout)
+
+        #scroll area, contains child widget and makes child widget scrollable
+        scrollArea = QtWidgets.QScrollArea(self)
+        scrollArea.setWidget(widget)
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollArea.setStyleSheet(CSS_SHEET_SCROLLBAR)
+
+        #layout, contains scroll area
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(scrollArea)
+
+        self.setLayout(layout)
+
+        self.setStyleSheet(CSS_SHEET_SETTINGS)
+
 
 
 #primary container widget
@@ -1023,12 +1067,18 @@ class CentralWidget(QtWidgets.QWidget):
 
         #generation settings
         self._settingsList = SettingsList()
+        self._settingsList.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
 
         #tabs to switch between track list and settings
         tabs = QtWidgets.QTabWidget()
         tabs.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
         tabs.setStyleSheet(CSS_SHEET_TABS)
-        tabs.setDocumentMode(True)  #todo: do this differently
+
+        #set tabs background color
+        tabs.setAutoFillBackground(True)
+        palette = tabs.palette()
+        palette.setColor(QtGui.QPalette.Window, QtGui.QColor(32, 32, 32))
+        tabs.setPalette(palette)
 
         tabs.addTab(self._discList, "    Tracks    ")
         tabs.addTab(self._settingsList, "    Settings    ")
