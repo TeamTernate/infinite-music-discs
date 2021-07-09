@@ -46,7 +46,7 @@ MAX_DRAW_MULTI_DRAGDROP = 10
 
 CSS_SHEET_ARROWBUTTON = """
 ArrowButton {
-    border: 0px solid white;
+    border: 0;
     background-color: rgb(48, 48, 48);
 }
 
@@ -165,39 +165,23 @@ NewDiscButton:hover[drag_held="true"] {
 
 CSS_SHEET_DISCENTRY = """
 DiscListEntry {
-    padding-top: 1px;
-    padding-left: 1px;
-    padding-right: 1px;
-    padding-bottom: 1px;
-
+    padding: 1px;
     border-bottom: 2px solid rgb(72, 72, 72);
-
     background-color: rgb(48, 48, 48);
 }
 """
 
 CSS_SHEET_NEWENTRY = """
 NewDiscEntry {
-    padding-top: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-bottom: 5px;
-
+    padding: 5px;
     background-color: rgb(48, 48, 48);
 }
 """
 
 CSS_SHEET_DISCLIST = """
 QScrollArea {
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-
-    border-top: 0px solid white;
-    border-left: 0px solid white;
-    border-bottom: 0px solid white;
-    border-right: 0px solid white;
+    padding: 0;
+    border: 0;
 }
 
 #ChildWidget {
@@ -207,15 +191,8 @@ QScrollArea {
 
 CSS_SHEET_SETTINGS = """
 QScrollArea {
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-
-    border-top: 0px solid white;
-    border-left: 0px solid white;
-    border-bottom: 0px solid white;
-    border-right: 0px solid white;
+    padding: 0;
+    border: 0;
 }
 
 #ChildWidget {
@@ -225,16 +202,8 @@ QScrollArea {
 
 CSS_SHEET_TABS = """
 QTabWidget::pane {
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-
-    border-top: 0px solid white;
-    border-left: 0px solid white;
-    border-bottom: 0px solid white;
-    border-right: 0px solid white;
-
+    padding: 0;
+    border: 0;
     background-color: rgb(32, 32, 32);
 }
 
@@ -242,16 +211,8 @@ QTabWidget::tab-bar {
 }
 
 QTabBar {
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-
-    border-top: 0px solid white;
-    border-left: 0px solid white;
-    border-bottom: 0px solid white;
-    border-right: 0px solid white;
-
+    padding: 0;
+    border: 0;
     background-color: rgb(32, 32, 32);
 }
 
@@ -274,16 +235,8 @@ QTabBar::tab:hover {
 
 CSS_SHEET_SCROLLBAR = """
 QScrollBar:vertical {
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-
-    border-top: 0px solid white;
-    border-left: 0px solid white;
-    border-bottom: 0px solid white;
-    border-right: 0px solid white;
-
+    padding: 0;
+    border: 0;
     background-color: rgb(32, 32, 32);
 }
 
@@ -313,15 +266,8 @@ QScrollBar::sub-line:vertical {
 
 CSS_SHEET_CENTRAL = """
 CentralWidget {
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-
-    border-top: 0px solid white;
-    border-left: 0px solid white;
-    border-bottom: 0px solid white;
-    border-right: 0px solid white;
+    padding: 0;
+    border: 0;
 }
 
 DiscList {
