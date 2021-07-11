@@ -18,6 +18,7 @@ class ButtonType(Enum):
     NEW_TRACK = 3
     ARROW_UP = 4
     ARROW_DOWN = 5
+    PACKPNG = 6
 
 class SettingType(Enum):
     PACKPNG = 1
@@ -34,6 +35,7 @@ class FileExt():
 class Assets():
     ICON_ICON_EMPTY =       '../data/image-empty.png'
     ICON_TRACK_EMPTY =      '../data/track-empty.png'
+    ICON_PACK_EMPTY =       '../data/pack-empty.png'
     ICON_NEW_DISC =         '../data/new-disc.png'
     ICON_MP3 =              '../data/track-mp3.png'
     ICON_WAV =              '../data/track-wav.png'
@@ -475,6 +477,8 @@ class DragDropButton(QtWidgets.QPushButton):
             imgPath = assetDict.get(f, Assets.ICON_ICON_EMPTY)
         elif(self._type == ButtonType.TRACK):
             imgPath = assetDict.get(f, Assets.ICON_TRACK_EMPTY)
+        elif(self._type == ButtonType.PACKPNG):
+            imgPath = assetDict.get(f, Assets.ICON_PACK_EMPTY)
         elif(self._type == ButtonType.NEW_TRACK):
             self.setText('+')
             #imgPath = assetDict.get(f, Assets.ICON_NEW_DISC)
@@ -501,6 +505,8 @@ class DragDropButton(QtWidgets.QPushButton):
 
     def supportsFileType(self, ext):
         if(self._type == ButtonType.IMAGE):
+            return ( ext in [ FileExt.PNG ] )
+        if(self._type == ButtonType.PACKPNG):
             return ( ext in [ FileExt.PNG ] )
         if(self._type == ButtonType.TRACK):
             return ( ext in [ FileExt.MP3, FileExt.WAV, FileExt.OGG ] )
@@ -543,7 +549,7 @@ class FileButton(DragDropButton):
         super(FileButton, self).mousePressEvent(event)
 
         #set accepted file types based on button function
-        if(self._type == ButtonType.IMAGE):
+        if(self._type == ButtonType.IMAGE or self._type == ButtonType.PACKPNG):
             fileTypeStr = "Image files (*.png)"
         else:
             fileTypeStr = "Music files (*.mp3; *.wav; *.ogg)"
@@ -988,7 +994,7 @@ class SettingsSelector(QtWidgets.QWidget):
 
         if(self._type == SettingType.PACKPNG):
             self._parent.setObjectName("PACKPNG")
-            self._widget = FileButton(ButtonType.IMAGE, parent)
+            self._widget = FileButton(ButtonType.PACKPNG, parent)
             self._widget.multiDragEnter.connect(self._widget.multiDragEnterEvent)
             self._widget.multiDragLeave.connect(self._widget.multiDragLeaveEvent)
             self._widget.multiDrop.connect(self._widget.multiDropEvent)
