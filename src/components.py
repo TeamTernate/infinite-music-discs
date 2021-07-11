@@ -19,6 +19,12 @@ class ButtonType(Enum):
     ARROW_UP = 4
     ARROW_DOWN = 5
 
+class SettingType(Enum):
+    PACKPNG = 1
+    CHECK = 2
+    RADIO = 3
+    DROPDOWN = 4
+
 class FileExt():
     PNG = 'png'
     MP3 = 'mp3'
@@ -190,6 +196,18 @@ QScrollArea {
 """
 
 CSS_SHEET_SETTINGS = """
+SettingsListEntry#PACKPNG {
+    border: 0;
+    /* border-bottom: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgb(32,32,32), stop:0.8 rgba(0,0,0,0), stop:1 rgb(32,32,32)); */
+    border-bottom: 2px solid rgb(72, 72, 72);
+}
+
+QLabel#Label {
+    color: lightgray;
+    font-weight: normal;
+    font-size: 16px;
+}
+
 QScrollArea {
     padding: 0;
     border: 0;
@@ -961,6 +979,79 @@ class DiscList(QtWidgets.QWidget):
 
 
 
+class SettingsSelector(QtWidgets.QWidget):
+    def __init__(self, settingType = SettingType.PACKPNG, params = None, parent = None):
+        super(SettingsSelector, self).__init__(parent)
+
+        self._parent = parent
+        self._type = settingType
+
+        if(self._type == SettingType.PACKPNG):
+            self._parent.setObjectName("PACKPNG")
+            self._widget = FileButton(ButtonType.IMAGE, parent)
+            self._widget.multiDragEnter.connect(self._widget.multiDragEnterEvent)
+            self._widget.multiDragLeave.connect(self._widget.multiDragLeaveEvent)
+            self._widget.multiDrop.connect(self._widget.multiDropEvent)
+
+        elif(self._type == SettingType.CHECK):
+            self._parent.setObjectName("CHECK")
+            self._widget = QtWidgets.QCheckBox(self)
+
+        elif(self._type == SettingType.RADIO):
+            self._parent.setObjectName("RADIO")
+            self._widget = QtWidgets.QRadioButton(self)
+
+        elif(self._type == SettingType.DROPDOWN):
+            self._parent.setObjectName("DROPDOWN")
+            self._widget = QtWidgets.QComboBox(self)
+
+            if not params == None:
+                self._widget.addItems(params)
+
+    def getWidget(self):
+        return self._widget
+
+    def getValue(self):
+        if(self._type == SettingType.PACKPNG):
+            return self._widget.getFile()
+        elif(self._type == SettingType.CHECK):
+            return self._widget.isChecked()
+        elif(self._type == SettingType.RADIO):
+            return self._widget.isChecked()
+        elif(self._type == SettingType.DROPDOWN):
+            return self._widget.currentText()
+
+
+
+class SettingsListEntry(QContainerFrame):
+    def __init__(self, label, settingType = SettingType.PACKPNG, params = None, parent = None):
+        super(SettingsListEntry, self).__init__(parent)
+
+        self._parent = parent
+
+        self._label = QtWidgets.QLabel(label)
+        self._selector = SettingsSelector(settingType, params, self)
+
+        self._label.setObjectName("Label")
+
+        layout = QtWidgets.QHBoxLayout()
+        layout.setSpacing(20)
+        layout.setContentsMargins(5, 5, 5, 5)
+
+        if not settingType == SettingType.PACKPNG:
+            layout.setContentsMargins(50, -1, -1, -1)
+
+        layout.addWidget(self._selector.getWidget())
+        layout.addWidget(self._label)
+        layout.addStretch(1)
+
+        self.setLayout(layout)
+
+    def getIndex(self):
+        return 0
+
+
+
 class SettingsList(QtWidgets.QWidget):
     def __init__(self, parent = None):
         super(SettingsList, self).__init__(parent)
@@ -970,7 +1061,12 @@ class SettingsList(QtWidgets.QWidget):
         #child layout, contains settings entries
         self._childLayout = QtWidgets.QVBoxLayout()
         self._childLayout.setSpacing(0)
-        self._childLayout.setContentsMargins(0, 0, 0, 0)
+        self._childLayout.setContentsMargins(1, 1, 1, 1)
+
+        self._childLayout.addWidget(SettingsListEntry("Pack icon (pack.png)", SettingType.PACKPNG))
+        self._childLayout.addWidget(SettingsListEntry("Game version", SettingType.DROPDOWN, ['1.17', '1.16']))
+        self._childLayout.addWidget(SettingsListEntry("Generate pack as .zip", SettingType.CHECK))
+        self._childLayout.addWidget(SettingsListEntry("Mix stereo tracks to mono", SettingType.CHECK))
         self._childLayout.addStretch()
 
         #child widget, contains child layout
@@ -983,7 +1079,7 @@ class SettingsList(QtWidgets.QWidget):
         scrollArea.setWidget(widget)
         scrollArea.setWidgetResizable(True)
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scrollArea.setStyleSheet(CSS_SHEET_SCROLLBAR)
 
         #layout, contains scroll area
@@ -995,6 +1091,9 @@ class SettingsList(QtWidgets.QWidget):
         self.setLayout(layout)
 
         self.setStyleSheet(CSS_SHEET_SETTINGS)
+
+    def getUserSettings(self):
+        pass
 
 
 
@@ -1040,7 +1139,7 @@ class CentralWidget(QtWidgets.QWidget):
         self.setStyleSheet(CSS_SHEET_CENTRAL)
 
     def generatePacks(self):
-        #self._settings.getUserSettings()
+        #self._settingsList.getUserSettings()
         discEntries = self._discList.getDiscEntries()
 
         texture_files =     []
