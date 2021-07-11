@@ -9,6 +9,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from enum import Enum
 
+import os
 import generator
 
 #typedefs and constants
@@ -406,6 +407,10 @@ class DragDropButton(QtWidgets.QPushButton):
 
         self._file = ''
         self._type = btnType
+
+        if self._type == ButtonType.PACKPNG:
+            if os.path.isfile('pack.png'):
+                self._file = 'pack.png'
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.setAcceptDrops(True)
@@ -1030,10 +1035,11 @@ class SettingsSelector(QtWidgets.QWidget):
 
 
 class SettingsListEntry(QContainerFrame):
-    def __init__(self, label, settingType = SettingType.PACKPNG, params = None, parent = None):
+    def __init__(self, key, label, settingType = SettingType.PACKPNG, params = None, parent = None):
         super(SettingsListEntry, self).__init__(parent)
 
         self._parent = parent
+        self._key = key
 
         self._label = QtWidgets.QLabel(label)
         self._selector = SettingsSelector(settingType, params, self)
@@ -1056,6 +1062,9 @@ class SettingsListEntry(QContainerFrame):
     def getIndex(self):
         return 0
 
+    def getKeyValue(self):
+        return {self._key : self._selector.getValue()}
+
 
 
 class SettingsList(QtWidgets.QWidget):
@@ -1069,10 +1078,11 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.setSpacing(0)
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
-        self._childLayout.addWidget(SettingsListEntry("Pack icon (pack.png)", SettingType.PACKPNG))
-        self._childLayout.addWidget(SettingsListEntry("Game version", SettingType.DROPDOWN, ['1.17', '1.16']))
-        self._childLayout.addWidget(SettingsListEntry("Generate pack as .zip", SettingType.CHECK))
-        self._childLayout.addWidget(SettingsListEntry("Mix stereo tracks to mono", SettingType.CHECK))
+        self._childLayout.addWidget(SettingsListEntry('pack', "Pack icon (pack.png)", SettingType.PACKPNG))
+        self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, ['1.17', '1.16']))
+        self._childLayout.addWidget(SettingsListEntry('zip', "Generate pack as .zip", SettingType.CHECK))
+        self._childLayout.addWidget(SettingsListEntry('mix_mono', "Mix stereo tracks to mono", SettingType.CHECK))
+        self._childLayout.addWidget(SettingsListEntry('keep_tmp', "Keep intermediate converted files", SettingType.CHECK))
         self._childLayout.addStretch()
 
         #child widget, contains child layout
@@ -1099,7 +1109,14 @@ class SettingsList(QtWidgets.QWidget):
         self.setStyleSheet(CSS_SHEET_SETTINGS)
 
     def getUserSettings(self):
-        pass
+        settingsDict = {}
+        for i in range(self._childLayout.count()):
+            e = self._childLayout.itemAt(i).widget()
+
+            if(type(e) == SettingsListEntry):
+                settingsDict.update(e.getKeyValue())
+
+        return settingsDict
 
 
 
@@ -1145,7 +1162,7 @@ class CentralWidget(QtWidgets.QWidget):
         self.setStyleSheet(CSS_SHEET_CENTRAL)
 
     def generatePacks(self):
-        #self._settingsList.getUserSettings()
+        settings = self._settingsList.getUserSettings()
         discEntries = self._discList.getDiscEntries()
 
         texture_files =     []
@@ -1162,7 +1179,7 @@ class CentralWidget(QtWidgets.QWidget):
         #launch worker thread to generate packs
         #   FFmpeg conversion is slow, don't want to lock up UI
         self._thread = QThread(self)
-        self._worker = GeneratePackWorker(texture_files, track_files, titles, internal_names)
+        self._worker = GeneratePackWorker(settings, texture_files, track_files, titles, internal_names)
         self._worker.moveToThread(self._thread)
 
         self._thread.started.connect(self._worker.generate)
@@ -1170,12 +1187,12 @@ class CentralWidget(QtWidgets.QWidget):
         self._worker.destroyed.connect(self._thread.quit)
         self._thread.finished.connect(self._thread.deleteLater)
 
-        self._thread.start()
-
         self._btnGen.setEnabled(False)
         self._thread.finished.connect(
             lambda: self._btnGen.setEnabled(True)
         )
+
+        self._thread.start()
 
 
 
@@ -1186,9 +1203,10 @@ class GeneratePackWorker(QObject):
     progress = pyqtSignal(int)
     max_prog = pyqtSignal(int)
 
-    def __init__(self, texture_files, track_files, titles, internal_names):
+    def __init__(self, settings, texture_files, track_files, titles, internal_names):
         super(GeneratePackWorker, self).__init__()
 
+        self._settings = settings
         self._texture_files = texture_files
         self._track_files = track_files
         self._titles = titles
@@ -1206,7 +1224,8 @@ class GeneratePackWorker(QObject):
         status = generator.validate(self._texture_files,
                                     self._track_files,
                                     self._titles,
-                                    self._internal_names)
+                                    self._internal_names,
+                                    self._settings['pack'])
         if status > 0:
             self.finished.emit()
             return
@@ -1232,7 +1251,8 @@ class GeneratePackWorker(QObject):
         status = generator.generate_datapack(self._texture_files,
                                              self._track_files,
                                              self._titles,
-                                             self._internal_names)
+                                             self._internal_names,
+                                             self._settings['pack'])
         if status > 0:
             self.finished.emit()
             return
@@ -1243,7 +1263,8 @@ class GeneratePackWorker(QObject):
         status = generator.generate_resourcepack(self._texture_files,
                                                  self._track_files,
                                                  self._titles,
-                                                 self._internal_names)
+                                                 self._internal_names,
+                                                 self._settings['pack'])
         if status > 0:
             self.finished.emit()
             return

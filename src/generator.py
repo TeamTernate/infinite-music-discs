@@ -23,7 +23,7 @@ pack_format = 7
 
 
 
-def validate(texture_files, track_files, titles, internal_names):
+def validate(texture_files, track_files, titles, internal_names, packpng=''):
     #lists are all the same length
     if(not ( len(texture_files) == len(track_files) == len(titles) == len(internal_names) )):
         return 1
@@ -56,6 +56,17 @@ def validate(texture_files, track_files, titles, internal_names):
         #internal names are all lowercase
         if(not internal_names[i].islower()):
             return 1
+
+    #if pack icon is provided
+    if(not packpng == ''):
+        #image file still exists
+        if(not os.path.isfile(packpng)):
+            return 1
+
+        #image is .png
+        if(not ('.png' in packpng)):
+            return 1
+
 
     return 0
 
@@ -102,7 +113,7 @@ def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False
 
 
 
-def generate_datapack(texture_files, track_files, titles, internal_names):
+def generate_datapack(texture_files, track_files, titles, internal_names, packpng=''):
     #build datapack directory tree
     shutil.rmtree(datapack_name, ignore_errors=True)
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
@@ -207,15 +218,15 @@ def generate_datapack(texture_files, track_files, titles, internal_names):
 
     #copy pack.png
     try:
-        shutil.copyfile('pack.png', os.path.join(datapack_name, 'pack.png'))
-    except IOError:
+        shutil.copyfile(packpng, os.path.join(datapack_name, 'pack.png'))
+    except (FileNotFoundError, IOError) as e:
         print("Warning: No pack.png found. Your datapack will not have an icon.")
     
     return 0
 
 
 
-def generate_resourcepack(texture_files, track_files, titles, internal_names, cleanup_tmp=True):
+def generate_resourcepack(texture_files, track_files, titles, internal_names, packpng='', cleanup_tmp=True):
     #build resourcepack directory tree
     shutil.rmtree(resourcepack_name, ignore_errors=True)
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
@@ -266,8 +277,8 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, cl
     
     #copy pack.png
     try:
-        shutil.copyfile('pack.png', os.path.join(resourcepack_name, 'pack.png'))
-    except IOError:
+        shutil.copyfile(packpng, os.path.join(resourcepack_name, 'pack.png'))
+    except (FileNotFoundError, IOError) as e:
         print("Warning: No pack.png found. Your resourcepack will not have an icon.")
 
     #cleanup temp work directory
