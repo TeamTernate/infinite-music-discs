@@ -10,10 +10,14 @@ import os
 import json
 import shutil
 import sys
+import zipfile
 import pyffmpeg
 
 datapack_name = 'custom_music_discs_dp'
 resourcepack_name = 'custom_music_discs_rp'
+
+datapack_name_zip = datapack_name + '.zip'
+resourcepack_name_zip = resourcepack_name + '.zip'
 
 datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
@@ -113,7 +117,7 @@ def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False
 
 
 
-def generate_datapack(texture_files, track_files, titles, internal_names, packpng=''):
+def generate_datapack(texture_files, track_files, titles, internal_names, user_settings={}):
     #build datapack directory tree
     shutil.rmtree(datapack_name, ignore_errors=True)
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
@@ -218,15 +222,45 @@ def generate_datapack(texture_files, track_files, titles, internal_names, packpn
 
     #copy pack.png
     try:
-        shutil.copyfile(packpng, os.path.join(datapack_name, 'pack.png'))
+        if 'pack' in user_settings:
+            shutil.copyfile(user_settings['pack'], os.path.join(datapack_name, 'pack.png'))
+        else:
+            raise FileNotFoundError
+
     except (FileNotFoundError, IOError) as e:
         print("Warning: No pack.png found. Your datapack will not have an icon.")
-    
+
+    #move pack to .zip, if selected
+    try:
+        if 'zip' in user_settings and user_settings['zip']:
+            #remove old zip
+            if os.path.exists(datapack_name_zip):
+                os.remove(datapack_name_zip)
+
+            #generate new zip archive
+            with zipfile.ZipFile(datapack_name_zip, 'w') as dp_zip:
+                for root, dirs, files in os.walk(datapack_name):
+                    root_zip = os.path.relpath(root, datapack_name)
+
+                    for file in files:
+                        dp_zip.write(os.path.join(root, file), os.path.join(root_zip, file))
+
+            #remove datapack folder
+            if os.path.exists(datapack_name_zip):
+                shutil.rmtree(datapack_name, ignore_errors=True)
+
+    except (OSError, zipfile.BadZipFile) as e:
+        #remove bad zip, if it exists
+        if os.path.exists(datapack_name_zip):
+            os.remove(datapack_name_zip)
+
+        print("Error: Failed to zip datapack. Datapack has been generated as folder instead.")
+
     return 0
 
 
 
-def generate_resourcepack(texture_files, track_files, titles, internal_names, packpng='', cleanup_tmp=True):
+def generate_resourcepack(texture_files, track_files, titles, internal_names, user_settings={}, cleanup_tmp=True):
     #build resourcepack directory tree
     shutil.rmtree(resourcepack_name, ignore_errors=True)
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
@@ -277,9 +311,39 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, pa
     
     #copy pack.png
     try:
-        shutil.copyfile(packpng, os.path.join(resourcepack_name, 'pack.png'))
+        if 'pack' in user_settings:
+            shutil.copyfile(user_settings['pack'], os.path.join(resourcepack_name, 'pack.png'))
+        else:
+            raise FileNotFoundError
+
     except (FileNotFoundError, IOError) as e:
         print("Warning: No pack.png found. Your resourcepack will not have an icon.")
+
+    #move pack to .zip, if selected
+    try:
+        if 'zip' in user_settings and user_settings['zip']:
+            #remove old zip
+            if os.path.exists(resourcepack_name_zip):
+                os.remove(resourcepack_name_zip)
+
+            #generate new zip archive
+            with zipfile.ZipFile(resourcepack_name_zip, 'w') as rp_zip:
+                for root, dirs, files in os.walk(resourcepack_name):
+                    root_zip = os.path.relpath(root, resourcepack_name)
+
+                    for file in files:
+                        rp_zip.write(os.path.join(root, file), os.path.join(root_zip, file))
+
+            #remove resourcepack folder
+            if os.path.exists(resourcepack_name_zip):
+                shutil.rmtree(resourcepack_name, ignore_errors=True)
+
+    except (OSError, zipfile.BadZipFile) as e:
+        #remove bad zip, if it exists
+        if os.path.exists(resourcepack_name_zip):
+            os.remove(resourcepack_name_zip)
+
+        print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
 
     #cleanup temp work directory
     if cleanup_tmp:

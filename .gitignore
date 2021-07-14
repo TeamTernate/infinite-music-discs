@@ -3,6 +3,7 @@ src/*.png
 src/*.mp3
 src/*.wav
 src/*.ogg
+src/*.zip
 
 src/custom_music_discs_dp/*
 src/custom_music_discs_rp/*

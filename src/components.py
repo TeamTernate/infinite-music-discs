@@ -1252,7 +1252,7 @@ class GeneratePackWorker(QObject):
                                              self._track_files,
                                              self._titles,
                                              self._internal_names,
-                                             self._settings['pack'])
+                                             self._settings)
         if status > 0:
             self.finished.emit()
             return
@@ -1264,7 +1264,7 @@ class GeneratePackWorker(QObject):
                                                  self._track_files,
                                                  self._titles,
                                                  self._internal_names,
-                                                 self._settings['pack'])
+                                                 self._settings)
         if status > 0:
             self.finished.emit()
             return
