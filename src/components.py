@@ -5,6 +5,7 @@
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
 from PyQt5.QtCore import Qt, QFileInfo, QSize, QObject, QThread, pyqtSignal
+from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from enum import Enum
@@ -238,6 +239,7 @@ QTabBar {
 }
 
 QTabBar::tab {
+    height: 40px;
     font-weight: normal;
     font-size: 16px;
     color: lightgray;
@@ -990,6 +992,87 @@ class DiscList(QtWidgets.QWidget):
 
 
 
+#overloaded QTabBar, with an animated underline like the Minecraft launcher
+class AnimatedTabBar(QtWidgets.QTabBar):
+
+    UL_COLOR = QtGui.QColor(0, 124, 64)
+    UL_HEIGHT = 3
+    UL_WIDTH_2 = 12
+
+    def __init__(self, parent = None):
+        super(AnimatedTabBar, self).__init__(parent)
+
+        self.animations = []
+        self._first = True
+
+        self.currentChanged.connect(self.tabChanged)
+
+    def paintEvent(self, event):
+        super(AnimatedTabBar, self).paintEvent(event)
+
+        selected = self.currentIndex()
+        if selected < 0:
+            return
+
+        tab = QtWidgets.QStyleOptionTab()
+        self.initStyleOption(tab, selected)
+
+        qp = QtGui.QPainter(self)
+        qp.setRenderHints(qp.Antialiasing)
+        qp.setPen(QtCore.Qt.NoPen)
+        qp.setBrush(QtGui.QBrush(self.UL_COLOR))
+        qp.drawRect(self.animations[selected].currentValue())
+
+        style = self.style()
+        style.drawControl(style.CE_TabBarTabLabel, tab, qp, self)
+
+    def tabChanged(self, index):
+        if self.animations:
+            self.animations[index].start()
+
+    def tabInserted(self, index):
+        super(AnimatedTabBar, self).tabInserted(index)
+
+        baseRect = self.tabRect(index)
+
+        anim = QtCore.QVariantAnimation()
+        anim.setStartValue(self.getUnderlineRect(baseRect, False))
+        anim.setEndValue(self.getUnderlineRect(baseRect, True))
+        anim.setEasingCurve(QtCore.QEasingCurve.Linear)
+        anim.setDuration(125)
+        anim.valueChanged.connect(self.update)
+
+        self.animations.insert(index, anim)
+
+        if self._first:
+            self._first = False
+            anim.start()
+
+    def tabRemoved(self, index):
+        super(AnimatedTabBar, self).tabRemoved(index)
+
+        anim = self.animations.pop(index)
+        anim.stop()
+        anim.deleteLater()
+
+    #calculate underline QRect coordinates from tab QRect coordinates
+    def getUnderlineRect(self, tabRect, hasWidth=True):
+        ulRect = tabRect
+        ulRect.setTop(tabRect.bottom() - self.UL_HEIGHT)
+
+        center = tabRect.center().x()
+
+        if hasWidth:
+            ulRect.setLeft(center - self.UL_WIDTH_2)
+            ulRect.setRight(center + self.UL_WIDTH_2)
+        else:
+            ulRect.setLeft(center)
+            ulRect.setRight(center)
+
+        return ulRect
+
+
+
 class SettingsSelector(QtWidgets.QWidget):
     def __init__(self, settingType = SettingType.PACKPNG, params = None, parent = None):
         super(SettingsSelector, self).__init__(parent)
@@ -1148,6 +1231,8 @@ class CentralWidget(QtWidgets.QWidget):
         palette.setColor(QtGui.QPalette.Window, QtGui.QColor(32, 32, 32))
         tabs.setPalette(palette)
 
+        tabBar = AnimatedTabBar(self)
+        tabs.setTabBar(tabBar)
         tabs.addTab(self._discList, "    Tracks    ")
         tabs.addTab(self._settingsList, "    Settings    ")
         layout.addWidget(tabs, 0)
