@@ -4,7 +4,7 @@
 #Infinite Music Discs datapack + resourcepack GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-from PyQt5.QtCore import Qt, QFileInfo, QSize, QObject, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QFileInfo, QSize, QObject, QThread, pyqtSignal, QRect, QPoint
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -35,6 +35,7 @@ class FileExt():
     OGG = 'ogg'
 
 class Assets():
+    FONT_MC_LARGE =         '../data/minecraft-ten.ttf'
     ICON_ICON_EMPTY =       '../data/image-empty.png'
     ICON_TRACK_EMPTY =      '../data/track-empty.png'
     ICON_PACK_EMPTY =       '../data/pack-empty.png'
@@ -51,6 +52,8 @@ class StyleProperties():
     DRAG_HELD = 'drag_held'
     ALPHA =     'alpha'
     DISABLED =  'disabled'
+    PRESSED =   'pressed'
+    HOVER =     'hover'
 
 MAX_DRAW_MULTI_DRAGDROP = 10
 
@@ -62,6 +65,43 @@ ArrowButton {
 
 ArrowButton:hover {
     background-color: rgb(96, 96, 96);
+}
+"""
+
+CSS_SHEET_GENBUTTON = """
+GenerateButton {
+    border: 0;
+    color: white;
+    font-size: 32px;
+
+    qproperty-color_BorderOuter: black;
+    qproperty-color_BorderLeft: rgb(49,108,66);
+    qproperty-color_BorderTop: rgb(98,202,85);
+    qproperty-color_BorderRight: rgb(49,108,66);
+    qproperty-color_BorderBottom: rgb(32,75,45);
+    qproperty-color_Button: rgb(62,139,78);
+}
+
+GenerateButton[hover="true"] {
+    font-size: 33px;
+
+    qproperty-color_BorderOuter: black;
+    qproperty-color_BorderLeft: rgb(49,108,66);
+    qproperty-color_BorderTop: rgb(98,202,85);
+    qproperty-color_BorderRight: rgb(49,108,66);
+    qproperty-color_BorderBottom: rgb(32,75,45);
+    qproperty-color_Button: rgb(68,150,88);
+}
+
+GenerateButton[pressed="true"] {
+    font-size: 31px;
+
+    qproperty-color_BorderOuter: white;
+    qproperty-color_BorderLeft: rgb(49,108,66);
+    qproperty-color_BorderTop: rgb(32,75,45);
+    qproperty-color_BorderRight: rgb(49,108,66);
+    qproperty-color_BorderBottom: rgb(74,162,53);
+    qproperty-color_Button: rgb(62,140,78);
 }
 """
 
@@ -296,6 +336,10 @@ CentralWidget {
 DiscList {
     background-color: rgb(48, 48, 48);
 }
+
+QContainerFrame#GenFrame {
+    background-color: rgb(32, 32, 32);
+}
 """
 
 
@@ -324,21 +368,219 @@ class QFocusLineEdit(QtWidgets.QLineEdit):
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
 
+    BD_OUTER_WIDTH = 2
+    BD_TOP_WIDTH = 4
+    BD_SIDE_WIDTH = 5
+
+    BD_TOP_FULL_WIDTH = BD_OUTER_WIDTH + BD_TOP_WIDTH
+    BD_SIDE_FULL_WIDTH = BD_OUTER_WIDTH + BD_SIDE_WIDTH
+
+    COLOR_BG = QtGui.QColor(32,32,32)
+    COLOR_BD_OUTER = QtGui.QColor(0,0,0)
+    COLOR_BD_LEFT = QtGui.QColor(49,108,66)
+    COLOR_BD_TOP = QtGui.QColor(98,202,85)
+    COLOR_BD_RIGHT = COLOR_BD_LEFT
+    COLOR_BD_BOTTOM = QtGui.QColor(32,75,45)
+    COLOR_BTN = QtGui.QColor(62,139,78)
+
     generate = pyqtSignal()
     
     def __init__(self, parent = None):
-        super(GenerateButton, self).__init__("Generate Datapack")
+        super(GenerateButton, self).__init__("Generate")
 
         self._parent = parent
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+        #initialize colors with default values
+        #TODO: parse self.styleSheet() with regex, use border-left-color, etc.
+        self._color_BorderOuter = self.COLOR_BD_OUTER
+        self._color_BorderLeft = self.COLOR_BD_LEFT
+        self._color_BorderTop = self.COLOR_BD_TOP
+        self._color_BorderRight = self.COLOR_BD_RIGHT
+        self._color_BorderBottom = self.COLOR_BD_BOTTOM
+        self._color_Button = self.COLOR_BTN
+
+        self.setProperty(StyleProperties.HOVER, False)
+        self.setProperty(StyleProperties.PRESSED, False)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+
+        #load custom font
+        font_id = QtGui.QFontDatabase.addApplicationFont(Assets.FONT_MC_LARGE)
+        font_str = QtGui.QFontDatabase.applicationFontFamilies(font_id)[0]
+        self._font = QtGui.QFont(font_str)
+
+        self.setFont(self._font)
+        self.setStyleSheet(CSS_SHEET_GENBUTTON)
 
     def sizeHint(self):
-        return QSize(350, 87.5)
+        return QSize(350, 66)
 
     def mousePressEvent(self, event):
         event.accept()
+        self.setProperty(StyleProperties.PRESSED, True)
+        self.repolish(self)
+
+    def mouseReleaseEvent(self, event):
+        event.accept()
+        self.setProperty(StyleProperties.PRESSED, False)
+        self.repolish(self)
+
+        #begin generate operation
         self.generate.emit()
+
+    def enterEvent(self, event):
+        event.accept()
+        self.setProperty(StyleProperties.HOVER, True)
+        self.repolish(self)
+
+    def leaveEvent(self, event):
+        event.accept()
+        self.setProperty(StyleProperties.PRESSED, False)
+        self.setProperty(StyleProperties.HOVER, False)
+        self.repolish(self)
+
+    def paintEvent(self, event):
+        super(GenerateButton, self).paintEvent(event)
+
+        btn = QtWidgets.QStyleOptionButton()
+        self.initStyleOption(btn)
+
+        qp = QtGui.QPainter(self)
+        qp.setRenderHints(qp.Antialiasing)
+        qp.setRenderHints(qp.TextAntialiasing)
+        qp.setPen(QtCore.Qt.NoPen)
+
+        self.drawGenerateButton(qp)
+
+        style = self.style()
+        style.drawControl(style.CE_PushButton, btn, qp, self)
+
+    def drawGenerateButton(self, qp):
+        r = self.rect()
+
+        #TODO: should these points/sizes be constants? don't recalculate every time?
+
+        #define corner cutout rects
+        corn_tl_pt = QPoint(r.left(), r.top())
+        corn_tr_pt = QPoint(r.left() + r.width() - self.BD_SIDE_WIDTH, r.top())
+        corn_bl_pt = QPoint(r.left(), r.top() + r.height() - self.BD_TOP_WIDTH)
+        corn_br_pt = QPoint(r.left() + r.width() - self.BD_SIDE_WIDTH, r.top() + r.height() - self.BD_TOP_WIDTH)
+
+        corn_rect_size = QSize(self.BD_SIDE_WIDTH, self.BD_TOP_WIDTH)
+        corn_tl_rect = QRect(corn_tl_pt, corn_rect_size)
+        corn_tr_rect = QRect(corn_tr_pt, corn_rect_size)
+        corn_bl_rect = QRect(corn_bl_pt, corn_rect_size)
+        corn_br_rect = QRect(corn_br_pt, corn_rect_size)
+
+        #define inner border rects
+        bd_left_pt = corn_tl_pt + QPoint(self.BD_OUTER_WIDTH, self.BD_TOP_FULL_WIDTH)
+        bd_top_pt = corn_tl_pt + QPoint(self.BD_SIDE_FULL_WIDTH, self.BD_OUTER_WIDTH)
+        bd_right_pt = corn_tr_pt + QPoint(-self.BD_OUTER_WIDTH, self.BD_TOP_FULL_WIDTH)
+        bd_bottom_pt = corn_bl_pt + QPoint(self.BD_SIDE_FULL_WIDTH, -self.BD_OUTER_WIDTH)
+
+        bd_top_width = r.width() - (2 * self.BD_SIDE_FULL_WIDTH)
+        bd_side_height = r.height() - (2 * self.BD_TOP_FULL_WIDTH)
+
+        bd_top_size = QSize(bd_top_width, self.BD_TOP_WIDTH)
+        bd_side_size = QSize(self.BD_SIDE_WIDTH, bd_side_height)
+
+        bd_left_rect = QRect(bd_left_pt, bd_side_size)
+        bd_top_rect = QRect(bd_top_pt, bd_top_size)
+        bd_right_rect = QRect(bd_right_pt, bd_side_size)
+        bd_bottom_rect = QRect(bd_bottom_pt, bd_top_size)
+
+        #define central button rect
+        btn_tl_pt = r.topLeft() + QPoint(self.BD_SIDE_FULL_WIDTH, self.BD_TOP_FULL_WIDTH)
+        btn_tr_pt = r.topRight() + QPoint(-self.BD_SIDE_FULL_WIDTH, self.BD_TOP_FULL_WIDTH)
+        btn_bl_pt = r.bottomLeft() + QPoint(self.BD_SIDE_FULL_WIDTH, -self.BD_TOP_FULL_WIDTH)
+        btn_br_pt = r.bottomRight() + QPoint(-self.BD_SIDE_FULL_WIDTH, -self.BD_TOP_FULL_WIDTH)
+
+        btn_size = QSize(bd_top_width, bd_side_height)
+        btn_rect = QtCore.QRect(btn_tl_pt, btn_size)
+
+        #draw outer border
+        qp.setBrush(QtGui.QBrush(self._color_BorderOuter))
+        qp.drawRect(r)
+
+        #"cut out" corners
+        qp.setBrush(QtGui.QBrush(self.COLOR_BG))
+        qp.drawRect(corn_tl_rect)
+        qp.drawRect(corn_tr_rect)
+        qp.drawRect(corn_bl_rect)
+        qp.drawRect(corn_br_rect)
+
+        #draw inner borders
+        qp.setBrush(QtGui.QBrush(self._color_BorderLeft))
+        qp.drawRect(bd_left_rect)
+
+        qp.setBrush(QtGui.QBrush(self._color_BorderTop))
+        qp.drawRect(bd_top_rect)
+
+        qp.setBrush(QtGui.QBrush(self._color_BorderRight))
+        qp.drawRect(bd_right_rect)
+
+        qp.setBrush(QtGui.QBrush(self._color_BorderBottom))
+        qp.drawRect(bd_bottom_rect)
+
+        #draw main button rect
+        qp.setBrush(QtGui.QBrush(self._color_Button))
+        qp.drawRect(btn_rect)
+
+    def repolish(self, obj):
+        obj.style().unpolish(obj)
+        obj.style().polish(obj)
+
+    @QtCore.pyqtProperty(QtGui.QColor)
+    def color_BorderOuter(self):
+        return self._color_BorderOuter
+
+    @color_BorderOuter.setter
+    def color_BorderOuter(self, color):
+        self._color_BorderOuter = color
+
+
+    @QtCore.pyqtProperty(QtGui.QColor)
+    def color_BorderLeft(self):
+        return self._color_BorderLeft
+
+    @color_BorderLeft.setter
+    def color_BorderLeft(self, color):
+        self._color_BorderLeft = color
+
+
+    @QtCore.pyqtProperty(QtGui.QColor)
+    def color_BorderTop(self):
+        return self._color_BorderTop
+
+    @color_BorderTop.setter
+    def color_BorderTop(self, color):
+        self._color_BorderTop = color
+
+
+    @QtCore.pyqtProperty(QtGui.QColor)
+    def color_BorderRight(self):
+        return self._color_BorderRight
+
+    @color_BorderRight.setter
+    def color_BorderRight(self, color):
+        self._color_BorderRight = color
+
+
+    @QtCore.pyqtProperty(QtGui.QColor)
+    def color_BorderBottom(self):
+        return self._color_BorderBottom
+
+    @color_BorderBottom.setter
+    def color_BorderBottom(self, color):
+        self._color_BorderBottom = color
+
+
+    @QtCore.pyqtProperty(QtGui.QColor)
+    def color_Button(self):
+        return self._color_Button
+
+    @color_Button.setter
+    def color_Button(self, color):
+        self._color_Button = color
 
 
 
@@ -1240,8 +1482,19 @@ class CentralWidget(QtWidgets.QWidget):
         #button to generate datapack/resourcepack
         self._btnGen = GenerateButton()
         self._btnGen.generate.connect(self.generatePacks)
-        layout.addWidget(self._btnGen, 0, Qt.AlignBottom)
 
+        #wrap inside container frame and layout, for aesthetics
+        btnLayout = QtWidgets.QHBoxLayout()
+        btnLayout.setSpacing(0)
+        btnLayout.setContentsMargins(0, 5, 0, 5)
+        btnLayout.addStretch()
+        btnLayout.addWidget(self._btnGen, 0, Qt.AlignBottom)
+        btnLayout.addStretch()
+
+        btnFrame = QContainerFrame()
+        btnFrame.setObjectName("GenFrame")
+        btnFrame.setLayout(btnLayout)
+        layout.addWidget(btnFrame)
         self.setLayout(layout)
 
         self.setStyleSheet(CSS_SHEET_CENTRAL)
