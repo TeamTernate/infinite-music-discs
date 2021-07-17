@@ -11,6 +11,7 @@ from PyQt5 import QtWidgets
 from enum import Enum
 
 import os
+import re
 import generator
 
 #typedefs and constants
@@ -74,46 +75,36 @@ GenerateButton {
     color: white;
     font-size: 32px;
 
-    qproperty-color_BorderOuter: black;
-    qproperty-color_BorderLeft: rgb(49,108,66);
-    qproperty-color_BorderTop: rgb(98,202,85);
-    qproperty-color_BorderRight: rgb(49,108,66);
-    qproperty-color_BorderBottom: rgb(32,75,45);
-    qproperty-color_Button: rgb(62,139,78);
+    border-outer-color: rgb(0,0,0);
+    border-left-color: rgb(49,108,66);
+    border-top-color: rgb(98,202,85);
+    border-right-color: rgb(49,108,66);
+    border-bottom-color: rgb(32,75,45);
+    button-color: rgb(62,139,78);
 }
 
 GenerateButton[hover="true"] {
-    font-size: 33px;
+    font-size: 34px;
 
-    qproperty-color_BorderOuter: black;
-    qproperty-color_BorderLeft: rgb(49,108,66);
-    qproperty-color_BorderTop: rgb(98,202,85);
-    qproperty-color_BorderRight: rgb(49,108,66);
-    qproperty-color_BorderBottom: rgb(32,75,45);
-    qproperty-color_Button: rgb(68,150,88);
+    button-color: rgb(68,150,88);
 }
 
 GenerateButton[pressed="true"] {
     font-size: 31px;
 
-    qproperty-color_BorderOuter: white;
-    qproperty-color_BorderLeft: rgb(49,108,66);
-    qproperty-color_BorderTop: rgb(32,75,45);
-    qproperty-color_BorderRight: rgb(49,108,66);
-    qproperty-color_BorderBottom: rgb(74,162,53);
-    qproperty-color_Button: rgb(62,140,78);
+    border-outer-color: rgb(255,255,255);
+    border-top-color: rgb(32,75,45);
+    border-bottom-color: rgb(74,162,53);
+    button-color: rgb(62,140,78);
 }
 
 GenerateButton[disabled="true"] {
     color: lightgray;
     font-size: 32px;
 
-    qproperty-color_BorderOuter: black;
-    qproperty-color_BorderLeft: rgb(49,108,66);
-    qproperty-color_BorderTop: rgb(68,141,59);
-    qproperty-color_BorderRight: rgb(49,108,66);
-    qproperty-color_BorderBottom: rgb(22,52,31);
-    qproperty-color_Button: rgb(41,93,52);
+    border-top-color: rgb(68,141,59);
+    border-bottom-color: rgb(22,52,31);
+    button-color: rgb(41,93,52);
 }
 """
 
@@ -376,6 +367,7 @@ class QFocusLineEdit(QtWidgets.QLineEdit):
         self._wasFocused = True
 
 
+#TODO: make an abstract button with all helper functions so all buttons can inherit
 
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
@@ -388,12 +380,11 @@ class GenerateButton(QtWidgets.QPushButton):
     BD_SIDE_FULL_WIDTH = BD_OUTER_WIDTH + BD_SIDE_WIDTH
 
     COLOR_BG = QtGui.QColor(32,32,32)
-    COLOR_BD_OUTER = QtGui.QColor(0,0,0)
-    COLOR_BD_LEFT = QtGui.QColor(49,108,66)
-    COLOR_BD_TOP = QtGui.QColor(98,202,85)
-    COLOR_BD_RIGHT = COLOR_BD_LEFT
-    COLOR_BD_BOTTOM = QtGui.QColor(32,75,45)
-    COLOR_BTN = QtGui.QColor(62,139,78)
+
+    REGEX_CAPTURE = 'GenerateButton(\[.*?\])?\s*?\{(.*?)\}'
+    REGEX_CAPTURE_TAG = '\[(.*?)='
+    REGEX_CLEAN_WHITESPACE = '\n|\t| '
+    REGEX_RGB = 'rgb\((.*?)\)'
 
     generate = pyqtSignal()
     
@@ -402,15 +393,7 @@ class GenerateButton(QtWidgets.QPushButton):
 
         self._parent = parent
 
-        #initialize colors with default values
-        #TODO: parse self.styleSheet() with regex, use border-left-color, etc.
-        self._color_BorderOuter = self.COLOR_BD_OUTER
-        self._color_BorderLeft = self.COLOR_BD_LEFT
-        self._color_BorderTop = self.COLOR_BD_TOP
-        self._color_BorderRight = self.COLOR_BD_RIGHT
-        self._color_BorderBottom = self.COLOR_BD_BOTTOM
-        self._color_Button = self.COLOR_BTN
-
+        #initialize default state
         self.setProperty(StyleProperties.HOVER, False)
         self.setProperty(StyleProperties.PRESSED, False)
         self.setProperty(StyleProperties.DISABLED, False)
@@ -423,6 +406,7 @@ class GenerateButton(QtWidgets.QPushButton):
 
         self.setFont(self._font)
         self.setStyleSheet(CSS_SHEET_GENBUTTON)
+        self._styleDict = self.getStyleSheetDict()
 
     def sizeHint(self):
         return QSize(350, 66)
@@ -477,12 +461,21 @@ class GenerateButton(QtWidgets.QPushButton):
         qp.setRenderHints(qp.TextAntialiasing)
         qp.setPen(QtCore.Qt.NoPen)
 
-        self.drawGenerateButton(qp)
+        if self.property(StyleProperties.DISABLED):
+            style = StyleProperties.DISABLED
+        elif self.property(StyleProperties.PRESSED):
+            style = StyleProperties.PRESSED
+        elif self.property(StyleProperties.HOVER):
+            style = StyleProperties.HOVER
+        else:
+            style = ''
+
+        self.drawGenerateButton(qp, style)
 
         style = self.style()
         style.drawControl(style.CE_PushButton, btn, qp, self)
 
-    def drawGenerateButton(self, qp):
+    def drawGenerateButton(self, qp, style):
         r = self.rect()
 
         #TODO: should these points/sizes be constants? don't recalculate every time?
@@ -526,7 +519,7 @@ class GenerateButton(QtWidgets.QPushButton):
         btn_rect = QtCore.QRect(btn_tl_pt, btn_size)
 
         #draw outer border
-        qp.setBrush(QtGui.QBrush(self._color_BorderOuter))
+        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-outer-color', style)))
         qp.drawRect(r)
 
         #"cut out" corners
@@ -537,78 +530,94 @@ class GenerateButton(QtWidgets.QPushButton):
         qp.drawRect(corn_br_rect)
 
         #draw inner borders
-        qp.setBrush(QtGui.QBrush(self._color_BorderLeft))
+        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-left-color', style)))
         qp.drawRect(bd_left_rect)
 
-        qp.setBrush(QtGui.QBrush(self._color_BorderTop))
+        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-top-color', style)))
         qp.drawRect(bd_top_rect)
 
-        qp.setBrush(QtGui.QBrush(self._color_BorderRight))
+        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-right-color', style)))
         qp.drawRect(bd_right_rect)
 
-        qp.setBrush(QtGui.QBrush(self._color_BorderBottom))
+        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-bottom-color', style)))
         qp.drawRect(bd_bottom_rect)
 
         #draw main button rect
-        qp.setBrush(QtGui.QBrush(self._color_Button))
+        qp.setBrush(QtGui.QBrush(self.getCSSProperty('button-color', style)))
         qp.drawRect(btn_rect)
+
+    #parse this widget's CSS properties into a dictionary
+    def getStyleSheetDict(self):
+        ssDict = {}
+        ss = self.styleSheet()
+
+        #capture CSS groups with regex
+        matches = re.findall(self.REGEX_CAPTURE, ss, flags=re.DOTALL)
+        for match in matches:
+            #store key-value pairs in dict
+            groupDict = {}
+
+            tag = match[0]
+            group = match[1]
+
+            #strip extra characters
+            if not tag == '':
+                tag = re.findall(self.REGEX_CAPTURE_TAG, tag)[0]
+                tag = re.sub(self.REGEX_CLEAN_WHITESPACE, '', tag)
+
+            #strip whitespace
+            group = re.sub(self.REGEX_CLEAN_WHITESPACE, '', group, flags=re.DOTALL)
+
+            #split group by ';', ignoring empty last element
+            for prop in group.split(';')[:-1]:
+                #split properties by ':' to get key-value pairs
+                p = prop.split(':')
+
+                groupDict[ p[0] ] = p[1]
+
+            #add group dict to full sheet dict
+            ssDict[ tag ] = groupDict
+
+        return ssDict
+
+    def getCSSProperty(self, prop, style=''):
+        inheritDict = {StyleProperties.DISABLED: '',
+                       StyleProperties.PRESSED: StyleProperties.HOVER,
+                       StyleProperties.HOVER: '',
+                       '': None}
+
+        #end recursion if property could not be found
+        if style == None:
+            return ''
+
+        #get property from style dictionary
+        prop_val = self._styleDict[style].get(prop)
+
+        #if property could not be found, recurse until it is
+        if prop_val == None:
+            return self.getCSSProperty(prop, inheritDict[style])
+
+        #convert color-type properties into QColor
+        if 'rgb(' in prop_val:
+            return self.qColorFromRgb(prop_val)
+
+        return prop_val
+
+    def qColorFromRgb(self, rgb_str):
+        #get contents of rgb(...) and remove whitespace
+        rgb_tuple = re.findall(self.REGEX_RGB, rgb_str)[0]
+        rgb_tuple = re.sub(self.REGEX_CLEAN_WHITESPACE, '', rgb_tuple)
+
+        #split by ',' and create QColor
+        rgb = rgb_tuple.split(',')
+        rgb = list(map(int, rgb))
+
+        return QtGui.QColor(rgb[0], rgb[1], rgb[2])
 
     def repolish(self, obj):
         obj.style().unpolish(obj)
         obj.style().polish(obj)
-
-    @QtCore.pyqtProperty(QtGui.QColor)
-    def color_BorderOuter(self):
-        return self._color_BorderOuter
-
-    @color_BorderOuter.setter
-    def color_BorderOuter(self, color):
-        self._color_BorderOuter = color
-
-
-    @QtCore.pyqtProperty(QtGui.QColor)
-    def color_BorderLeft(self):
-        return self._color_BorderLeft
-
-    @color_BorderLeft.setter
-    def color_BorderLeft(self, color):
-        self._color_BorderLeft = color
-
-
-    @QtCore.pyqtProperty(QtGui.QColor)
-    def color_BorderTop(self):
-        return self._color_BorderTop
-
-    @color_BorderTop.setter
-    def color_BorderTop(self, color):
-        self._color_BorderTop = color
-
-
-    @QtCore.pyqtProperty(QtGui.QColor)
-    def color_BorderRight(self):
-        return self._color_BorderRight
-
-    @color_BorderRight.setter
-    def color_BorderRight(self, color):
-        self._color_BorderRight = color
-
-
-    @QtCore.pyqtProperty(QtGui.QColor)
-    def color_BorderBottom(self):
-        return self._color_BorderBottom
-
-    @color_BorderBottom.setter
-    def color_BorderBottom(self, color):
-        self._color_BorderBottom = color
-
-
-    @QtCore.pyqtProperty(QtGui.QColor)
-    def color_Button(self):
-        return self._color_Button
-
-    @color_Button.setter
-    def color_Button(self, color):
-        self._color_Button = color
+        self._styleDict = self.getStyleSheetDict()
 
 
 
