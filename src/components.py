@@ -103,6 +103,18 @@ GenerateButton[pressed="true"] {
     qproperty-color_BorderBottom: rgb(74,162,53);
     qproperty-color_Button: rgb(62,140,78);
 }
+
+GenerateButton[disabled="true"] {
+    color: lightgray;
+    font-size: 32px;
+
+    qproperty-color_BorderOuter: black;
+    qproperty-color_BorderLeft: rgb(49,108,66);
+    qproperty-color_BorderTop: rgb(68,141,59);
+    qproperty-color_BorderRight: rgb(49,108,66);
+    qproperty-color_BorderBottom: rgb(22,52,31);
+    qproperty-color_Button: rgb(41,93,52);
+}
 """
 
 CSS_SHEET_TRACKNAME = """
@@ -401,6 +413,7 @@ class GenerateButton(QtWidgets.QPushButton):
 
         self.setProperty(StyleProperties.HOVER, False)
         self.setProperty(StyleProperties.PRESSED, False)
+        self.setProperty(StyleProperties.DISABLED, False)
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
         #load custom font
@@ -528,6 +541,14 @@ class GenerateButton(QtWidgets.QPushButton):
     def repolish(self, obj):
         obj.style().unpolish(obj)
         obj.style().polish(obj)
+
+    def onGenStart(self):
+        self.setProperty(StyleProperties.DISABLED, True)
+        self.repolish(self)
+
+    def onGenFinish(self):
+        self.setProperty(StyleProperties.DISABLED, False)
+        self.repolish(self)
 
     @QtCore.pyqtProperty(QtGui.QColor)
     def color_BorderOuter(self):
@@ -1447,6 +1468,10 @@ class SettingsList(QtWidgets.QWidget):
 
 #primary container widget
 class CentralWidget(QtWidgets.QWidget):
+
+    onGenStart = pyqtSignal()
+    onGenFinish = pyqtSignal()
+
     def __init__(self, parent = None):
         super(CentralWidget, self).__init__()
 
@@ -1481,7 +1506,11 @@ class CentralWidget(QtWidgets.QWidget):
 
         #button to generate datapack/resourcepack
         self._btnGen = GenerateButton()
-        self._btnGen.generate.connect(self.generatePacks)
+        self._btnGen.generate.connect(self.onGenStart)
+
+        self.onGenStart.connect(self.generatePacks)
+        self.onGenStart.connect(self._btnGen.onGenStart)
+        self.onGenFinish.connect(self._btnGen.onGenFinish)
 
         #wrap inside container frame and layout, for aesthetics
         btnLayout = QtWidgets.QHBoxLayout()
@@ -1521,6 +1550,7 @@ class CentralWidget(QtWidgets.QWidget):
         self._worker.moveToThread(self._thread)
 
         self._thread.started.connect(self._worker.generate)
+        self._worker.finished.connect(self.onGenFinish)
         self._worker.finished.connect(self._worker.deleteLater)
         self._worker.destroyed.connect(self._thread.quit)
         self._thread.finished.connect(self._thread.deleteLater)
