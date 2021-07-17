@@ -451,6 +451,21 @@ class GenerateButton(QtWidgets.QPushButton):
         self.setProperty(StyleProperties.HOVER, False)
         self.repolish(self)
 
+    def changeEvent(self, event):
+        event.accept()
+
+        if event.type() == QtCore.QEvent.EnabledChange:
+            self.setProperty(StyleProperties.DISABLED, not self.isEnabled() )
+            self.repolish(self)
+
+            #disabled -> enabled after pack generation
+            if self.isEnabled():
+                #do exit logic
+                pass
+            else:
+                #do entry logic
+                pass
+
     def paintEvent(self, event):
         super(GenerateButton, self).paintEvent(event)
 
@@ -541,14 +556,6 @@ class GenerateButton(QtWidgets.QPushButton):
     def repolish(self, obj):
         obj.style().unpolish(obj)
         obj.style().polish(obj)
-
-    def onGenStart(self):
-        self.setProperty(StyleProperties.DISABLED, True)
-        self.repolish(self)
-
-    def onGenFinish(self):
-        self.setProperty(StyleProperties.DISABLED, False)
-        self.repolish(self)
 
     @QtCore.pyqtProperty(QtGui.QColor)
     def color_BorderOuter(self):
@@ -1468,10 +1475,6 @@ class SettingsList(QtWidgets.QWidget):
 
 #primary container widget
 class CentralWidget(QtWidgets.QWidget):
-
-    onGenStart = pyqtSignal()
-    onGenFinish = pyqtSignal()
-
     def __init__(self, parent = None):
         super(CentralWidget, self).__init__()
 
@@ -1506,11 +1509,7 @@ class CentralWidget(QtWidgets.QWidget):
 
         #button to generate datapack/resourcepack
         self._btnGen = GenerateButton()
-        self._btnGen.generate.connect(self.onGenStart)
-
-        self.onGenStart.connect(self.generatePacks)
-        self.onGenStart.connect(self._btnGen.onGenStart)
-        self.onGenFinish.connect(self._btnGen.onGenFinish)
+        self._btnGen.generate.connect(self.generatePacks)
 
         #wrap inside container frame and layout, for aesthetics
         btnLayout = QtWidgets.QHBoxLayout()
@@ -1550,7 +1549,6 @@ class CentralWidget(QtWidgets.QWidget):
         self._worker.moveToThread(self._thread)
 
         self._thread.started.connect(self._worker.generate)
-        self._worker.finished.connect(self.onGenFinish)
         self._worker.finished.connect(self._worker.deleteLater)
         self._worker.destroyed.connect(self._thread.quit)
         self._thread.finished.connect(self._thread.deleteLater)
