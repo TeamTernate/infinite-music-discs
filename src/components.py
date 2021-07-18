@@ -70,10 +70,27 @@ ArrowButton:hover {
 """
 
 CSS_SHEET_GENBUTTON = """
-GenerateButton {
-    border: 0;
+QLabel {
     color: white;
     font-size: 32px;
+}
+
+QLabel[hover="true"] {
+    font-size: 34px;
+}
+
+QLabel[pressed="true"] {
+    font-size: 31px;
+}
+
+QLabel[disabled="true"] {
+    color: lightgray;
+    font-size: 32px;
+}
+
+GenerateButton {
+    border: 0;
+    background-color: rgb(32,32,32);
 
     border-outer-color: rgb(0,0,0);
     border-left-color: rgb(49,108,66);
@@ -84,14 +101,10 @@ GenerateButton {
 }
 
 GenerateButton[hover="true"] {
-    font-size: 34px;
-
     button-color: rgb(68,150,88);
 }
 
 GenerateButton[pressed="true"] {
-    font-size: 31px;
-
     border-outer-color: rgb(255,255,255);
     border-top-color: rgb(32,75,45);
     border-bottom-color: rgb(74,162,53);
@@ -99,9 +112,6 @@ GenerateButton[pressed="true"] {
 }
 
 GenerateButton[disabled="true"] {
-    color: lightgray;
-    font-size: 32px;
-
     border-top-color: rgb(68,141,59);
     border-bottom-color: rgb(22,52,31);
     button-color: rgb(41,93,52);
@@ -379,8 +389,6 @@ class GenerateButton(QtWidgets.QPushButton):
     BD_TOP_FULL_WIDTH = BD_OUTER_WIDTH + BD_TOP_WIDTH
     BD_SIDE_FULL_WIDTH = BD_OUTER_WIDTH + BD_SIDE_WIDTH
 
-    COLOR_BG = QtGui.QColor(32,32,32)
-
     REGEX_CAPTURE = 'GenerateButton(\[.*?\])?\s*?\{(.*?)\}'
     REGEX_CAPTURE_TAG = '\[(.*?)='
     REGEX_CLEAN_WHITESPACE = '\n|\t| '
@@ -389,7 +397,7 @@ class GenerateButton(QtWidgets.QPushButton):
     generate = pyqtSignal()
     
     def __init__(self, parent = None):
-        super(GenerateButton, self).__init__("Generate")
+        super(GenerateButton, self).__init__()
 
         self._parent = parent
 
@@ -404,7 +412,41 @@ class GenerateButton(QtWidgets.QPushButton):
         font_str = QtGui.QFontDatabase.applicationFontFamilies(font_id)[0]
         self._font = QtGui.QFont(font_str)
 
-        self.setFont(self._font)
+        #create button text and progress bar
+        shadow = QtWidgets.QGraphicsDropShadowEffect()
+        shadow.setOffset(0, 3)
+
+        self._label = QtWidgets.QLabel("Generate", self)
+        self._label.setAlignment(Qt.AlignHCenter)
+        self._label.setGraphicsEffect(shadow)
+        self._label.setFont(self._font)
+
+        self._progress = QtWidgets.QProgressBar(self)
+        self._progress.setAlignment(Qt.AlignHCenter)
+        self._progress.setTextVisible(False)
+
+        #container widgets and layouts
+        lytLabel = QtWidgets.QVBoxLayout()
+        lytLabel.setContentsMargins(0, 0, 0, 10)
+        lytLabel.addStretch()
+        lytLabel.addWidget(self._label)
+        lytLabel.addStretch()
+        wgtLabel = QContainerFrame(self)
+        wgtLabel.setLayout(lytLabel)
+
+        lytProgress = QtWidgets.QVBoxLayout()
+        lytProgress.setContentsMargins(15, 0, 15, 0)
+        lytProgress.addStretch()
+        lytProgress.addWidget(self._progress)
+        lytProgress.addStretch()
+        wgtProgress = QContainerFrame(self)
+        wgtProgress.setLayout(lytProgress)
+
+        layout = QtWidgets.QStackedLayout()
+        layout.addWidget(wgtLabel)
+        layout.addWidget(wgtProgress)
+        self.setLayout(layout)
+
         self.setStyleSheet(CSS_SHEET_GENBUTTON)
         self._styleDict = self.getStyleSheetDict()
 
@@ -413,34 +455,27 @@ class GenerateButton(QtWidgets.QPushButton):
 
     def mousePressEvent(self, event):
         event.accept()
-        self.setProperty(StyleProperties.PRESSED, True)
-        self.repolish(self)
+        self.setPropertyComplete(StyleProperties.PRESSED, True)
 
     def mouseReleaseEvent(self, event):
         event.accept()
-        self.setProperty(StyleProperties.PRESSED, False)
-        self.repolish(self)
-
-        #begin generate operation
+        self.setPropertyComplete(StyleProperties.PRESSED, False)
         self.generate.emit()
 
     def enterEvent(self, event):
         event.accept()
-        self.setProperty(StyleProperties.HOVER, True)
-        self.repolish(self)
+        self.setPropertyComplete(StyleProperties.HOVER, True)
 
     def leaveEvent(self, event):
         event.accept()
-        self.setProperty(StyleProperties.PRESSED, False)
-        self.setProperty(StyleProperties.HOVER, False)
-        self.repolish(self)
+        self.setPropertyComplete(StyleProperties.PRESSED, False)
+        self.setPropertyComplete(StyleProperties.HOVER, False)
 
     def changeEvent(self, event):
         event.accept()
 
         if event.type() == QtCore.QEvent.EnabledChange:
-            self.setProperty(StyleProperties.DISABLED, not self.isEnabled() )
-            self.repolish(self)
+            self.setPropertyComplete(StyleProperties.DISABLED, not self.isEnabled() )
 
             #disabled -> enabled after pack generation
             if self.isEnabled():
@@ -453,14 +488,13 @@ class GenerateButton(QtWidgets.QPushButton):
     def paintEvent(self, event):
         super(GenerateButton, self).paintEvent(event)
 
-        btn = QtWidgets.QStyleOptionButton()
-        self.initStyleOption(btn)
-
+        #setup painter
         qp = QtGui.QPainter(self)
         qp.setRenderHints(qp.Antialiasing)
         qp.setRenderHints(qp.TextAntialiasing)
         qp.setPen(QtCore.Qt.NoPen)
 
+        #decide palette based on set properties
         if self.property(StyleProperties.DISABLED):
             style = StyleProperties.DISABLED
         elif self.property(StyleProperties.PRESSED):
@@ -470,15 +504,8 @@ class GenerateButton(QtWidgets.QPushButton):
         else:
             style = ''
 
-        self.drawGenerateButton(qp, style)
-
-        style = self.style()
-        style.drawControl(style.CE_PushButton, btn, qp, self)
-
-    def drawGenerateButton(self, qp, style):
-        r = self.rect()
-
         #TODO: should these points/sizes be constants? don't recalculate every time?
+        r = self.rect()
 
         #define corner cutout rects
         corn_tl_pt = QPoint(r.left(), r.top())
@@ -516,14 +543,14 @@ class GenerateButton(QtWidgets.QPushButton):
         btn_br_pt = r.bottomRight() + QPoint(-self.BD_SIDE_FULL_WIDTH, -self.BD_TOP_FULL_WIDTH)
 
         btn_size = QSize(bd_top_width, bd_side_height)
-        btn_rect = QtCore.QRect(btn_tl_pt, btn_size)
+        btn_rect = QRect(btn_tl_pt, btn_size)
 
         #draw outer border
         qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-outer-color', style)))
         qp.drawRect(r)
 
         #"cut out" corners
-        qp.setBrush(QtGui.QBrush(self.COLOR_BG))
+        qp.setBrush(QtGui.QBrush(self.getCSSProperty('background-color', style)))
         qp.drawRect(corn_tl_rect)
         qp.drawRect(corn_tr_rect)
         qp.drawRect(corn_bl_rect)
@@ -602,6 +629,16 @@ class GenerateButton(QtWidgets.QPushButton):
             return self.qColorFromRgb(prop_val)
 
         return prop_val
+
+    #apply setProperty() to this widget and all children
+    def setPropertyComplete(self, prop, value):
+        self.setProperty(prop, value)
+        self._label.setProperty(prop, value)
+        self._progress.setProperty(prop, value)
+
+        self.repolish(self)
+        self.repolish(self._label)
+        self.repolish(self._progress)
 
     def qColorFromRgb(self, rgb_str):
         #get contents of rgb(...) and remove whitespace
@@ -1556,6 +1593,10 @@ class CentralWidget(QtWidgets.QWidget):
         self._thread = QThread(self)
         self._worker = GeneratePackWorker(settings, texture_files, track_files, titles, internal_names)
         self._worker.moveToThread(self._thread)
+
+        self._worker.min_prog.connect(self._btnGen._progress.setMinimum)
+        self._worker.progress.connect(self._btnGen._progress.setValue)
+        self._worker.max_prog.connect(self._btnGen._progress.setMaximum)
 
         self._thread.started.connect(self._worker.generate)
         self._worker.finished.connect(self._worker.deleteLater)
