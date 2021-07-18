@@ -265,6 +265,58 @@ QLabel#Label {
     font-size: 16px;
 }
 
+QComboBox {
+    border: 1px solid rgb(100, 100, 100);
+    color: white;
+    font-size: 16px;
+    background-color: rgb(48, 48, 48);
+    selection-background-color: rgb(57, 130, 73);
+    width: 50px;
+    height: 30px;
+}
+
+QComboBox:hover {
+    background-color: rgb(72, 72, 72);
+}
+
+QComboBox::drop-down {
+    border: 0;
+    width: 30px;
+    height: 30px;
+}
+
+QComboBox::down-arrow {
+    background: url(../data/arrow-down.png) no-repeat center;
+}
+
+QComboBox QAbstractItemView {
+    border: 0;
+    font-size: 16px;
+    background-color: rgb(6, 6, 6);
+}
+
+QCheckBox::indicator {
+    border: 0;
+    width: 20px;
+    height: 20px;
+}
+
+QCheckBox::indicator:unchecked {
+    background: url(../data/check-bg-unchecked.png) no-repeat center;
+}
+
+QCheckBox::indicator:unchecked:hover {
+    background: url(../data/check-bg-unchecked-hover.png) no-repeat center;
+}
+
+QCheckBox::indicator:checked {
+    background: url(../data/check-bg-checked.png) no-repeat center;
+}
+
+QCheckBox::indicator:checked:hover {
+    background: url(../data/check-bg-checked-hover.png) no-repeat center;
+}
+
 QScrollArea {
     padding: 0;
     border: 0;
@@ -1311,7 +1363,7 @@ class DiscList(QtWidgets.QWidget):
 #overloaded QTabBar, with an animated underline like the Minecraft launcher
 class AnimatedTabBar(QtWidgets.QTabBar):
 
-    UL_COLOR = QtGui.QColor(0, 124, 64)
+    UL_COLOR = QtGui.QColor(57, 130, 73)
     UL_HEIGHT = 3
     UL_WIDTH_2 = 12
 
