@@ -88,6 +88,18 @@ QLabel[disabled="true"] {
     font-size: 32px;
 }
 
+QProgressBar {
+    border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0,0,0,0.5), stop:1 rgba(0,0,0,0));
+    border-left: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0,0,0,0.5), stop:1 rgba(0,0,0,0));
+    background-color: rgb(72, 102, 78);
+}
+
+QProgressBar::chunk {
+    border: 0;
+    padding: 0;
+    background-color: rgb(46, 170, 78);
+}
+
 GenerateButton {
     border: 0;
     background-color: rgb(32,32,32);
@@ -112,7 +124,7 @@ GenerateButton[pressed="true"] {
 }
 
 GenerateButton[disabled="true"] {
-    border-top-color: rgb(68,141,59);
+    border-top-color: rgb(65,136,57);
     border-bottom-color: rgb(22,52,31);
     button-color: rgb(41,93,52);
 }
