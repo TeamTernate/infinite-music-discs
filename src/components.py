@@ -447,7 +447,8 @@ class GenerateButton(QtWidgets.QPushButton):
     REGEX_RGB = 'rgb\((.*?)\)'
 
     generate = pyqtSignal()
-    
+    setCurrentIndex = pyqtSignal(int)
+
     def __init__(self, parent = None):
         super(GenerateButton, self).__init__()
 
@@ -498,6 +499,8 @@ class GenerateButton(QtWidgets.QPushButton):
         layout.addWidget(wgtLabel)
         layout.addWidget(wgtProgress)
         self.setLayout(layout)
+
+        self.setCurrentIndex.connect(layout.setCurrentIndex)
 
         self.setStyleSheet(CSS_SHEET_GENBUTTON)
         self._styleDict = self.getStyleSheetDict()
@@ -1646,6 +1649,9 @@ class CentralWidget(QtWidgets.QWidget):
         self._worker = GeneratePackWorker(settings, texture_files, track_files, titles, internal_names)
         self._worker.moveToThread(self._thread)
 
+        self._worker.started.connect(lambda: self._btnGen.setCurrentIndex.emit(1))
+        self._worker.finished.connect(lambda: self._btnGen.setCurrentIndex.emit(0))
+
         self._worker.min_prog.connect(self._btnGen._progress.setMinimum)
         self._worker.progress.connect(self._btnGen._progress.setValue)
         self._worker.max_prog.connect(self._btnGen._progress.setMaximum)
@@ -1666,6 +1672,7 @@ class CentralWidget(QtWidgets.QWidget):
 
 #worker object that generates the datapack/resourcepack in a separate QThread
 class GeneratePackWorker(QObject):
+    started = pyqtSignal()
     finished = pyqtSignal()
     min_prog = pyqtSignal(int)
     progress = pyqtSignal(int)
@@ -1681,6 +1688,8 @@ class GeneratePackWorker(QObject):
         self._internal_names = internal_names
 
     def generate(self):
+        self.started.emit()
+
         #total steps = validate + num track conversions + generate dp + generate rp
         self.min_prog.emit(0)
         self.progress.emit(0)
