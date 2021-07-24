@@ -48,6 +48,7 @@ class Assets():
     ICON_ARROW_DOWN =       '../data/arrow-down.png'
     ICON_ARROW_UP_DIS =     '../data/arrow-up-disabled.png'
     ICON_ARROW_DOWN_DIS =   '../data/arrow-down-disabled.png'
+    ICON_DELETE =           '../data/delete-btn.png'
 
 class StyleProperties():
     DRAG_HELD = 'drag_held'
@@ -243,6 +244,16 @@ DiscListEntry {
     padding: 1px;
     border-bottom: 2px solid rgb(72, 72, 72);
     background-color: rgb(48, 48, 48);
+}
+
+DeleteButton {
+    border: 0;
+    background-color: rgb(48, 48, 48);
+    background: url(../data/delete-btn.png) no-repeat center;
+}
+
+DeleteButton:hover {
+    background: url(../data/delete-btn-hover.png) no-repeat center;
 }
 """
 
@@ -725,6 +736,10 @@ class GenerateButton(QtWidgets.QPushButton):
 
 
 
+class DeleteButton(QtWidgets.QPushButton):
+    def sizeHint(self):
+        return QSize(25, 25)
+
 #button for reordering track list elements
 class ArrowButton(QtWidgets.QPushButton):
 
@@ -1105,6 +1120,7 @@ class DiscListEntry(QContainerFrame):
         self._btnTrack = FileButton(ButtonType.TRACK, self)
         self._leTitle = QFocusLineEdit("Track Title", self)
         self._lblIName = QtWidgets.QLabel("internal name", self)
+        self._btnDelete = DeleteButton(self)
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
         self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
 
@@ -1125,11 +1141,17 @@ class DiscListEntry(QContainerFrame):
         trackLayout.setContentsMargins(5, 5, 0, 5)
         layout.addLayout(trackLayout)
 
-        #container layout for track title and internal name labels
+        #container layouts for track title and internal name labels
         self._leTitle.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
+
+        ulLayout = QtWidgets.QHBoxLayout()
+        ulLayout.addWidget(self._lblIName, 1)
+        ulLayout.addWidget(self._btnDelete, 0, Qt.AlignRight)
+        ulLayout.setSpacing(0)
+        ulLayout.setContentsMargins(0, 10, 0, 0)
         txtLayout = QtWidgets.QVBoxLayout()
         txtLayout.addWidget(self._leTitle, 1)
-        txtLayout.addWidget(self._lblIName, 1)
+        txtLayout.addLayout(ulLayout)
         txtLayout.setSpacing(0)
         txtLayout.setContentsMargins(10, 10, 10, 10)
         layout.addLayout(txtLayout)
@@ -1162,6 +1184,7 @@ class DiscListEntry(QContainerFrame):
         self._parent.track_multiDrop.connect(self._btnTrack.multiDropEvent)
 
         #bind other signals
+        self._btnDelete.clicked.connect(self.deleteSelf)
         self._btnTrack.fileChanged.connect(self.setTitle)
         self._leTitle.textChanged.connect(self.setSubtitle)
 
@@ -1184,6 +1207,9 @@ class DiscListEntry(QContainerFrame):
             self._btnDownArrow.setDisabled(True)
         else:
             self._btnDownArrow.setDisabled(False)
+
+    def deleteSelf(self):
+        self._parent.removeDiscEntry(self.getIndex())
 
     def getIndex(self):
         return self._parent._childLayout.indexOf(self)
@@ -1372,6 +1398,15 @@ class DiscList(QtWidgets.QWidget):
 
         if(remainingTracks > 0):
             self.addDiscEntries(fTrackList[remainingIndex:])
+
+    def removeDiscEntry(self, index):
+        w = self._childLayout.itemAt(index).widget()
+        self._childLayout.removeWidget(w)
+        w.deleteLater()
+        w = None
+
+        #trigger reorder event
+        self.reordered.emit(self.getNumDiscEntries())
 
 
 
