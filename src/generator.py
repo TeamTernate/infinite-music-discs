@@ -10,6 +10,7 @@ import os
 import json
 import shutil
 import sys
+import enum
 import zipfile
 import pyffmpeg
 
@@ -26,53 +27,71 @@ tmp_path = 'imd-tmp'    #TODO: use tempfile module
 pack_format = 7
 
 
+class Status(enum.Enum):
+    SUCCESS = 0
+    LIST_EMPTY = 1
+    LIST_UNEVEN_LENGTH = 2
+    IMAGE_FILE_MISSING = 3
+    BAD_IMAGE_TYPE = 4
+    TRACK_FILE_MISSING = 5
+    BAD_TRACK_TYPE = 6
+    BAD_INTERNAL_NAME = 7
+    PACK_IMAGE_MISSING = 8
+    BAD_PACK_IMAGE_TYPE = 9
+    BAD_OGG_CONVERT = 10
+    BAD_ZIP = 11
+
+
 
 def validate(texture_files, track_files, titles, internal_names, packpng=''):
     #lists are all the same length
     if(not ( len(texture_files) == len(track_files) == len(titles) == len(internal_names) )):
-        return 1
+        return Status.LIST_UNEVEN_LENGTH
 
     #lists are not empty
     if(len(texture_files) == 0):
-        return 1
+        return Status.LIST_EMPTY
 
     for i in range(len(texture_files)):
         #image files still exist
         if(not os.path.isfile(texture_files[i])):
-            return 1
+            return Status.IMAGE_FILE_MISSING
 
         #images are all .png
         if(not ( '.png' in texture_files[i] )):
-            return 1
+            return Status.BAD_IMAGE_TYPE
 
         #track files still exist
         if(not os.path.isfile(track_files[i])):
-            return 1
+            return Status.TRACK_FILE_MISSING
 
         #tracks are all .mp3, .wav, .ogg
         if(not ( '.mp3' in track_files[i] or '.wav' in track_files[i] or '.ogg' in track_files[i] )):
-            return 1
+            return Status.BAD_TRACK_TYPE
+
+        #internal names are empty
+        if(internal_names[i] == ''):
+            return Status.BAD_INTERNAL_NAME
 
         #internal names are letters-only
         if(not internal_names[i].isalpha()):
-            return 1
+            return Status.BAD_INTERNAL_NAME
 
         #internal names are all lowercase
         if(not internal_names[i].islower()):
-            return 1
+            return Status.BAD_INTERNAL_NAME
 
     #if pack icon is provided
     if(not packpng == ''):
         #image file still exists
         if(not os.path.isfile(packpng)):
-            return 1
+            return Status.PACK_IMAGE_MISSING
 
         #image is .png
         if(not ('.png' in packpng)):
-            return 1
+            return Status.BAD_PACK_IMAGE_TYPE
 
-
-    return 0
+    return Status.SUCCESS
 
 
 
@@ -89,7 +108,7 @@ def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False
 
     #skip files already in .ogg format
     if '.ogg' in track:
-        return 0
+        return Status.SUCCESS
 
     #rename file so FFmpeg can process it
     track_ext = track.split('/')[-1].split('.')[-1]
@@ -104,7 +123,7 @@ def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False
 
     #exit if file was not converted successfully
     if not os.path.isfile(out_track):
-        return 1
+        return Status.BAD_OGG_CONVERT
 
     #change file reference to new converted file
     track_file[0] = out_track
@@ -113,7 +132,7 @@ def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False
     if cleanup_tmp:
         shutil.rmtree(tmp_path, ignore_errors=True)
 
-    return 0
+    return Status.SUCCESS
 
 
 
@@ -255,8 +274,9 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
             os.remove(datapack_name_zip)
 
         print("Error: Failed to zip datapack. Datapack has been generated as folder instead.")
+        return Status.BAD_ZIP
 
-    return 0
+    return Status.SUCCESS
 
 
 
@@ -344,11 +364,12 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, us
             os.remove(resourcepack_name_zip)
 
         print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
+        return Status.BAD_ZIP
 
     #cleanup temp work directory
     if cleanup_tmp:
         shutil.rmtree(tmp_path, ignore_errors=True)
     
-    return 0
+    return Status.SUCCESS
 
 

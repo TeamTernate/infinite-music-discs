@@ -13,6 +13,7 @@ from enum import Enum
 import os
 import re
 import generator
+from generator import Status
 
 #typedefs and constants
 class ButtonType(Enum):
@@ -56,6 +57,21 @@ class StyleProperties():
     DISABLED =  'disabled'
     PRESSED =   'pressed'
     HOVER =     'hover'
+
+StatusMessageDict = {
+    Status.SUCCESS:             "Successfully generated datapack and resourcepack!",
+    Status.LIST_EMPTY:          "Provide at least one track to generate a pack.",
+    Status.LIST_UNEVEN_LENGTH:  "Some tracks are missing an icon or a music file.",
+    Status.IMAGE_FILE_MISSING:  "Couldn't find icon file. It may have been moved or deleted.",
+    Status.BAD_IMAGE_TYPE:      "Icon file is not in a supported format.",
+    Status.TRACK_FILE_MISSING:  "Couldn't find music file. It may have been moved or deleted.",
+    Status.BAD_TRACK_TYPE:      "Music file is not in a supported format.",
+    Status.BAD_INTERNAL_NAME:   "Invalid track name. Make sure all tracks have a subtitle.",
+    Status.PACK_IMAGE_MISSING:  "Couldn't find pack icon file.",
+    Status.BAD_PACK_IMAGE_TYPE: "Pack icon is not in a supported format.",
+    Status.BAD_OGG_CONVERT:     "Failed to convert some tracks to .ogg format.",
+    Status.BAD_ZIP:             "Failed to generate as '.zip'. Packs have been left as folders."
+}
 
 MAX_DRAW_MULTI_DRAGDROP = 10
 
@@ -1673,7 +1689,7 @@ class StatusDisplayWidget(QtWidgets.QLabel):
 
     def show(self, status):
         #use status to decide text and bg color
-        self.setText(status)
+        self.setText(StatusMessageDict.get(status, "something went wrong"))
         self.adjustSize()
 
         #set start and end points
@@ -1798,6 +1814,7 @@ class CentralWidget(QtWidgets.QWidget):
 
         self._worker.started.connect(lambda: self._btnGen.setCurrentIndex.emit(1))
         self._worker.finished.connect(lambda: self._btnGen.setCurrentIndex.emit(0))
+        self._worker.status.connect(self._status.show)
 
         self._worker.min_prog.connect(self._btnGen._progress.setMinimum)
         self._worker.progress.connect(self._btnGen._progress.setValue)
@@ -1821,6 +1838,7 @@ class CentralWidget(QtWidgets.QWidget):
 class GeneratePackWorker(QObject):
     started = pyqtSignal()
     finished = pyqtSignal()
+    status = pyqtSignal(Status)
     min_prog = pyqtSignal(int)
     progress = pyqtSignal(int)
     max_prog = pyqtSignal(int)
@@ -1850,7 +1868,8 @@ class GeneratePackWorker(QObject):
                                     self._titles,
                                     self._internal_names,
                                     self._settings['pack'])
-        if status > 0:
+        if not status == Status.SUCCESS:
+            self.status.emit(status)
             self.finished.emit()
             return
 
@@ -1863,7 +1882,8 @@ class GeneratePackWorker(QObject):
             status = generator.convert_to_ogg(wrapper,
                                               self._internal_names[i],
                                               (i == 0))
-            if status > 0:
+            if not status == Status.SUCCESS:
+                self.status.emit(status)
                 self.finished.emit()
                 return
 
@@ -1877,9 +1897,12 @@ class GeneratePackWorker(QObject):
                                              self._titles,
                                              self._internal_names,
                                              self._settings)
-        if status > 0:
-            self.finished.emit()
-            return
+        if not status == Status.SUCCESS:
+            self.status.emit(status)
+
+            if not status == Status.BAD_ZIP:
+                self.finished.emit()
+                return
 
         progress += 1
         self.progress.emit(progress)
@@ -1889,15 +1912,19 @@ class GeneratePackWorker(QObject):
                                                  self._titles,
                                                  self._internal_names,
                                                  self._settings)
-        if status > 0:
-            self.finished.emit()
-            return
+        if not status == Status.SUCCESS:
+            self.status.emit(status)
+
+            if not status == Status.BAD_ZIP:
+                self.finished.emit()
+                return
 
         progress += 1
         self.progress.emit(progress)
 
         print("Successfully generated datapack and resourcepack!")
-        
+
+        self.status.emit(status)
         self.finished.emit()
 
 
