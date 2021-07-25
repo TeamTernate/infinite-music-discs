@@ -59,21 +59,24 @@ class StyleProperties():
     HOVER =     'hover'
 
 StatusMessageDict = {
-    Status.SUCCESS:             "Successfully generated datapack and resourcepack!",
-    Status.LIST_EMPTY:          "Provide at least one track to generate a pack.",
-    Status.LIST_UNEVEN_LENGTH:  "Some tracks are missing an icon or a music file.",
-    Status.IMAGE_FILE_MISSING:  "Couldn't find icon file. It may have been moved or deleted.",
-    Status.BAD_IMAGE_TYPE:      "Icon file is not in a supported format.",
-    Status.TRACK_FILE_MISSING:  "Couldn't find music file. It may have been moved or deleted.",
-    Status.BAD_TRACK_TYPE:      "Music file is not in a supported format.",
-    Status.BAD_INTERNAL_NAME:   "Invalid track name. Make sure all tracks have a subtitle.",
-    Status.PACK_IMAGE_MISSING:  "Couldn't find pack icon file.",
-    Status.BAD_PACK_IMAGE_TYPE: "Pack icon is not in a supported format.",
-    Status.BAD_OGG_CONVERT:     "Failed to convert some tracks to .ogg format.",
-    Status.BAD_ZIP:             "Failed to generate as '.zip'. Packs have been left as folders."
+    Status.SUCCESS:                 "Successfully generated datapack and resourcepack!",
+    Status.LIST_EMPTY:              "Provide at least one track to generate a pack.",
+    Status.LIST_UNEVEN_LENGTH:      "Some tracks are missing an icon or a music file.",
+    Status.IMAGE_FILE_MISSING:      "Couldn't find icon file. It may have been moved or deleted.",
+    Status.BAD_IMAGE_TYPE:          "Icon file is not in a supported format.",
+    Status.TRACK_FILE_MISSING:      "Couldn't find music file. It may have been moved or deleted.",
+    Status.BAD_TRACK_TYPE:          "Music file is not in a supported format.",
+    Status.BAD_INTERNAL_NAME:       "Invalid track name. Make sure all tracks have a subtitle.",
+    Status.PACK_IMAGE_MISSING:      "Couldn't find pack icon file.",
+    Status.BAD_PACK_IMAGE_TYPE:     "Pack icon is not in a supported format.",
+    Status.BAD_OGG_CONVERT:         "Failed to convert some tracks to .ogg format.",
+    Status.BAD_ZIP:                 "Failed to generate as '.zip'. Packs have been left as folders.",
+    Status.IMAGE_FILE_NOT_GIVEN:    "Some tracks are missing an icon.",
+    Status.TRACK_FILE_NOT_GIVEN:    "Some tracks are missing a music file."
 }
 
 MAX_DRAW_MULTI_DRAGDROP = 10
+STATUS_MESSAGE_SHOW_TIME_MS = 10000
 
 CSS_SHEET_ARROWBUTTON = """
 ArrowButton {
@@ -1662,9 +1665,16 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         shadow.setOffset(1, 3)
         self.setGraphicsEffect(shadow)
 
+        #slide in/out animation
         self.animation = QtCore.QPropertyAnimation(self, b"geometry")
         self.animation.setDuration(300)
         self.animation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+
+        #automatic hide timer
+        self.timer = QtCore.QTimer(self)
+        self.timer.setInterval(STATUS_MESSAGE_SHOW_TIME_MS)
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.hide)
 
         self.setStyleSheet(CSS_SHEET_STATUSDISP)
 
@@ -1689,7 +1699,7 @@ class StatusDisplayWidget(QtWidgets.QLabel):
 
     def show(self, status):
         #use status to decide text and bg color
-        self.setText(StatusMessageDict.get(status, "something went wrong"))
+        self.setText(StatusMessageDict.get(status, 'Unknown error.'))
         self.adjustSize()
 
         #set start and end points
@@ -1697,11 +1707,12 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         startRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
         endRect = QRect(self._basePos, r.size())
 
-        #start animation
+        #start animation and auto-hide timer
         self.animation.stop()
         self.animation.setStartValue(startRect)
         self.animation.setEndValue(endRect)
         self.animation.start()
+        self.timer.start()
 
         self.setVisible(True)
 
@@ -1712,6 +1723,7 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         endRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
 
         #start animation
+        self.timer.stop()
         self.animation.stop()
         self.animation.finished.connect(self.unsetVisible)
         self.animation.setStartValue(startRect)

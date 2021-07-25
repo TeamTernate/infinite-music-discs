@@ -40,6 +40,8 @@ class Status(enum.Enum):
     BAD_PACK_IMAGE_TYPE = 9
     BAD_OGG_CONVERT = 10
     BAD_ZIP = 11
+    IMAGE_FILE_NOT_GIVEN = 12
+    TRACK_FILE_NOT_GIVEN = 13
 
 
 
@@ -53,6 +55,10 @@ def validate(texture_files, track_files, titles, internal_names, packpng=''):
         return Status.LIST_EMPTY
 
     for i in range(len(texture_files)):
+        #image is provided
+        if(texture_files[i] == ''):
+            return Status.IMAGE_FILE_NOT_GIVEN
+
         #image files still exist
         if(not os.path.isfile(texture_files[i])):
             return Status.IMAGE_FILE_MISSING
@@ -60,6 +66,10 @@ def validate(texture_files, track_files, titles, internal_names, packpng=''):
         #images are all .png
         if(not ( '.png' in texture_files[i] )):
             return Status.BAD_IMAGE_TYPE
+
+        #track is provided
+        if(track_files[i] == ''):
+            return Status.TRACK_FILE_NOT_GIVEN
 
         #track files still exist
         if(not os.path.isfile(track_files[i])):
@@ -69,7 +79,7 @@ def validate(texture_files, track_files, titles, internal_names, packpng=''):
         if(not ( '.mp3' in track_files[i] or '.wav' in track_files[i] or '.ogg' in track_files[i] )):
             return Status.BAD_TRACK_TYPE
 
-        #internal names are empty
+        #internal names are not empty
         if(internal_names[i] == ''):
             return Status.BAD_INTERNAL_NAME
 
