@@ -8,11 +8,13 @@ import sys
 import ctypes
 import platform
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
 from PyQt5 import QtGui
 
 from components import CentralWidget
 
 class UI(QtWidgets.QMainWindow):
+    resized = QtCore.pyqtSignal()
     def __init__(self):
         super().__init__()
 
@@ -21,6 +23,10 @@ class UI(QtWidgets.QMainWindow):
 
         self._centralWidget = CentralWidget(self)
         self.setCentralWidget(self._centralWidget)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.resized.emit()
 
 
 

@@ -1656,13 +1656,20 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         event.accept()
         self.hide()
 
+    #widget is not part of a layout, so position has to be updated manually
     def setBasePos(self):
         r = self.rect()
         w_pos = self._widget.mapToParent( QPoint(0,0) )
         w_pos = w_pos - QPoint(0, r.height())
 
         self._basePos = w_pos
-        self.setGeometry(w_pos.x(), w_pos.y(), r.width(), r.height())
+
+        if self.isVisible():
+            self.setGeometry(w_pos.x(), w_pos.y(), r.width(), r.height())
+
+    def unsetVisible(self):
+        self.animation.finished.disconnect()
+        self.setVisible(False)
 
     def show(self, status):
         #use status to decide text and bg color
@@ -1690,6 +1697,7 @@ class StatusDisplayWidget(QtWidgets.QLabel):
 
         #start animation
         self.animation.stop()
+        self.animation.finished.connect(self.unsetVisible)
         self.animation.setStartValue(startRect)
         self.animation.setEndValue(endRect)
         self.animation.start()
@@ -1700,6 +1708,8 @@ class StatusDisplayWidget(QtWidgets.QLabel):
 class CentralWidget(QtWidgets.QWidget):
     def __init__(self, parent = None):
         super(CentralWidget, self).__init__(parent)
+
+        self._parent = parent
 
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0)
@@ -1752,6 +1762,7 @@ class CentralWidget(QtWidgets.QWidget):
 
         #status display bar
         self._status = StatusDisplayWidget('', btnFrame, self)
+        self._parent.resized.connect(self._status.setBasePos)
 
         #arrange draw order
         btnFrame.raise_()
