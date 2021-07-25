@@ -415,6 +415,15 @@ QScrollBar::sub-line:vertical {
 }
 """
 
+CSS_SHEET_STATUSDISP = """
+StatusDisplayWidget {
+    padding: 10px 10px 10px 5px;
+    background-color: rgba(62, 139, 78, 0.5);
+    color: white;
+    font-size: 16px;
+}
+"""
+
 CSS_SHEET_CENTRAL = """
 CentralWidget {
     padding: 0;
@@ -1621,10 +1630,76 @@ class SettingsList(QtWidgets.QWidget):
 
 
 
+#semi-transparent popup to display errors during pack generation
+class StatusDisplayWidget(QtWidgets.QLabel):
+    def __init__(self, text, relativeWidget, parent = None):
+        super(StatusDisplayWidget, self).__init__(text, parent)
+
+        self._parent = parent
+        self._widget = relativeWidget
+        self._basePos = QPoint(0,0)
+
+        self.setAutoFillBackground(True)
+        self.setVisible(False)
+
+        shadow = QtWidgets.QGraphicsDropShadowEffect()
+        shadow.setOffset(1, 3)
+        self.setGraphicsEffect(shadow)
+
+        self.animation = QtCore.QPropertyAnimation(self, b"geometry")
+        self.animation.setDuration(300)
+        self.animation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+
+        self.setStyleSheet(CSS_SHEET_STATUSDISP)
+
+    def mousePressEvent(self, event):
+        event.accept()
+        self.hide()
+
+    def setBasePos(self):
+        r = self.rect()
+        w_pos = self._widget.mapToParent( QPoint(0,0) )
+        w_pos = w_pos - QPoint(0, r.height())
+
+        self._basePos = w_pos
+        self.setGeometry(w_pos.x(), w_pos.y(), r.width(), r.height())
+
+    def show(self, status):
+        #use status to decide text and bg color
+        self.setText(status)
+        self.adjustSize()
+
+        #set start and end points
+        r = self.rect()
+        startRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
+        endRect = QRect(self._basePos, r.size())
+
+        #start animation
+        self.animation.stop()
+        self.animation.setStartValue(startRect)
+        self.animation.setEndValue(endRect)
+        self.animation.start()
+
+        self.setVisible(True)
+
+    def hide(self):
+        #set start and end points
+        r = self.rect()
+        startRect = QRect(self._basePos, r.size())
+        endRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
+
+        #start animation
+        self.animation.stop()
+        self.animation.setStartValue(startRect)
+        self.animation.setEndValue(endRect)
+        self.animation.start()
+
+
+
 #primary container widget
 class CentralWidget(QtWidgets.QWidget):
     def __init__(self, parent = None):
-        super(CentralWidget, self).__init__()
+        super(CentralWidget, self).__init__(parent)
 
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0)
@@ -1656,24 +1731,38 @@ class CentralWidget(QtWidgets.QWidget):
         layout.addWidget(tabs, 0)
 
         #button to generate datapack/resourcepack
-        self._btnGen = GenerateButton()
+        self._btnGen = GenerateButton(self)
         self._btnGen.generate.connect(self.generatePacks)
 
         #wrap inside container frame and layout, for aesthetics
-        btnLayout = QtWidgets.QHBoxLayout()
+        btnLayout = QtWidgets.QHBoxLayout(self)
         btnLayout.setSpacing(0)
         btnLayout.setContentsMargins(0, 5, 0, 5)
         btnLayout.addStretch()
         btnLayout.addWidget(self._btnGen, 0, Qt.AlignBottom)
         btnLayout.addStretch()
 
-        btnFrame = QContainerFrame()
+        btnFrame = QContainerFrame(self)
         btnFrame.setObjectName("GenFrame")
         btnFrame.setLayout(btnLayout)
         layout.addWidget(btnFrame)
         self.setLayout(layout)
 
         self.setStyleSheet(CSS_SHEET_CENTRAL)
+
+        #status display bar
+        self._status = StatusDisplayWidget('', btnFrame, self)
+
+        #arrange draw order
+        btnFrame.raise_()
+        self._status.raise_()
+
+    def showEvent(self, event):
+        super(CentralWidget, self).showEvent(event)
+
+        #setup status display bar, now that widget coordinates are determined
+        self._status.adjustSize()
+        self._status.setBasePos()
 
     def generatePacks(self):
         settings = self._settingsList.getUserSettings()
