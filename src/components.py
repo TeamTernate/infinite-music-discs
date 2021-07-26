@@ -109,7 +109,11 @@ class GenerateButton(QtWidgets.QPushButton):
 
         self.setCurrentIndex.connect(layout.setCurrentIndex)
 
-        self.setStyleSheet(CSS_SHEET_GENBUTTON)
+        self.setObjectName('GenerateButton')
+        self._label.setObjectName('GenLabel')
+        self._progress.setObjectName('GenProgress')
+
+        self.setStyleSheet(CSS_STYLESHEET)
         self._styleDict = self.getStyleSheetDict()
 
     def sizeHint(self):
@@ -347,7 +351,6 @@ class ArrowButton(QtWidgets.QPushButton):
         layout.addWidget(self._img)
 
         self.setLayout(layout)
-        self.setStyleSheet(CSS_SHEET_ARROWBUTTON)
 
     def sizeHint(self):
         return QSize(25, 25)
@@ -532,7 +535,8 @@ class FileButton(DragDropButton):
         #   two nested QWidgets are necessary to allow double border
         self.setProperty(StyleProperties.DRAG_HELD, False)
         self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
-        self.setStyleSheet(CSS_SHEET_DRAGDROPBUTTON)
+
+        self._childFrame.setObjectName('FileButtonFrame')
 
     def mousePressEvent(self, event):
         super(FileButton, self).mousePressEvent(event)
@@ -594,7 +598,7 @@ class FileButton(DragDropButton):
         selfIndex = self._parent.getIndex()
         if(selfIndex < initIndex):
             return
-        if(selfIndex >= initIndex + min(MAX_DRAW_MULTI_DRAGDROP, count)):
+        if(selfIndex >= initIndex + min(Constants.MAX_DRAW_MULTI_DRAGDROP, count)):
             return
 
         #reset styling
@@ -634,6 +638,8 @@ class NewDiscButton(DragDropButton):
 
         self._img.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(5, 5, 5, 5)
@@ -643,8 +649,7 @@ class NewDiscButton(DragDropButton):
 
         self.setLayout(layout)
 
-        self.setProperty(StyleProperties.DRAG_HELD, False)
-        self.setStyleSheet(CSS_SHEET_NEWDISCBUTTON)
+        self.setObjectName('NewDiscButton')
 
     def mousePressEvent(self, event):
         super(NewDiscButton, self).mousePressEvent(event)
@@ -772,9 +777,14 @@ class DiscListEntry(QContainerFrame):
         self._btnTrack.fileChanged.connect(self.setTitle)
         self._leTitle.textChanged.connect(self.setSubtitle)
 
-        self.setStyleSheet(CSS_SHEET_DISCENTRY)
-        self._leTitle.setStyleSheet(CSS_SHEET_TRACKNAME)
-        self._lblIName.setStyleSheet(CSS_SHEET_TRACKNAME)
+        self.setObjectName('DiscListEntry')
+        self._btnIcon.setObjectName('ImageButton')
+        self._btnTrack.setObjectName('TrackButton')
+        self._leTitle.setObjectName('TitleLineEdit')
+        self._lblIName.setObjectName('INameLabel')
+        self._btnDelete.setObjectName('DeleteButton')
+        self._btnUpArrow.setObjectName('ArrowUp')
+        self._btnDownArrow.setObjectName('ArrowDown')
 
     def sizeHint(self):
         return QSize(350, 87.5)
@@ -843,7 +853,7 @@ class NewDiscEntry(QContainerFrame):
 
         self.setLayout(layout)
 
-        self.setStyleSheet(CSS_SHEET_NEWENTRY)
+        self.setObjectName('NewDiscEntry')
 
     def sizeHint(self):
         return QSize(350, 87.5)
@@ -884,7 +894,6 @@ class DiscList(QtWidgets.QWidget):
 
         #child widget, contains child layout
         widget = QtWidgets.QWidget()
-        widget.setObjectName("ChildWidget")
         widget.setLayout(self._childLayout)
 
         #scroll area, contains child widget and makes child widget scrollable
@@ -893,7 +902,6 @@ class DiscList(QtWidgets.QWidget):
         scrollArea.setWidgetResizable(True)
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        scrollArea.setStyleSheet(CSS_SHEET_SCROLLBAR)
 
         #layout, contains scroll area
         layout = QtWidgets.QVBoxLayout(self)
@@ -903,10 +911,12 @@ class DiscList(QtWidgets.QWidget):
 
         self.setLayout(layout)
 
-        self.setStyleSheet(CSS_SHEET_DISCLIST)
-
         self.icon_multiDrop.connect(self.addExcessEntries)
         self.track_multiDrop.connect(self.addExcessEntries)
+
+        self.setObjectName('DiscList')
+        widget.setObjectName('DiscListChildWidget')
+        scrollArea.setObjectName('DiscListScrollArea')
 
     def discMoveUpEvent(self, index):
         if(index == 0):
@@ -1008,6 +1018,8 @@ class AnimatedTabBar(QtWidgets.QTabBar):
         self._first = True
 
         self.currentChanged.connect(self.tabChanged)
+
+        self.setObjectName('AnimatedTabBar')
 
     def paintEvent(self, event):
         super(AnimatedTabBar, self).paintEvent(event)
@@ -1129,8 +1141,6 @@ class SettingsListEntry(QContainerFrame):
         self._label = QtWidgets.QLabel(label)
         self._selector = SettingsSelector(settingType, params, self)
 
-        self._label.setObjectName("Label")
-
         layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(20)
         layout.setContentsMargins(5, 5, 5, 5)
@@ -1143,6 +1153,8 @@ class SettingsListEntry(QContainerFrame):
         layout.addStretch(1)
 
         self.setLayout(layout)
+
+        self._label.setObjectName('SettingLabel')
 
     def getIndex(self):
         return 0
@@ -1172,7 +1184,6 @@ class SettingsList(QtWidgets.QWidget):
 
         #child widget, contains child layout
         widget = QtWidgets.QWidget()
-        widget.setObjectName("ChildWidget")
         widget.setLayout(self._childLayout)
 
         #scroll area, contains child widget and makes child widget scrollable
@@ -1181,7 +1192,6 @@ class SettingsList(QtWidgets.QWidget):
         scrollArea.setWidgetResizable(True)
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scrollArea.setStyleSheet(CSS_SHEET_SCROLLBAR)
 
         #layout, contains scroll area
         layout = QtWidgets.QVBoxLayout(self)
@@ -1191,7 +1201,9 @@ class SettingsList(QtWidgets.QWidget):
 
         self.setLayout(layout)
 
-        self.setStyleSheet(CSS_SHEET_SETTINGS)
+        self.setObjectName('SettingsList')
+        widget.setObjectName('SettingsChildWidget')
+        scrollArea.setObjectName('SettingsScrollArea')
 
     def getUserSettings(self):
         settingsDict = {}
@@ -1230,7 +1242,7 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
 
-        self.setStyleSheet(CSS_SHEET_STATUSDISP)
+        self.setObjectName('StatusDisplay')
 
     def mousePressEvent(self, event):
         event.accept()
@@ -1313,9 +1325,9 @@ class CentralWidget(QtWidgets.QWidget):
         self._settingsList.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
 
         #tabs to switch between track list and settings
-        tabs = QtWidgets.QTabWidget()
+        tabs = QtWidgets.QTabWidget(self)
         tabs.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
-        tabs.setStyleSheet(CSS_SHEET_TABS)
+        tabs.setStyleSheet(CSS_STYLESHEET)
 
         #set tabs background color
         tabs.setAutoFillBackground(True)
@@ -1342,12 +1354,15 @@ class CentralWidget(QtWidgets.QWidget):
         btnLayout.addStretch()
 
         btnFrame = QContainerFrame(self)
-        btnFrame.setObjectName("GenFrame")
         btnFrame.setLayout(btnLayout)
         layout.addWidget(btnFrame)
         self.setLayout(layout)
 
-        self.setStyleSheet(CSS_SHEET_CENTRAL)
+        self.setObjectName('CentralWidget')
+        tabs.setObjectName('AnimatedTabs')
+        btnFrame.setObjectName('GenFrame')
+
+        self.setStyleSheet(CSS_STYLESHEET)
 
         #status display bar
         self._status = StatusDisplayWidget('', btnFrame, self)

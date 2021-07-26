@@ -79,47 +79,13 @@ StatusMessageDict = {
 
 
 #CSS sheets
-CSS_SHEET_ARROWBUTTON = """
-ArrowButton {
-    border: 0;
-    background-color: rgb(48, 48, 48);
-}
-
-ArrowButton:hover {
-    background-color: rgb(96, 96, 96);
-}
-"""
-
-CSS_SHEET_GENBUTTON = """
-QLabel {
-    color: white;
-    font-size: 32px;
-}
-
-QLabel[hover="true"] {
-    font-size: 34px;
-}
-
-QLabel[pressed="true"] {
-    font-size: 31px;
-}
-
-QLabel[disabled="true"] {
-    color: lightgray;
-    font-size: 32px;
-}
-
-QProgressBar {
-    border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0,0,0,0.5), stop:1 rgba(0,0,0,0));
-    border-left: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0,0,0,0.5), stop:1 rgba(0,0,0,0));
-    background-color: rgb(72, 102, 78);
-}
-
-QProgressBar::chunk {
-    border: 0;
+CSS_STYLESHEET = """
+CentralWidget {
     padding: 0;
-    background-color: rgb(46, 170, 78);
+    border: 0;
 }
+
+
 
 GenerateButton {
     border: 0;
@@ -149,228 +115,65 @@ GenerateButton[disabled="true"] {
     border-bottom-color: rgb(22,52,31);
     button-color: rgb(41,93,52);
 }
-"""
 
-CSS_SHEET_TRACKNAME = """
-QLineEdit {
-    padding-left: 10px;
-    padding-right: 10px;
-
-    color: lightgray;
-    font-size: 16px;
-    border-radius: 4px;
-
+QFrame#GenFrame {
     background-color: rgb(32, 32, 32);
 }
 
-QLineEdit:focus {
-    color: white;
-    border: 1px solid lightgray;
+QProgressBar#GenProgress {
+    border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0,0,0,0.5), stop:1 rgba(0,0,0,0));
+    border-left: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0,0,0,0.5), stop:1 rgba(0,0,0,0));
+    background-color: rgb(72, 102, 78);
 }
 
-QLabel {
-    color: gray;
-    font-style: italic;
-}
-"""
-
-CSS_SHEET_DRAGDROPBUTTON = """
-DragDropButton {
-    background-color: rgb(48, 48, 48);
-    border: 5px solid rgb(48, 48, 48);
-}
-
-DragDropButton[drag_held="true"] {
-    border: 5px solid rgb(51, 178, 45);
-}
-
-DragDropButton[alpha="9"] {
-    border: 5px solid rgba(51, 178, 45, 0.9);
-}
-
-DragDropButton[alpha="8"] {
-    border: 5px solid rgba(51, 178, 45, 0.8);
-}
-
-DragDropButton[alpha="7"] {
-    border: 5px solid rgba(51, 178, 45, 0.7);
-}
-
-DragDropButton[alpha="6"] {
-    border: 5px solid rgba(51, 178, 45, 0.6);
-}
-
-DragDropButton[alpha="5"] {
-    border: 5px solid rgba(51, 178, 45, 0.5);
-}
-
-DragDropButton[alpha="4"] {
-    border: 5px solid rgba(51, 178, 45, 0.4);
-}
-
-DragDropButton[alpha="3"] {
-    border: 5px solid rgba(51, 178, 45, 0.3);
-}
-
-DragDropButton[alpha="2"] {
-    border: 5px solid rgba(51, 178, 45, 0.2);
-}
-
-DragDropButton[alpha="1"] {
-    border: 5px solid rgba(51, 178, 45, 0.1);
-}
-
-QContainerFrame {
-    border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
-    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
-    border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
-    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
-
-    background-color: rgb(32, 32, 32);
-}
-
-QContainerFrame:hover[drag_held="true"] {
-    background-color: rgb(72, 72, 72);
-}
-
-QContainerFrame:hover {
-    background-color: rgb(72, 72, 72);
-}
-"""
-
-CSS_SHEET_NEWDISCBUTTON = """
-NewDiscButton {
-    border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
-    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(24,24,24), stop:1 rgba(0,0,0,0));
-    border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
-    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(24,24,24), stop:1 rgba(0,0,0,0));
-
-    font-size: 48px;
-    color: gray;
-    background-color: rgb(32, 32, 32);
-}
-
-NewDiscButton:hover {
-    color:lightgray;
-    background-color: rgb(72, 72, 72);
-}
-
-NewDiscButton:hover[drag_held="true"] {
-}
-"""
-
-CSS_SHEET_DISCENTRY = """
-DiscListEntry {
-    padding: 1px;
-    border-bottom: 2px solid rgb(72, 72, 72);
-    background-color: rgb(48, 48, 48);
-}
-
-DeleteButton {
+QProgressBar#GenProgress::chunk {
     border: 0;
-    background-color: rgb(48, 48, 48);
-    background: url(../data/delete-btn.png) no-repeat center;
-}
-
-DeleteButton:hover {
-    background: url(../data/delete-btn-hover.png) no-repeat center;
-}
-"""
-
-CSS_SHEET_NEWENTRY = """
-NewDiscEntry {
-    padding: 5px;
-    background-color: rgb(48, 48, 48);
-}
-"""
-
-CSS_SHEET_DISCLIST = """
-QScrollArea {
     padding: 0;
-    border: 0;
+    background-color: rgb(46, 170, 78);
 }
 
-#ChildWidget {
-    background-color: rgb(48, 48, 48);
-}
-"""
-
-CSS_SHEET_SETTINGS = """
-SettingsListEntry#PACKPNG {
-    border: 0;
-    /* border-bottom: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgb(32,32,32), stop:0.8 rgba(0,0,0,0), stop:1 rgb(32,32,32)); */
-    border-bottom: 2px solid rgb(72, 72, 72);
+QLabel#GenLabel {
+    color: white;
+    font-size: 32px;
 }
 
-QLabel#Label {
+QLabel#GenLabel[hover="true"] {
+    font-size: 34px;
+}
+
+QLabel#GenLabel[pressed="true"] {
+    font-size: 31px;
+}
+
+QLabel#GenLabel[disabled="true"] {
     color: lightgray;
-    font-weight: normal;
-    font-size: 16px;
+    font-size: 32px;
 }
 
-QComboBox {
-    border: 1px solid rgb(100, 100, 100);
+
+
+StatusDisplayWidget {
+    border: 0;
+    padding: 10px 10px 10px 5px;
+    background-color: rgba(62, 139, 78, 0.75);
     color: white;
     font-size: 16px;
-    background-color: rgb(48, 48, 48);
-    selection-background-color: rgb(57, 130, 73);
-    width: 50px;
-    height: 30px;
 }
 
-QComboBox:hover {
-    background-color: rgb(72, 72, 72);
+StatusDisplayWidget:hover[error="false"] {
+    background-color: rgba(68, 150, 88, 0.75);
 }
 
-QComboBox::drop-down {
-    border: 0;
-    width: 30px;
-    height: 30px;
+StatusDisplayWidget[error="true"] {
+    background-color: rgba(168, 33, 36, 0.7);
 }
 
-QComboBox::down-arrow {
-    background: url(../data/arrow-down.png) no-repeat center;
+StatusDisplayWidget:hover[error="true"] {
+    background-color: rgba(178, 43, 46, 0.7);
 }
 
-QComboBox QAbstractItemView {
-    border: 0;
-    font-size: 16px;
-    background-color: rgb(6, 6, 6);
-}
 
-QCheckBox::indicator {
-    border: 0;
-    width: 20px;
-    height: 20px;
-}
 
-QCheckBox::indicator:unchecked {
-    background: url(../data/check-bg-unchecked.png) no-repeat center;
-}
-
-QCheckBox::indicator:unchecked:hover {
-    background: url(../data/check-bg-unchecked-hover.png) no-repeat center;
-}
-
-QCheckBox::indicator:checked {
-    background: url(../data/check-bg-checked.png) no-repeat center;
-}
-
-QCheckBox::indicator:checked:hover {
-    background: url(../data/check-bg-checked-hover.png) no-repeat center;
-}
-
-QScrollArea {
-    padding: 0;
-    border: 0;
-}
-
-#ChildWidget {
-    background-color: rgb(48, 48, 48);
-}
-"""
-
-CSS_SHEET_TABS = """
 QTabWidget::pane {
     padding: 0;
     border: 0;
@@ -402,9 +205,14 @@ QTabBar::tab:selected {
 QTabBar::tab:hover {
     color: white;
 }
-"""
 
-CSS_SHEET_SCROLLBAR = """
+
+
+QScrollArea {
+    padding: 0;
+    border: 0;
+}
+
 QScrollBar:vertical {
     padding: 0;
     border: 0;
@@ -433,42 +241,223 @@ QScrollBar::sub-line:vertical {
     width: 0px;
     height: 0px;
 }
-"""
 
-CSS_SHEET_STATUSDISP = """
-StatusDisplayWidget {
+
+
+SettingsList {
+    background-color: rgb(48, 48, 48)
+}
+
+SettingsListEntry#PACKPNG {
     border: 0;
-    padding: 10px 10px 10px 5px;
-    background-color: rgba(62, 139, 78, 0.75);
-    color: white;
+    /* border-bottom: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgb(32,32,32), stop:0.8 rgba(0,0,0,0), stop:1 rgb(32,32,32)); */
+    border-bottom: 2px solid rgb(72, 72, 72);
+}
+
+QWidget#SettingsChildWidget {
+    background-color: rgb(48, 48, 48);
+}
+
+QLabel#SettingLabel {
+    color: lightgray;
+    font-weight: normal;
     font-size: 16px;
 }
 
-StatusDisplayWidget:hover[error="false"] {
-    background-color: rgba(68, 150, 88, 0.75);
+QComboBox {
+    border: 1px solid rgb(100, 100, 100);
+    color: white;
+    font-size: 16px;
+    background-color: rgb(48, 48, 48);
+    selection-background-color: rgb(57, 130, 73);
+    width: 50px;
+    height: 30px;
 }
 
-StatusDisplayWidget[error="true"] {
-    background-color: rgba(168, 33, 36, 0.7);
-}
-
-StatusDisplayWidget:hover[error="true"] {
-    background-color: rgba(178, 43, 46, 0.7);
-}
-"""
-
-CSS_SHEET_CENTRAL = """
-CentralWidget {
-    padding: 0;
+QComboBox QAbstractItemView {
     border: 0;
+    font-size: 16px;
+    background-color: rgb(6, 6, 6);
 }
+
+QComboBox:hover {
+    background-color: rgb(72, 72, 72);
+}
+
+QComboBox::drop-down {
+    border: 0;
+    width: 30px;
+    height: 30px;
+}
+
+QComboBox::down-arrow {
+    background: url(../data/arrow-down.png) no-repeat center;
+}
+
+QCheckBox::indicator {
+    border: 0;
+    width: 20px;
+    height: 20px;
+}
+
+QCheckBox::indicator:unchecked {
+    background: url(../data/check-bg-unchecked.png) no-repeat center;
+}
+
+QCheckBox::indicator:unchecked:hover {
+    background: url(../data/check-bg-unchecked-hover.png) no-repeat center;
+}
+
+QCheckBox::indicator:checked {
+    background: url(../data/check-bg-checked.png) no-repeat center;
+}
+
+QCheckBox::indicator:checked:hover {
+    background: url(../data/check-bg-checked-hover.png) no-repeat center;
+}
+
+
 
 DiscList {
     background-color: rgb(48, 48, 48);
 }
 
-QContainerFrame#GenFrame {
+QWidget#DiscListChildWidget {
+    background-color: rgb(48, 48, 48);
+}
+
+NewDiscButton {
+    border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(24,24,24), stop:1 rgba(0,0,0,0));
+    border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(24,24,24), stop:1 rgba(0,0,0,0));
+
+    font-size: 48px;
+    color: gray;
     background-color: rgb(32, 32, 32);
+}
+
+NewDiscButton:hover {
+    color:lightgray;
+    background-color: rgb(72, 72, 72);
+}
+
+NewDiscButton:hover[drag_held="true"] {
+}
+
+NewDiscEntry {
+    padding: 5px;
+    background-color: rgb(48, 48, 48);
+}
+
+
+
+DiscListEntry {
+    padding: 1px;
+    border-bottom: 2px solid rgb(72, 72, 72);
+    background-color: rgb(48, 48, 48);
+}
+
+FileButton {
+    background-color: rgb(48, 48, 48);
+    border: 5px solid rgb(48, 48, 48);
+}
+
+FileButton[drag_held="true"] {
+    border: 5px solid rgb(51, 178, 45);
+}
+
+FileButton[alpha="9"] {
+    border: 5px solid rgba(51, 178, 45, 0.9);
+}
+
+FileButton[alpha="8"] {
+    border: 5px solid rgba(51, 178, 45, 0.8);
+}
+
+FileButton[alpha="7"] {
+    border: 5px solid rgba(51, 178, 45, 0.7);
+}
+
+FileButton[alpha="6"] {
+    border: 5px solid rgba(51, 178, 45, 0.6);
+}
+
+FileButton[alpha="5"] {
+    border: 5px solid rgba(51, 178, 45, 0.5);
+}
+
+FileButton[alpha="4"] {
+    border: 5px solid rgba(51, 178, 45, 0.4);
+}
+
+FileButton[alpha="3"] {
+    border: 5px solid rgba(51, 178, 45, 0.3);
+}
+
+FileButton[alpha="2"] {
+    border: 5px solid rgba(51, 178, 45, 0.2);
+}
+
+FileButton[alpha="1"] {
+    border: 5px solid rgba(51, 178, 45, 0.1);
+}
+
+QFrame#FileButtonFrame {
+    border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
+    border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
+
+    background-color: rgb(32, 32, 32);
+}
+
+QFrame#FileButtonFrame:hover[drag_held="true"] {
+    background-color: rgb(72, 72, 72);
+}
+
+QFrame#FileButtonFrame:hover {
+    background-color: rgb(72, 72, 72);
+}
+
+QLineEdit#TitleLineEdit {
+    padding-left: 10px;
+    padding-right: 10px;
+
+    color: lightgray;
+    font-size: 16px;
+    border-radius: 4px;
+
+    background-color: rgb(32, 32, 32);
+}
+
+QLineEdit#TitleLineEdit:focus {
+    color: white;
+    border: 1px solid lightgray;
+}
+
+QLabel#INameLabel {
+    color: gray;
+    font-style: italic;
+}
+
+DeleteButton {
+    border: 0;
+    background-color: rgb(48, 48, 48);
+    background: url(../data/delete-btn.png) no-repeat center;
+}
+
+DeleteButton:hover {
+    background: url(../data/delete-btn-hover.png) no-repeat center;
+}
+
+ArrowButton {
+    border: 0;
+    background-color: rgb(48, 48, 48);
+}
+
+ArrowButton:hover {
+    background-color: rgb(96, 96, 96);
 }
 """
 
