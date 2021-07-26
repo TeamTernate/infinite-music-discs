@@ -16,10 +16,6 @@ import generator
 from definitions import *
 from generator import Status
 
-#dummy child of QFrame for CSS inheritance purposes
-class QContainerFrame(QtWidgets.QFrame):
-    pass
-
 
 
 #Child of QLineEdit with text autoselect on click
@@ -91,7 +87,7 @@ class GenerateButton(QtWidgets.QPushButton):
         lytLabel.addStretch()
         lytLabel.addWidget(self._label)
         lytLabel.addStretch()
-        wgtLabel = QContainerFrame(self)
+        wgtLabel = QtWidgets.QFrame(self)
         wgtLabel.setLayout(lytLabel)
 
         lytProgress = QtWidgets.QVBoxLayout()
@@ -99,7 +95,7 @@ class GenerateButton(QtWidgets.QPushButton):
         lytProgress.addStretch()
         lytProgress.addWidget(self._progress)
         lytProgress.addStretch()
-        wgtProgress = QContainerFrame(self)
+        wgtProgress = QtWidgets.QFrame(self)
         wgtProgress.setLayout(lytProgress)
 
         layout = QtWidgets.QStackedLayout()
@@ -517,7 +513,7 @@ class FileButton(DragDropButton):
         super(FileButton, self).__init__(btnType, parent)
 
         #child QFrame, for CSS styling purposes
-        self._childFrame = QContainerFrame()
+        self._childFrame = QtWidgets.QFrame()
         childLayout = QtWidgets.QVBoxLayout()
         childLayout.setSpacing(0)
         childLayout.setContentsMargins(5, 5, 5, 5)
@@ -696,7 +692,7 @@ class NewDiscButton(DragDropButton):
 
 
 #entry in list of tracks
-class DiscListEntry(QContainerFrame):
+class DiscListEntry(QtWidgets.QFrame):
     def __init__(self, parent = None):
         super(DiscListEntry, self).__init__()
 
@@ -828,7 +824,7 @@ class DiscListEntry(QContainerFrame):
 
 
 #blank entry in list of tracks
-class NewDiscEntry(QContainerFrame):
+class NewDiscEntry(QtWidgets.QFrame):
     def __init__(self, parent = None):
         super(NewDiscEntry, self).__init__()
 
@@ -1131,7 +1127,7 @@ class SettingsSelector(QtWidgets.QWidget):
 
 
 
-class SettingsListEntry(QContainerFrame):
+class SettingsListEntry(QtWidgets.QFrame):
     def __init__(self, key, label, settingType = SettingType.PACKPNG, params = None, parent = None):
         super(SettingsListEntry, self).__init__(parent)
 
@@ -1353,7 +1349,7 @@ class CentralWidget(QtWidgets.QWidget):
         btnLayout.addWidget(self._btnGen, 0, Qt.AlignBottom)
         btnLayout.addStretch()
 
-        btnFrame = QContainerFrame(self)
+        btnFrame = QtWidgets.QFrame(self)
         btnFrame.setLayout(btnLayout)
         layout.addWidget(btnFrame)
         self.setLayout(layout)
