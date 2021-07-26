@@ -4,17 +4,18 @@
 #Infinite Music Discs datapack + resourcepack GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-from PyQt5.QtCore import Qt, QFileInfo, QSize, QObject, QThread, pyqtSignal, QRect, QPoint
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from enum import Enum
-
 import os
 import re
 import generator
-from definitions import *
+
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
+
 from generator import Status
+from definitions import Assets, Constants, ButtonType, SettingType, FileExt, StyleProperties
+from definitions import StatusMessageDict, CSS_STYLESHEET
 
 
 
@@ -154,7 +155,7 @@ class GenerateButton(QtWidgets.QPushButton):
         qp = QtGui.QPainter(self)
         qp.setRenderHints(qp.Antialiasing)
         qp.setRenderHints(qp.TextAntialiasing)
-        qp.setPen(QtCore.Qt.NoPen)
+        qp.setPen(Qt.NoPen)
 
         #decide palette based on set properties
         if self.property(StyleProperties.DISABLED):
@@ -416,7 +417,7 @@ class DragDropButton(QtWidgets.QPushButton):
 
         for u in event.mimeData().urls():
             u = u.toLocalFile()
-            u = QFileInfo(u).completeSuffix()
+            u = QtCore.QFileInfo(u).completeSuffix()
 
             if(self.supportsFileType(u)):
                 event.accept()
@@ -451,7 +452,7 @@ class DragDropButton(QtWidgets.QPushButton):
         self.setImage(self._file)
 
     def setImage(self, file):
-        f = QFileInfo(file).completeSuffix()
+        f = QtCore.QFileInfo(file).completeSuffix()
 
         assetDict = {
             FileExt.PNG: self._file,
@@ -484,7 +485,7 @@ class DragDropButton(QtWidgets.QPushButton):
 
         for u in urls:
             uf = u.toLocalFile()
-            uext = QFileInfo(uf).completeSuffix()
+            uext = QtCore.QFileInfo(uf).completeSuffix()
 
             if self.supportsFileType(uext):
                 f.append(uf)
@@ -1029,7 +1030,7 @@ class AnimatedTabBar(QtWidgets.QTabBar):
 
         qp = QtGui.QPainter(self)
         qp.setRenderHints(qp.Antialiasing)
-        qp.setPen(QtCore.Qt.NoPen)
+        qp.setPen(Qt.NoPen)
         qp.setBrush(QtGui.QBrush(self.UL_COLOR))
         qp.drawRect(self.animations[selected].currentValue())
 
@@ -1392,7 +1393,7 @@ class CentralWidget(QtWidgets.QWidget):
 
         #launch worker thread to generate packs
         #   FFmpeg conversion is slow, don't want to lock up UI
-        self._thread = QThread(self)
+        self._thread = QtCore.QThread(self)
         self._worker = GeneratePackWorker(settings, texture_files, track_files, titles, internal_names)
         self._worker.moveToThread(self._thread)
 
@@ -1419,7 +1420,7 @@ class CentralWidget(QtWidgets.QWidget):
 
 
 #worker object that generates the datapack/resourcepack in a separate QThread
-class GeneratePackWorker(QObject):
+class GeneratePackWorker(QtCore.QObject):
     started = pyqtSignal()
     finished = pyqtSignal()
     status = pyqtSignal(Status)
