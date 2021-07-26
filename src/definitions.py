@@ -1,0 +1,475 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#Infinite Music Discs constants definition module
+#Generation tool, datapack design, and resourcepack design by link2_thepast
+
+from enum import Enum
+from generator import Status
+
+#constants
+class Constants():
+    MAX_DRAW_MULTI_DRAGDROP = 10
+    STATUS_MESSAGE_SHOW_TIME_MS = 10000
+
+
+
+#typedefs
+class ButtonType(Enum):
+    IMAGE = 1
+    TRACK = 2
+    NEW_TRACK = 3
+    ARROW_UP = 4
+    ARROW_DOWN = 5
+    PACKPNG = 6
+
+class SettingType(Enum):
+    PACKPNG = 1
+    CHECK = 2
+    RADIO = 3
+    DROPDOWN = 4
+
+class FileExt():
+    PNG = 'png'
+    MP3 = 'mp3'
+    WAV = 'wav'
+    OGG = 'ogg'
+
+class Assets():
+    FONT_MC_LARGE =         '../data/minecraft-ten.ttf'
+    ICON_ICON_EMPTY =       '../data/image-empty.png'
+    ICON_TRACK_EMPTY =      '../data/track-empty.png'
+    ICON_PACK_EMPTY =       '../data/pack-empty.png'
+    ICON_NEW_DISC =         '../data/new-disc.png'
+    ICON_MP3 =              '../data/track-mp3.png'
+    ICON_WAV =              '../data/track-wav.png'
+    ICON_OGG =              '../data/track-ogg.png'
+    ICON_ARROW_UP =         '../data/arrow-up.png'
+    ICON_ARROW_DOWN =       '../data/arrow-down.png'
+    ICON_ARROW_UP_DIS =     '../data/arrow-up-disabled.png'
+    ICON_ARROW_DOWN_DIS =   '../data/arrow-down-disabled.png'
+    ICON_DELETE =           '../data/delete-btn.png'
+
+class StyleProperties():
+    DRAG_HELD = 'drag_held'
+    ALPHA =     'alpha'
+    DISABLED =  'disabled'
+    PRESSED =   'pressed'
+    HOVER =     'hover'
+    ERROR =     'error'
+
+#dictionary to associate Status : status message string
+StatusMessageDict = {
+    Status.SUCCESS:                 "Successfully generated datapack and resourcepack!",
+    Status.LIST_EMPTY:              "Provide at least one track to generate a pack.",
+    Status.LIST_UNEVEN_LENGTH:      "Some tracks are missing an icon or a music file.",
+    Status.IMAGE_FILE_MISSING:      "Couldn't find icon file. It may have been moved or deleted.",
+    Status.BAD_IMAGE_TYPE:          "Icon file is not in a supported format.",
+    Status.TRACK_FILE_MISSING:      "Couldn't find music file. It may have been moved or deleted.",
+    Status.BAD_TRACK_TYPE:          "Music file is not in a supported format.",
+    Status.BAD_INTERNAL_NAME:       "Invalid track name. Make sure all tracks have a subtitle.",
+    Status.PACK_IMAGE_MISSING:      "Couldn't find pack icon file.",
+    Status.BAD_PACK_IMAGE_TYPE:     "Pack icon is not in a supported format.",
+    Status.BAD_OGG_CONVERT:         "Failed to convert some tracks to .ogg format.",
+    Status.BAD_ZIP:                 "Failed to generate as '.zip'. Packs have been left as folders.",
+    Status.IMAGE_FILE_NOT_GIVEN:    "Some tracks are missing an icon.",
+    Status.TRACK_FILE_NOT_GIVEN:    "Some tracks are missing a music file."
+}
+
+
+
+#CSS sheets
+CSS_SHEET_ARROWBUTTON = """
+ArrowButton {
+    border: 0;
+    background-color: rgb(48, 48, 48);
+}
+
+ArrowButton:hover {
+    background-color: rgb(96, 96, 96);
+}
+"""
+
+CSS_SHEET_GENBUTTON = """
+QLabel {
+    color: white;
+    font-size: 32px;
+}
+
+QLabel[hover="true"] {
+    font-size: 34px;
+}
+
+QLabel[pressed="true"] {
+    font-size: 31px;
+}
+
+QLabel[disabled="true"] {
+    color: lightgray;
+    font-size: 32px;
+}
+
+QProgressBar {
+    border-top: 2px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0,0,0,0.5), stop:1 rgba(0,0,0,0));
+    border-left: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0,0,0,0.5), stop:1 rgba(0,0,0,0));
+    background-color: rgb(72, 102, 78);
+}
+
+QProgressBar::chunk {
+    border: 0;
+    padding: 0;
+    background-color: rgb(46, 170, 78);
+}
+
+GenerateButton {
+    border: 0;
+    background-color: rgb(32,32,32);
+
+    border-outer-color: rgb(0,0,0);
+    border-left-color: rgb(49,108,66);
+    border-top-color: rgb(98,202,85);
+    border-right-color: rgb(49,108,66);
+    border-bottom-color: rgb(32,75,45);
+    button-color: rgb(62,139,78);
+}
+
+GenerateButton[hover="true"] {
+    button-color: rgb(68,150,88);
+}
+
+GenerateButton[pressed="true"] {
+    border-outer-color: rgb(255,255,255);
+    border-top-color: rgb(32,75,45);
+    border-bottom-color: rgb(74,162,53);
+    button-color: rgb(62,140,78);
+}
+
+GenerateButton[disabled="true"] {
+    border-top-color: rgb(65,136,57);
+    border-bottom-color: rgb(22,52,31);
+    button-color: rgb(41,93,52);
+}
+"""
+
+CSS_SHEET_TRACKNAME = """
+QLineEdit {
+    padding-left: 10px;
+    padding-right: 10px;
+
+    color: lightgray;
+    font-size: 16px;
+    border-radius: 4px;
+
+    background-color: rgb(32, 32, 32);
+}
+
+QLineEdit:focus {
+    color: white;
+    border: 1px solid lightgray;
+}
+
+QLabel {
+    color: gray;
+    font-style: italic;
+}
+"""
+
+CSS_SHEET_DRAGDROPBUTTON = """
+DragDropButton {
+    background-color: rgb(48, 48, 48);
+    border: 5px solid rgb(48, 48, 48);
+}
+
+DragDropButton[drag_held="true"] {
+    border: 5px solid rgb(51, 178, 45);
+}
+
+DragDropButton[alpha="9"] {
+    border: 5px solid rgba(51, 178, 45, 0.9);
+}
+
+DragDropButton[alpha="8"] {
+    border: 5px solid rgba(51, 178, 45, 0.8);
+}
+
+DragDropButton[alpha="7"] {
+    border: 5px solid rgba(51, 178, 45, 0.7);
+}
+
+DragDropButton[alpha="6"] {
+    border: 5px solid rgba(51, 178, 45, 0.6);
+}
+
+DragDropButton[alpha="5"] {
+    border: 5px solid rgba(51, 178, 45, 0.5);
+}
+
+DragDropButton[alpha="4"] {
+    border: 5px solid rgba(51, 178, 45, 0.4);
+}
+
+DragDropButton[alpha="3"] {
+    border: 5px solid rgba(51, 178, 45, 0.3);
+}
+
+DragDropButton[alpha="2"] {
+    border: 5px solid rgba(51, 178, 45, 0.2);
+}
+
+DragDropButton[alpha="1"] {
+    border: 5px solid rgba(51, 178, 45, 0.1);
+}
+
+QContainerFrame {
+    border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
+    border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
+
+    background-color: rgb(32, 32, 32);
+}
+
+QContainerFrame:hover[drag_held="true"] {
+    background-color: rgb(72, 72, 72);
+}
+
+QContainerFrame:hover {
+    background-color: rgb(72, 72, 72);
+}
+"""
+
+CSS_SHEET_NEWDISCBUTTON = """
+NewDiscButton {
+    border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(24,24,24), stop:1 rgba(0,0,0,0));
+    border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
+    border-right: 3px solid qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 rgb(24,24,24), stop:1 rgba(0,0,0,0));
+
+    font-size: 48px;
+    color: gray;
+    background-color: rgb(32, 32, 32);
+}
+
+NewDiscButton:hover {
+    color:lightgray;
+    background-color: rgb(72, 72, 72);
+}
+
+NewDiscButton:hover[drag_held="true"] {
+}
+"""
+
+CSS_SHEET_DISCENTRY = """
+DiscListEntry {
+    padding: 1px;
+    border-bottom: 2px solid rgb(72, 72, 72);
+    background-color: rgb(48, 48, 48);
+}
+
+DeleteButton {
+    border: 0;
+    background-color: rgb(48, 48, 48);
+    background: url(../data/delete-btn.png) no-repeat center;
+}
+
+DeleteButton:hover {
+    background: url(../data/delete-btn-hover.png) no-repeat center;
+}
+"""
+
+CSS_SHEET_NEWENTRY = """
+NewDiscEntry {
+    padding: 5px;
+    background-color: rgb(48, 48, 48);
+}
+"""
+
+CSS_SHEET_DISCLIST = """
+QScrollArea {
+    padding: 0;
+    border: 0;
+}
+
+#ChildWidget {
+    background-color: rgb(48, 48, 48);
+}
+"""
+
+CSS_SHEET_SETTINGS = """
+SettingsListEntry#PACKPNG {
+    border: 0;
+    /* border-bottom: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgb(32,32,32), stop:0.8 rgba(0,0,0,0), stop:1 rgb(32,32,32)); */
+    border-bottom: 2px solid rgb(72, 72, 72);
+}
+
+QLabel#Label {
+    color: lightgray;
+    font-weight: normal;
+    font-size: 16px;
+}
+
+QComboBox {
+    border: 1px solid rgb(100, 100, 100);
+    color: white;
+    font-size: 16px;
+    background-color: rgb(48, 48, 48);
+    selection-background-color: rgb(57, 130, 73);
+    width: 50px;
+    height: 30px;
+}
+
+QComboBox:hover {
+    background-color: rgb(72, 72, 72);
+}
+
+QComboBox::drop-down {
+    border: 0;
+    width: 30px;
+    height: 30px;
+}
+
+QComboBox::down-arrow {
+    background: url(../data/arrow-down.png) no-repeat center;
+}
+
+QComboBox QAbstractItemView {
+    border: 0;
+    font-size: 16px;
+    background-color: rgb(6, 6, 6);
+}
+
+QCheckBox::indicator {
+    border: 0;
+    width: 20px;
+    height: 20px;
+}
+
+QCheckBox::indicator:unchecked {
+    background: url(../data/check-bg-unchecked.png) no-repeat center;
+}
+
+QCheckBox::indicator:unchecked:hover {
+    background: url(../data/check-bg-unchecked-hover.png) no-repeat center;
+}
+
+QCheckBox::indicator:checked {
+    background: url(../data/check-bg-checked.png) no-repeat center;
+}
+
+QCheckBox::indicator:checked:hover {
+    background: url(../data/check-bg-checked-hover.png) no-repeat center;
+}
+
+QScrollArea {
+    padding: 0;
+    border: 0;
+}
+
+#ChildWidget {
+    background-color: rgb(48, 48, 48);
+}
+"""
+
+CSS_SHEET_TABS = """
+QTabWidget::pane {
+    padding: 0;
+    border: 0;
+    background-color: rgb(32, 32, 32);
+}
+
+QTabWidget::tab-bar {
+}
+
+QTabBar {
+    padding: 0;
+    border: 0;
+    background-color: rgb(32, 32, 32);
+}
+
+QTabBar::tab {
+    height: 40px;
+    font-weight: normal;
+    font-size: 16px;
+    color: lightgray;
+    background-color: rgb(32, 32, 32);
+}
+
+QTabBar::tab:selected {
+    font-weight: bold;
+    color: white;
+}
+
+QTabBar::tab:hover {
+    color: white;
+}
+"""
+
+CSS_SHEET_SCROLLBAR = """
+QScrollBar:vertical {
+    padding: 0;
+    border: 0;
+    background-color: rgb(32, 32, 32);
+}
+
+QScrollBar::handle:vertical {
+    background-color: rgb(72, 72, 72);
+    min-height: 0px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: rgb(96, 96, 96);
+}
+
+QScrollBar::add-line:vertical {
+    border: none;
+    background: none;
+    width: 0px;
+    height: 0px;
+}
+
+QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+    width: 0px;
+    height: 0px;
+}
+"""
+
+CSS_SHEET_STATUSDISP = """
+StatusDisplayWidget {
+    border: 0;
+    padding: 10px 10px 10px 5px;
+    background-color: rgba(62, 139, 78, 0.75);
+    color: white;
+    font-size: 16px;
+}
+
+StatusDisplayWidget:hover[error="false"] {
+    background-color: rgba(68, 150, 88, 0.75);
+}
+
+StatusDisplayWidget[error="true"] {
+    background-color: rgba(168, 33, 36, 0.7);
+}
+
+StatusDisplayWidget:hover[error="true"] {
+    background-color: rgba(178, 43, 46, 0.7);
+}
+"""
+
+CSS_SHEET_CENTRAL = """
+CentralWidget {
+    padding: 0;
+    border: 0;
+}
+
+DiscList {
+    background-color: rgb(48, 48, 48);
+}
+
+QContainerFrame#GenFrame {
+    background-color: rgb(32, 32, 32);
+}
+"""
+
+
