@@ -57,6 +57,7 @@ class StyleProperties():
     DISABLED =  'disabled'
     PRESSED =   'pressed'
     HOVER =     'hover'
+    ERROR =     'error'
 
 StatusMessageDict = {
     Status.SUCCESS:                 "Successfully generated datapack and resourcepack!",
@@ -436,10 +437,23 @@ QScrollBar::sub-line:vertical {
 
 CSS_SHEET_STATUSDISP = """
 StatusDisplayWidget {
+    border: 0;
     padding: 10px 10px 10px 5px;
-    background-color: rgba(62, 139, 78, 0.5);
+    background-color: rgba(62, 139, 78, 0.75);
     color: white;
     font-size: 16px;
+}
+
+StatusDisplayWidget:hover[error="false"] {
+    background-color: rgba(68, 150, 88, 0.75);
+}
+
+StatusDisplayWidget[error="true"] {
+    background-color: rgba(168, 33, 36, 0.7);
+}
+
+StatusDisplayWidget:hover[error="true"] {
+    background-color: rgba(178, 43, 46, 0.7);
 }
 """
 
@@ -1658,12 +1672,10 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         self._widget = relativeWidget
         self._basePos = QPoint(0,0)
 
+        self.setProperty(StyleProperties.ERROR, False)
+        #self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.setAutoFillBackground(True)
         self.setVisible(False)
-
-        shadow = QtWidgets.QGraphicsDropShadowEffect()
-        shadow.setOffset(1, 3)
-        self.setGraphicsEffect(shadow)
 
         #slide in/out animation
         self.animation = QtCore.QPropertyAnimation(self, b"geometry")
@@ -1681,6 +1693,10 @@ class StatusDisplayWidget(QtWidgets.QLabel):
     def mousePressEvent(self, event):
         event.accept()
         self.hide()
+
+    def repolish(self, obj):
+        obj.style().unpolish(obj)
+        obj.style().polish(obj)
 
     #widget is not part of a layout, so position has to be updated manually
     def setBasePos(self):
@@ -1701,6 +1717,9 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         #use status to decide text and bg color
         self.setText(StatusMessageDict.get(status, 'Unknown error.'))
         self.adjustSize()
+
+        self.setProperty(StyleProperties.ERROR, (status != Status.SUCCESS) )
+        self.repolish(self)
 
         #set start and end points
         r = self.rect()
