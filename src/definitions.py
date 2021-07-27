@@ -5,7 +5,7 @@
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
 from enum import Enum
-from generator import Status
+from src.generator import Status
 
 #constants
 class Constants():
@@ -36,19 +36,19 @@ class FileExt():
     OGG = 'ogg'
 
 class Assets():
-    FONT_MC_LARGE =         '../data/minecraft-ten.ttf'
-    ICON_ICON_EMPTY =       '../data/image-empty.png'
-    ICON_TRACK_EMPTY =      '../data/track-empty.png'
-    ICON_PACK_EMPTY =       '../data/pack-empty.png'
-    ICON_NEW_DISC =         '../data/new-disc.png'
-    ICON_MP3 =              '../data/track-mp3.png'
-    ICON_WAV =              '../data/track-wav.png'
-    ICON_OGG =              '../data/track-ogg.png'
-    ICON_ARROW_UP =         '../data/arrow-up.png'
-    ICON_ARROW_DOWN =       '../data/arrow-down.png'
-    ICON_ARROW_UP_DIS =     '../data/arrow-up-disabled.png'
-    ICON_ARROW_DOWN_DIS =   '../data/arrow-down-disabled.png'
-    ICON_DELETE =           '../data/delete-btn.png'
+    FONT_MC_LARGE =         'data/minecraft-ten.ttf'
+    ICON_ICON_EMPTY =       'data/image-empty.png'
+    ICON_TRACK_EMPTY =      'data/track-empty.png'
+    ICON_PACK_EMPTY =       'data/pack-empty.png'
+    ICON_NEW_DISC =         'data/new-disc.png'
+    ICON_MP3 =              'data/track-mp3.png'
+    ICON_WAV =              'data/track-wav.png'
+    ICON_OGG =              'data/track-ogg.png'
+    ICON_ARROW_UP =         'data/arrow-up.png'
+    ICON_ARROW_DOWN =       'data/arrow-down.png'
+    ICON_ARROW_UP_DIS =     'data/arrow-up-disabled.png'
+    ICON_ARROW_DOWN_DIS =   'data/arrow-down-disabled.png'
+    ICON_DELETE =           'data/delete-btn.png'
 
 class StyleProperties():
     DRAG_HELD = 'drag_held'
@@ -67,7 +67,7 @@ StatusMessageDict = {
     Status.BAD_IMAGE_TYPE:          "Icon file is not in a supported format.",
     Status.TRACK_FILE_MISSING:      "Couldn't find music file. It may have been moved or deleted.",
     Status.BAD_TRACK_TYPE:          "Music file is not in a supported format.",
-    Status.BAD_INTERNAL_NAME:       "Invalid track name. Make sure all tracks have a subtitle.",
+    Status.BAD_INTERNAL_NAME:       "Invalid track name. Make sure all tracks show a subtitle.",
     Status.PACK_IMAGE_MISSING:      "Couldn't find pack icon file.",
     Status.BAD_PACK_IMAGE_TYPE:     "Pack icon is not in a supported format.",
     Status.BAD_OGG_CONVERT:         "Failed to convert some tracks to .ogg format.",
@@ -291,7 +291,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-    background: url(../data/arrow-down.png) no-repeat center;
+    background: url(data/arrow-down.png) no-repeat center;
 }
 
 QCheckBox::indicator {
@@ -301,19 +301,19 @@ QCheckBox::indicator {
 }
 
 QCheckBox::indicator:unchecked {
-    background: url(../data/check-bg-unchecked.png) no-repeat center;
+    background: url(data/check-bg-unchecked.png) no-repeat center;
 }
 
 QCheckBox::indicator:unchecked:hover {
-    background: url(../data/check-bg-unchecked-hover.png) no-repeat center;
+    background: url(data/check-bg-unchecked-hover.png) no-repeat center;
 }
 
 QCheckBox::indicator:checked {
-    background: url(../data/check-bg-checked.png) no-repeat center;
+    background: url(data/check-bg-checked.png) no-repeat center;
 }
 
 QCheckBox::indicator:checked:hover {
-    background: url(../data/check-bg-checked-hover.png) no-repeat center;
+    background: url(data/check-bg-checked-hover.png) no-repeat center;
 }
 
 
@@ -444,11 +444,11 @@ QLabel#INameLabel {
 DeleteButton {
     border: 0;
     background-color: rgb(48, 48, 48);
-    background: url(../data/delete-btn.png) no-repeat center;
+    background: url(data/delete-btn.png) no-repeat center;
 }
 
 DeleteButton:hover {
-    background: url(../data/delete-btn-hover.png) no-repeat center;
+    background: url(data/delete-btn-hover.png) no-repeat center;
 }
 
 ArrowButton {

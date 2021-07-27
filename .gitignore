@@ -1,13 +1,23 @@
 bin/*
-src/*.png
-src/*.mp3
-src/*.wav
-src/*.ogg
-src/*.zip
 
+*.png
+*.mp3
+*.wav
+*.ogg
+*.zip
+
+!data/*.png
+!data/*.mp3
+!data/*.wav
+!data/*.ogg
+
+custom_music_discs_dp/*
+custom_music_discs_rp/*
 src/custom_music_discs_dp/*
 src/custom_music_discs_rp/*
 
+tmp/*
+imd-tmp/*
 src/tmp/*
 src/imd-tmp/*
 

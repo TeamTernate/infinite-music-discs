@@ -6,16 +6,16 @@
 
 import os
 import re
-import generator
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 
-from generator import Status
-from definitions import Assets, Constants, ButtonType, SettingType, FileExt, StyleProperties
-from definitions import StatusMessageDict, CSS_STYLESHEET
+from src import generator
+from src.generator import Status
+from src.definitions import Assets, Constants, ButtonType, SettingType, FileExt, StyleProperties
+from src.definitions import StatusMessageDict, CSS_STYLESHEET
 
 
 
