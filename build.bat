@@ -17,5 +17,6 @@ pyinstaller main.pyw --onefile --clean --noconfirm ^
 --add-data "./data/check-bg-unchecked-hover.png;./data" ^
 --add-data "./data/check-bg-checked.png;./data" ^
 --add-data "./data/check-bg-checked-hover.png;./data" ^
---name "infinite-music-discs.exe" ^
+--name "infinite-music-discs" ^
+--icon "data/jukebox_256.ico" ^
 --distpath bin
