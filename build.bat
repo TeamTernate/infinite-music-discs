@@ -1,0 +1,21 @@
+pyinstaller main.pyw --onefile --clean --noconfirm ^
+--add-data "./data/minecraft-ten.ttf;./data" ^
+--add-data "./data/image-empty.png;./data" ^
+--add-data "./data/track-empty.png;./data" ^
+--add-data "./data/pack-empty.png;./data" ^
+--add-data "./data/track-mp3.png;./data" ^
+--add-data "./data/track-wav.png;./data" ^
+--add-data "./data/track-ogg.png;./data" ^
+--add-data "./data/arrow-up.png;./data" ^
+--add-data "./data/arrow-down.png;./data" ^
+--add-data "./data/arrow-up-disabled.png;./data" ^
+--add-data "./data/arrow-down-disabled.png;./data" ^
+--add-data "./data/delete-btn.png;./data" ^
+--add-data "./data/delete-btn-hover.png;./data" ^
+--add-data "./data/jukebox_256.png;./data" ^
+--add-data "./data/check-bg-unchecked.png;./data" ^
+--add-data "./data/check-bg-unchecked-hover.png;./data" ^
+--add-data "./data/check-bg-checked.png;./data" ^
+--add-data "./data/check-bg-checked-hover.png;./data" ^
+--name "infinite-music-discs.exe" ^
+--distpath bin

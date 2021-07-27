@@ -1,10 +1,10 @@
 bin/*
+build/*
 
 *.png
 *.mp3
 *.wav
 *.ogg
-*.zip
 
 !data/*.png
 !data/*.mp3
@@ -22,3 +22,5 @@ src/tmp/*
 src/imd-tmp/*
 
 *.pyc
+*.spec
+*.zip
