@@ -4,6 +4,7 @@
 #Infinite Music Discs constants definition module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+import sys
 from enum import Enum
 from src.generator import Status
 
@@ -35,20 +36,32 @@ class FileExt():
     WAV = 'wav'
     OGG = 'ogg'
 
+class Helpers():
+    def data_path():
+        #if exe, locate temp directory
+        try:
+            #PyQt uses '/' separator, regardless of operating system
+            return sys._MEIPASS.replace('\\', '/') + '/'
+
+        #if pyw, use local 'data' directory
+        except Exception:
+            return './'
+
 class Assets():
-    FONT_MC_LARGE =         'data/minecraft-ten.ttf'
-    ICON_ICON_EMPTY =       'data/image-empty.png'
-    ICON_TRACK_EMPTY =      'data/track-empty.png'
-    ICON_PACK_EMPTY =       'data/pack-empty.png'
-    ICON_NEW_DISC =         'data/new-disc.png'
-    ICON_MP3 =              'data/track-mp3.png'
-    ICON_WAV =              'data/track-wav.png'
-    ICON_OGG =              'data/track-ogg.png'
-    ICON_ARROW_UP =         'data/arrow-up.png'
-    ICON_ARROW_DOWN =       'data/arrow-down.png'
-    ICON_ARROW_UP_DIS =     'data/arrow-up-disabled.png'
-    ICON_ARROW_DOWN_DIS =   'data/arrow-down-disabled.png'
-    ICON_DELETE =           'data/delete-btn.png'
+    APP_ICON =              Helpers.data_path() + 'data/jukebox_256.png'
+    FONT_MC_LARGE =         Helpers.data_path() + 'data/minecraft-ten.ttf'
+    ICON_ICON_EMPTY =       Helpers.data_path() + 'data/image-empty.png'
+    ICON_TRACK_EMPTY =      Helpers.data_path() + 'data/track-empty.png'
+    ICON_PACK_EMPTY =       Helpers.data_path() + 'data/pack-empty.png'
+    ICON_NEW_DISC =         Helpers.data_path() + 'data/new-disc.png'
+    ICON_MP3 =              Helpers.data_path() + 'data/track-mp3.png'
+    ICON_WAV =              Helpers.data_path() + 'data/track-wav.png'
+    ICON_OGG =              Helpers.data_path() + 'data/track-ogg.png'
+    ICON_ARROW_UP =         Helpers.data_path() + 'data/arrow-up.png'
+    ICON_ARROW_DOWN =       Helpers.data_path() + 'data/arrow-down.png'
+    ICON_ARROW_UP_DIS =     Helpers.data_path() + 'data/arrow-up-disabled.png'
+    ICON_ARROW_DOWN_DIS =   Helpers.data_path() + 'data/arrow-down-disabled.png'
+    ICON_DELETE =           Helpers.data_path() + 'data/delete-btn.png'
 
 class StyleProperties():
     DRAG_HELD = 'drag_held'
@@ -291,7 +304,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-    background: url(data/arrow-down.png) no-repeat center;
+    background: url(./data/arrow-down.png) no-repeat center;
 }
 
 QCheckBox::indicator {
@@ -301,19 +314,19 @@ QCheckBox::indicator {
 }
 
 QCheckBox::indicator:unchecked {
-    background: url(data/check-bg-unchecked.png) no-repeat center;
+    background: url(./data/check-bg-unchecked.png) no-repeat center;
 }
 
 QCheckBox::indicator:unchecked:hover {
-    background: url(data/check-bg-unchecked-hover.png) no-repeat center;
+    background: url(./data/check-bg-unchecked-hover.png) no-repeat center;
 }
 
 QCheckBox::indicator:checked {
-    background: url(data/check-bg-checked.png) no-repeat center;
+    background: url(./data/check-bg-checked.png) no-repeat center;
 }
 
 QCheckBox::indicator:checked:hover {
-    background: url(data/check-bg-checked-hover.png) no-repeat center;
+    background: url(./data/check-bg-checked-hover.png) no-repeat center;
 }
 
 
@@ -444,11 +457,11 @@ QLabel#INameLabel {
 DeleteButton {
     border: 0;
     background-color: rgb(48, 48, 48);
-    background: url(data/delete-btn.png) no-repeat center;
+    background: url(./data/delete-btn.png) no-repeat center;
 }
 
 DeleteButton:hover {
-    background: url(data/delete-btn-hover.png) no-repeat center;
+    background: url(./data/delete-btn-hover.png) no-repeat center;
 }
 
 ArrowButton {
@@ -459,6 +472,6 @@ ArrowButton {
 ArrowButton:hover {
     background-color: rgb(96, 96, 96);
 }
-"""
+""".replace('./', Helpers.data_path() )
 
 

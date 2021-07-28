@@ -12,6 +12,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
+from src.definitions import Assets
 from src.components import CentralWidget
 
 class UI(QtWidgets.QMainWindow):
@@ -20,7 +21,7 @@ class UI(QtWidgets.QMainWindow):
         super().__init__()
 
         self.setWindowTitle("IMD Datapack Generator")
-        self.setWindowIcon(QtGui.QIcon('data/jukebox_256.png'))
+        self.setWindowIcon(QtGui.QIcon(Assets.APP_ICON))
 
         self._centralWidget = CentralWidget(self)
         self.setCentralWidget(self._centralWidget)
