@@ -13,6 +13,7 @@ import sys
 import enum
 import zipfile
 import pyffmpeg
+import tempfile
 
 datapack_name = 'custom_music_discs_dp'
 resourcepack_name = 'custom_music_discs_rp'
@@ -23,7 +24,7 @@ resourcepack_name_zip = resourcepack_name + '.zip'
 datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
 
-tmp_path = 'imd-tmp'    #TODO: use tempfile module
+tmp_path = None
 pack_format = 7
 
 
@@ -46,6 +47,8 @@ class Status(enum.Enum):
 
 
 def validate(texture_files, track_files, titles, internal_names, packpng=''):
+    global tmp_path
+
     #lists are all the same length
     if(not ( len(texture_files) == len(track_files) == len(titles) == len(internal_names) )):
         return Status.LIST_UNEVEN_LENGTH
@@ -106,14 +109,19 @@ def validate(texture_files, track_files, titles, internal_names, packpng=''):
 
 
 def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False):
+    global tmp_path
+
     #FFmpeg object
     ffmpeg = pyffmpeg.FFmpeg()
 
     #create temp work directory
     if create_tmp:
-        shutil.rmtree(tmp_path, ignore_errors=True)
-        os.makedirs(tmp_path)
+        if tmp_path != None:
+            shutil.rmtree(tmp_path)
 
+        tmp_path = tempfile.mkdtemp()
+
+    #grab file reference
     track = track_file[0]
 
     #skip files already in .ogg format
@@ -141,12 +149,15 @@ def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False
     #usually won't clean up temp work directory here, wait until resource pack generation
     if cleanup_tmp:
         shutil.rmtree(tmp_path, ignore_errors=True)
+        tmp_path = None
 
     return Status.SUCCESS
 
 
 
 def generate_datapack(texture_files, track_files, titles, internal_names, user_settings={}):
+    global tmp_path
+
     #build datapack directory tree
     shutil.rmtree(datapack_name, ignore_errors=True)
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
@@ -291,6 +302,8 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
 
 
 def generate_resourcepack(texture_files, track_files, titles, internal_names, user_settings={}, cleanup_tmp=True):
+    global tmp_path
+
     #build resourcepack directory tree
     shutil.rmtree(resourcepack_name, ignore_errors=True)
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
@@ -379,6 +392,7 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, us
     #cleanup temp work directory
     if cleanup_tmp:
         shutil.rmtree(tmp_path, ignore_errors=True)
+        tmp_path = None
     
     return Status.SUCCESS
 
