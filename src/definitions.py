@@ -48,7 +48,7 @@ class Helpers():
             return './'
 
 class Assets():
-    APP_ICON =              Helpers.data_path() + 'data/jukebox_256.png'
+    APP_ICON =              Helpers.data_path() + 'data/jukebox_256.ico'
     FONT_MC_LARGE =         Helpers.data_path() + 'data/minecraft-ten.ttf'
     ICON_ICON_EMPTY =       Helpers.data_path() + 'data/image-empty.png'
     ICON_TRACK_EMPTY =      Helpers.data_path() + 'data/track-empty.png'
