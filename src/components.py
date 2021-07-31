@@ -15,7 +15,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 from src import generator
 from src.generator import Status
 from src.definitions import Assets, Constants, ButtonType, SettingType, FileExt, StyleProperties
-from src.definitions import StatusMessageDict, CSS_STYLESHEET
+from src.definitions import StatusMessageDict, DigitNameDict, CSS_STYLESHEET
 
 
 
@@ -819,7 +819,8 @@ class DiscListEntry(QtWidgets.QFrame):
         self._leTitle.setText(filename)
 
     def setSubtitle(self, title):
-        internal_name = ''.join([i for i in title.lower() if i.isalpha()])
+        numname_title = ''.join([ DigitNameDict.get(i, i) for i in title.lower() ])
+        internal_name = ''.join([ i for i in numname_title if i.isalpha() ])
         self._lblIName.setText(internal_name)
 
 
