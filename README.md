@@ -1,10 +1,19 @@
 # infinite-music-discs
 A graphical app for adding lots of custom music discs to Minecraft. Built in Python with PyQt, packaged into runnable binaries with pyinstaller.
 
-## Supported Systems
+### Supported Systems
 64-bit Windows
 
-## How to Install
-Download imd-gui.zip from the latest release, under Assets. Extract the .zip to a work folder and run the executable inside. Follow the video instructions at <yt link> to generate a datapack/resourcepack pair; the datapack and resourcepack will be created in the same folder as the executable.
+### How to Install
+Download imd-gui.zip from the latest release, under Assets. Extract the .zip to a work folder and run the executable inside. Follow the video instructions at *yt link* to generate a datapack/resourcepack pair; the datapack and resourcepack will be created in the same folder as the executable.
 
 An example disc texture and a pack.png are provided alongside the executable binary, for convenience.
+
+### Building from Source
+The build environment is set up for Windows, though pyinstaller is cross-platform so you could build on macOS or Linux, if you wanted. You would not be able to use the provided build script on any OS other than Windows.
+1. Clone this repository.
+2. Install Python 3, 64 bit.
+3. Open a command prompt in the *infinite-music-discs* directory and run `pip install -r requirements.rc`.
+4. Try running `main.pyw` to verify the application works in your environment. Make sure you can generate a pack, convert files to .ogg with pyffmpeg, etc.
+5. Run `build.bat` to compile the source into a Windows executable binary.
+6. Run your executable! Note that your antivirus may flag your executable as suspicious because it's an unknown, unsigned program. You should be safe to ignore this warning, but of course, always use caution and common sense when ignoring the warnings of your antivirus.
