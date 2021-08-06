@@ -1,11 +1,13 @@
-# infinite-music-discs
-A graphical app for adding lots of custom music discs to Minecraft. Built in Python with PyQt, packaged into runnable binaries with pyinstaller.
+# Infinite Music Discs
+A graphical app for adding lots of custom music discs to Minecraft. Creates a resourcepack to add new music tracks and disc textures, and a datapack with custom logic to play the new music discs.
+
+Written in Python with a PyQt5 frontend; compiled into runnable binaries with pyinstaller.
 
 ### Supported Systems
 64-bit Windows
 
 ### How to Install
-Download imd-gui.zip from the latest release, under Assets. Extract the .zip to a work folder and run the executable inside. Follow the video instructions at *yt link* to generate a datapack/resourcepack pair; the datapack and resourcepack will be created in the same folder as the executable.
+Download `imd-gui.zip` from the latest release, under Assets. Extract the .zip to a work folder and run the executable inside. Follow the video instructions at *yt link* to generate a datapack/resourcepack pair; the datapack and resourcepack will be created in the same folder as the executable.
 
 An example disc texture and a pack.png are provided alongside the executable binary, for convenience.
 
