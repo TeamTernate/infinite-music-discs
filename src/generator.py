@@ -15,6 +15,8 @@ import zipfile
 import pyffmpeg
 import tempfile
 
+from mutagen.mp3 import MP3
+
 datapack_name = 'custom_music_discs_dp'
 resourcepack_name = 'custom_music_discs_rp'
 
@@ -43,6 +45,7 @@ class Status(enum.Enum):
     BAD_ZIP = 11
     IMAGE_FILE_NOT_GIVEN = 12
     TRACK_FILE_NOT_GIVEN = 13
+    BAD_MP3_META = 14
 
 
 
@@ -135,9 +138,22 @@ def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False
     out_name = internal_name + '.ogg'
     out_track = os.path.join(tmp_path, out_name)
 
-    #copy file to temp work directory and convert
+    #copy file to temp work directory
     shutil.copyfile(track, tmp_track)
+
+    #strip ID3 metadata from mp3
+    if '.mp3' in tmp_track:
+        meta_mp3 = MP3(tmp_track)
+        meta_mp3.delete()
+        meta_mp3.save()
+
+    #exit if metadata removal failed
+    if not os.path.isfile(tmp_track):
+        return Status.BAD_MP3_META
+
+    #convert file
     ffmpeg.convert(tmp_track, out_track)
+    #ffmpeg.options("-i %s -c:a libvorbis -o %s" % (tmp_track, out_track) )
 
     #exit if file was not converted successfully
     if not os.path.isfile(out_track):

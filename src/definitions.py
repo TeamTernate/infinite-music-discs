@@ -86,7 +86,8 @@ StatusMessageDict = {
     Status.BAD_OGG_CONVERT:         "Failed to convert some tracks to .ogg format.",
     Status.BAD_ZIP:                 "Failed to generate as '.zip'. Packs have been left as folders.",
     Status.IMAGE_FILE_NOT_GIVEN:    "Some tracks are missing an icon.",
-    Status.TRACK_FILE_NOT_GIVEN:    "Some tracks are missing a music file."
+    Status.TRACK_FILE_NOT_GIVEN:    "Some tracks are missing a music file.",
+    Status.BAD_MP3_META:            "Failed to remove mp3 metadata while converting."
 }
 
 #dictionary to associate digit : digit name
