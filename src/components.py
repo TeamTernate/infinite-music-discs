@@ -604,7 +604,7 @@ class DragDropButton(QtWidgets.QPushButton):
             imgPath = assetDict.get(f, Assets.ICON_PACK_EMPTY)
         elif(self._type == ButtonType.NEW_TRACK):
             self.setText('+')
-            #imgPath = assetDict.get(f, Assets.ICON_NEW_DISC)
+            #imgPath = Assets.ICON_NEW_DISC
         else:
             pass
 
@@ -634,7 +634,7 @@ class DragDropButton(QtWidgets.QPushButton):
         if(self._type == ButtonType.TRACK):
             return ( ext in [ FileExt.MP3, FileExt.WAV, FileExt.OGG ] )
         if(self._type == ButtonType.NEW_TRACK):
-            return ( ext in [ FileExt.MP3, FileExt.WAV, FileExt.OGG, FileExt.PNG ] )
+            return ( ext in [ FileExt.MP3, FileExt.WAV, FileExt.OGG ] )
 
 
 
@@ -771,7 +771,7 @@ class NewDiscButton(DragDropButton):
 
         self.setProperty(StyleProperties.DRAG_HELD, False)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(5, 5, 5, 5)
         layout.addStretch(1)
@@ -1122,7 +1122,8 @@ class DiscList(QtWidgets.QWidget):
     def addDiscEntries(self, fTrackList):
         for f in fTrackList:
             if '.png' in f:
-                self.addDiscEntry(f, '', "New Track")
+                pass
+                #self.addDiscEntry(f, '', "New Track")
             else:
                 self.addDiscEntry('', f, "New Track")
 
