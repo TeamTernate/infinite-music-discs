@@ -201,7 +201,7 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     setup_load.writelines(['scoreboard objectives add usedDisc minecraft.used:minecraft.music_disc_11\n',
                            'scoreboard objectives add heldDisc dummy\n',
                            '\n',
-                           'tellraw @a {"text":"Custom Music Discs v1.8 by link2_thepast","color":"yellow"}\n'])
+                           'tellraw @a {"text":"Custom Music Discs v1.9 by link2_thepast","color":"yellow"}\n'])
     setup_load.close()
     
     #write 'detect_play_tick.mcfunction'
@@ -261,6 +261,24 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
                          'execute as @s at @s run stopsound @a[distance=..64] record minecraft:music_disc.11\n',
                          'execute as @s at @s run playsound minecraft:music_disc.%s record @a[distance=..64] ~ ~ ~ 4 1\n' % name])
         play.close()
+
+    #write 'give_*_disc.mcfunction' files
+    for i, track in enumerate(titles):
+        i+=1
+        
+        give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % internal_names[i-1]), 'w')
+        give.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (i, track))
+        give.close()
+    
+    #write 'give_all_discs.mcfunction'
+    give_all = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_all_discs.mcfunction'), 'w')
+    
+    for i, track in enumerate(titles):
+        i+=1
+        
+        give_all.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (i, track))
+    
+    give_all.close()
     
     #write 'creeper.json'
     creeper = open(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'), 'w')
