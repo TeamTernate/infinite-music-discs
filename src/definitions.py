@@ -4,6 +4,7 @@
 #Infinite Music Discs constants definition module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+import re
 import sys
 from enum import Enum
 from src.generator import Status
@@ -47,6 +48,12 @@ class Helpers():
         #if pyw, use local 'data' directory
         except Exception:
             return './'
+
+    def natural_keys(text):
+        return [ Helpers.atoi(c) for c in re.split(r'(\d+)', text) ]
+
+    def atoi(text):
+        return int(text) if text.isdigit() else text
 
 class Assets():
     APP_ICON =              Helpers.data_path() + 'data/jukebox_256.ico'

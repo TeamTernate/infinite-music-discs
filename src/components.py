@@ -14,7 +14,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 
 from src import generator
 from src.generator import Status
-from src.definitions import Assets, Constants, ButtonType, SettingType, FileExt, StyleProperties
+from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties
 from src.definitions import StatusMessageDict, DigitNameDict, CSS_STYLESHEET
 
 
@@ -624,7 +624,7 @@ class DragDropButton(QtWidgets.QPushButton):
             if self.supportsFileType(uext):
                 f.append(uf)
 
-        return f
+        return sorted(f, key=Helpers.natural_keys)
 
     def supportsFileType(self, ext):
         if(self._type == ButtonType.IMAGE):
@@ -815,10 +815,7 @@ class NewDiscButton(DragDropButton):
         if not event.isAccepted():
             return
         
-        f = event.mimeData().urls()
-        for i, u in enumerate(f):
-            f[i] = u.toLocalFile()
-
+        f = self.getFilesFromEvent(event)
         self.fileChanged.emit(f)
 
         self.setProperty(StyleProperties.DRAG_HELD, False)
