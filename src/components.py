@@ -19,8 +19,143 @@ from src.definitions import StatusMessageDict, DigitNameDict, CSS_STYLESHEET
 
 
 
-#Child of QLineEdit with text autoselect on click
-class QFocusLineEdit(QtWidgets.QLineEdit):
+#child of QLineEdit with drag-drop text
+class QDragDropLineEdit(QtWidgets.QLineEdit):
+    def __init__(self, text, parent = None):
+        super(QDragDropLineEdit, self).__init__(text, parent)
+        self._parent = parent
+
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.setProperty(StyleProperties.ALPHA, 10)
+
+    def dragEnterEvent(self, event):
+        if not event.mimeData().hasUrls():
+            event.ignore()
+            return
+
+        for u in event.mimeData().urls():
+            u = u.toLocalFile()
+            u = QtCore.QFileInfo(u).completeSuffix()
+
+            if(self.supportsFileType(u)):
+                event.accept()
+                return
+
+        event.ignore()
+
+    def dragLeaveEvent(self, event):
+        event.accept()
+
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+        #line edit may have moved away from mouse, force clear hover state
+        self.setAttribute(Qt.WA_UnderMouse, False)
+
+    def getFilesFromEvent(self, event):
+        urls = event.mimeData().urls()
+
+        for u in urls:
+            uf = u.toLocalFile()
+            uext = QtCore.QFileInfo(uf).completeSuffix()
+
+            if self.supportsFileType(uext):
+                #parse lines from first available text file as titles
+                return self.getLinesFromFile(uf)
+
+        return []
+
+    def getLinesFromFile(self, file):
+        with open(file, 'r') as uf:
+            return list(line.replace('\n', '') for line in uf)
+
+    def supportsFileType(self, ext):
+        return ( ext in [ FileExt.TXT ] )
+
+    def repolish(self, obj):
+        obj.style().unpolish(obj)
+        obj.style().polish(obj)
+
+
+#child of QDragDropLineEdit with multi-drag-drop support
+class QMultiDragDropLineEdit(QDragDropLineEdit):
+    multiDragEnter = pyqtSignal(int, int)
+    multiDragLeave = pyqtSignal(int, int)
+    multiDrop = pyqtSignal(int, list)
+
+    def dragEnterEvent(self, event):
+        super(QMultiDragDropLineEdit, self).dragEnterEvent(event)
+        if not event.isAccepted():
+            return
+
+        f = self.getFilesFromEvent(event)
+        self.multiDragEnter.emit(self._parent.getIndex(), len(f))
+
+    def dragLeaveEvent(self, event):
+        super(QMultiDragDropLineEdit, self).dragLeaveEvent(event)
+
+        self.multiDragLeave.emit(self._parent.getIndex(), Constants.MAX_DRAW_MULTI_DRAGDROP)
+
+    def dropEvent(self, event):
+        super(QMultiDragDropLineEdit, self).dropEvent(event)
+        if not event.isAccepted():
+            return
+
+        f = self.getFilesFromEvent(event)
+        self.multiDrop.emit(self._parent.getIndex(), f)
+
+    def multiDragEnterEvent(self, initIndex, count):
+        #check if this element should be highlighted
+        selfIndex = self._parent.getIndex()
+        if(selfIndex < initIndex):
+            return
+        if(selfIndex >= initIndex + min(Constants.MAX_DRAW_MULTI_DRAGDROP, count)):
+            return
+
+        #update styling
+        self.setProperty(StyleProperties.DRAG_HELD, True)
+        self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - (selfIndex - initIndex))
+        self.repolish(self)
+
+    def multiDragLeaveEvent(self, initIndex, count):
+        #check if this element should be highlighted
+        selfIndex = self._parent.getIndex()
+        if(selfIndex < initIndex):
+            return
+        if(selfIndex >= initIndex + min(Constants.MAX_DRAW_MULTI_DRAGDROP, count)):
+            return
+
+        #reset styling
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.setProperty(StyleProperties.ALPHA, 10)
+        self.repolish(self)
+
+    def multiDropEvent(self, initIndex, files):
+        #check if this element should be highlighted
+        #   allow all text lines to drop, instead of restricting like outline render
+        selfIndex = self._parent.getIndex()
+        if(selfIndex < initIndex):
+            return
+        if(selfIndex >= initIndex + len(files)):
+            return
+
+        #save text line
+        deltaIndex = selfIndex - initIndex
+
+        self.setText(files[deltaIndex])
+
+        #reset styling
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.setProperty(StyleProperties.ALPHA, 10)
+        self.repolish(self)
+
+
+
+#child of QMultiDragDropLineEdit with text autoselect on click
+class QFocusLineEdit(QMultiDragDropLineEdit):
     def focusInEvent(self, event):
         self._wasFocused = False
 
@@ -33,7 +168,6 @@ class QFocusLineEdit(QtWidgets.QLineEdit):
         self._wasFocused = True
 
 
-#TODO: make an abstract button with all helper functions so all buttons can inherit
 
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
@@ -769,6 +903,13 @@ class DiscListEntry(QtWidgets.QFrame):
         self._parent.track_multiDragLeave.connect(self._btnTrack.multiDragLeaveEvent)
         self._parent.track_multiDrop.connect(self._btnTrack.multiDropEvent)
 
+        self._leTitle.multiDragEnter.connect(self._parent.title_multiDragEnter)
+        self._leTitle.multiDragLeave.connect(self._parent.title_multiDragLeave)
+        self._leTitle.multiDrop.connect(self._parent.title_multiDrop)
+        self._parent.title_multiDragEnter.connect(self._leTitle.multiDragEnterEvent)
+        self._parent.title_multiDragLeave.connect(self._leTitle.multiDragLeaveEvent)
+        self._parent.title_multiDrop.connect(self._leTitle.multiDropEvent)
+
         #bind other signals
         self._btnDelete.clicked.connect(self.deleteSelf)
         self._btnTrack.fileChanged.connect(self.setTitle)
@@ -874,6 +1015,10 @@ class DiscList(QtWidgets.QWidget):
     track_multiDragLeave = pyqtSignal(int, int)
     track_multiDrop = pyqtSignal(int, list)
 
+    title_multiDragEnter = pyqtSignal(int, int)
+    title_multiDragLeave = pyqtSignal(int, int)
+    title_multiDrop = pyqtSignal(int, list)
+
     def __init__(self, parent = None):
         super(DiscList, self).__init__()
 
@@ -911,6 +1056,7 @@ class DiscList(QtWidgets.QWidget):
 
         self.icon_multiDrop.connect(self.addExcessEntries)
         self.track_multiDrop.connect(self.addExcessEntries)
+        self.title_multiDrop.connect(self.addExcessEntries)
 
         self.setObjectName('DiscList')
         widget.setObjectName('DiscListChildWidget')

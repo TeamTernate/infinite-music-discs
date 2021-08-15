@@ -35,6 +35,7 @@ class FileExt():
     MP3 = 'mp3'
     WAV = 'wav'
     OGG = 'ogg'
+    TXT = 'txt'
 
 class Helpers():
     def data_path():
@@ -459,7 +460,47 @@ QLineEdit#TitleLineEdit {
     background-color: rgb(32, 32, 32);
 }
 
-QLineEdit#TitleLineEdit:focus {
+QMultiDragDropLineEdit[drag_held="true"] {
+    border: 1px solid rgb(51, 178, 45);
+}
+
+QMultiDragDropLineEdit[alpha="9"] {
+    border: 1px solid rgba(51, 178, 45, 0.9);
+}
+
+QMultiDragDropLineEdit[alpha="8"] {
+    border: 1px solid rgba(51, 178, 45, 0.8);
+}
+
+QMultiDragDropLineEdit[alpha="7"] {
+    border: 1px solid rgba(51, 178, 45, 0.7);
+}
+
+QMultiDragDropLineEdit[alpha="6"] {
+    border: 1px solid rgba(51, 178, 45, 0.6);
+}
+
+QMultiDragDropLineEdit[alpha="5"] {
+    border: 1px solid rgba(51, 178, 45, 0.5);
+}
+
+QMultiDragDropLineEdit[alpha="4"] {
+    border: 1px solid rgba(51, 178, 45, 0.4);
+}
+
+QMultiDragDropLineEdit[alpha="3"] {
+    border: 1px solid rgba(51, 178, 45, 0.3);
+}
+
+QMultiDragDropLineEdit[alpha="2"] {
+    border: 1px solid rgba(51, 178, 45, 0.2);
+}
+
+QMultiDragDropLineEdit[alpha="1"] {
+    border: 1px solid rgba(51, 178, 45, 0.1);
+}
+
+QFocusLineEdit:focus {
     color: white;
     border: 1px solid lightgray;
 }
