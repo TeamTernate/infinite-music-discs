@@ -1119,8 +1119,7 @@ class DiscList(QtWidgets.QWidget):
     def addDiscEntries(self, fTrackList):
         for f in fTrackList:
             if '.png' in f:
-                pass
-                #self.addDiscEntry(f, '', "New Track")
+                self.addDiscEntry(f, '', "New Track")
             else:
                 self.addDiscEntry('', f, "New Track")
 
