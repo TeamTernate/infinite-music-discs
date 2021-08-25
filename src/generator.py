@@ -4,7 +4,7 @@
 #Infinite Music Discs datapack + resourcepack generator module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 #
-#Generates datapack v1.8
+#Generates datapack v1.9
 
 import os
 import json
