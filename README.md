@@ -15,7 +15,8 @@ An example disc texture and a pack.png are provided alongside the executable bin
 The build environment is set up for Windows, though pyinstaller is cross-platform so you could build on macOS or Linux, if you wanted. You would not be able to use the provided build script on any OS other than Windows.
 1. Clone this repository.
 2. Install Python 3, 64 bit.
-3. Open a command prompt in the *infinite-music-discs* directory and run `pip install -r requirements.rc`.
-4. Try running `main.pyw` to verify the application works in your environment. Make sure you can generate a pack, convert files to .ogg with pyffmpeg, etc.
-5. Run `build.bat` to compile the source into a Windows executable binary.
-6. Run your executable! Note that your antivirus may flag your executable as suspicious because it's an unknown, unsigned program. You should be safe to ignore this warning, but of course, always use caution and common sense when ignoring the warnings of your antivirus.
+3. Add Python to your PATH environment variable.
+4. Open a command prompt in the *infinite-music-discs* directory and run `pip install -r requirements.rc`.
+5. Try running `main.pyw` to verify the application works in your environment. Make sure you can generate a pack, convert files to .ogg with pyffmpeg, etc.
+6. Run `build.bat` to compile the source into a Windows executable binary.
+7. Run your executable! Note that your antivirus may flag your executable as suspicious because it's an unknown, unsigned program. You should be safe to ignore this warning, but of course, always use caution and common sense when ignoring the warnings of your antivirus.
