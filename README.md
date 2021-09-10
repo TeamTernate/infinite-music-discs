@@ -1,3 +1,5 @@
+![GitHub release (latest by date)](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/latest/total?label=downloads%20%28latest%29) ![GitHub all releases](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/total?label=total%20downloads)
+
 # Infinite Music Discs
 A graphical app for adding lots of custom music discs to Minecraft. Creates a resourcepack to add new music tracks and disc textures, and a datapack with custom logic to play the new music discs.
 
