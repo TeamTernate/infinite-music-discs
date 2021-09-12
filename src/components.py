@@ -1319,7 +1319,7 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.addWidget(SettingsListEntry('pack', "Pack icon (optional)", SettingType.PACKPNG))
         #self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, ['1.17', '1.16']))
         self._childLayout.addWidget(SettingsListEntry('zip', "Generate pack as .zip", SettingType.CHECK))
-        #self._childLayout.addWidget(SettingsListEntry('mix_mono', "Mix stereo tracks to mono", SettingType.CHECK))
+        self._childLayout.addWidget(SettingsListEntry('mix_mono', "Mix stereo tracks to mono", SettingType.CHECK))
         #self._childLayout.addWidget(SettingsListEntry('keep_tmp', "Keep intermediate converted files", SettingType.CHECK))
         self._childLayout.addStretch()
 
@@ -1610,6 +1610,7 @@ class GeneratePackWorker(QtCore.QObject):
             wrapper = [ self._track_files[i] ]
             status = generator.convert_to_ogg(wrapper,
                                               self._internal_names[i],
+                                              self._settings['mix_mono'],
                                               (i == 0))
             if not status == Status.SUCCESS:
                 self.status.emit(status)

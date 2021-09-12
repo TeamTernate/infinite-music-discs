@@ -111,9 +111,8 @@ def validate(texture_files, track_files, titles, internal_names, packpng=''):
 
 
 
-def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False):
+def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup_tmp=False):
     global tmp_path
-
     #FFmpeg object
     ffmpeg = pyffmpeg.FFmpeg()
 
@@ -151,9 +150,13 @@ def convert_to_ogg(track_file, internal_name, create_tmp=True, cleanup_tmp=False
     if not os.path.isfile(tmp_track):
         return Status.BAD_MP3_META
 
-    #convert file
-    ffmpeg.convert(tmp_track, out_track)
-    #ffmpeg.options("-i %s -c:a libvorbis -o %s" % (tmp_track, out_track) )
+    if mix_mono:
+        #convert file in Mono
+        ffmpeg.convert(tmp_track +" -ac 1", out_track)
+    else:    
+        #convert file
+        ffmpeg.convert(tmp_track, out_track)
+
 
     #exit if file was not converted successfully
     if not os.path.isfile(out_track):
