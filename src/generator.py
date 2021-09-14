@@ -152,10 +152,10 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
 
     if mix_mono:
         #convert file in Mono
-        ffmpeg.options("-i "+tmp_track+" -ac 1 "+ out_track)
+        ffmpeg.options("-nostdin -i "+tmp_track+" -ac 1 "+ out_track)
     else:    
         #convert file
-        ffmpeg.options("-i "+tmp_track+" "+ out_track)
+        ffmpeg.options("-nostdin -i "+tmp_track+" "+ out_track)
 
 
     #exit if file was not converted successfully
