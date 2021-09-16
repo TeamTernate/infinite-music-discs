@@ -126,13 +126,19 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
     #grab file reference
     track = track_file[0]
 
-    #skip files already in .ogg format
-    if '.ogg' in track:
+    #build FFmpeg settings
+    args = ''
+
+    if mix_mono:
+        args += ' -ac 1'
+
+    #skip files that don't need to be processed
+    if args == '' and '.ogg' in track:
         return Status.SUCCESS
 
     #rename file so FFmpeg can process it
     track_ext = track.split('/')[-1].split('.')[-1]
-    tmp_track = os.path.join(tmp_path, internal_name + '.' + track_ext)
+    tmp_track = os.path.join(tmp_path, internal_name + '.tmp.' + track_ext)
 
     out_name = internal_name + '.ogg'
     out_track = os.path.join(tmp_path, out_name)
@@ -150,16 +156,14 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
     if not os.path.isfile(tmp_track):
         return Status.BAD_MP3_META
 
-    if mix_mono:
-        #convert file in Mono
-        ffmpeg.options("-nostdin -i "+tmp_track+" -ac 1 "+ out_track)
-    else:    
-        #convert file
-        ffmpeg.options("-nostdin -i "+tmp_track+" "+ out_track)
-
+    #convert file
+    ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
 
     #exit if file was not converted successfully
     if not os.path.isfile(out_track):
+        return Status.BAD_OGG_CONVERT
+
+    if os.path.getsize(out_track) == 0:
         return Status.BAD_OGG_CONVERT
 
     #change file reference to new converted file
