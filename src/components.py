@@ -1253,6 +1253,7 @@ class SettingsSelector(QtWidgets.QWidget):
         elif(self._type == SettingType.DROPDOWN):
             self._parent.setObjectName("DROPDOWN")
             self._widget = QtWidgets.QComboBox(self)
+            self._widget.view().setMinimumSize(len(max(params, key=len) * 8), self._widget.height())
 
             if not params == None:
                 self._widget.addItems(params)
