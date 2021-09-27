@@ -2,16 +2,25 @@ import json
 import os
 from typing import List
 
-data= [
-  {
-    "pack_format": 7,
-    "game_versions": "1.17"
-  },
-  {
-    "pack_format": 8,
-    "game_versions": "1.18+"
-  }
+data = [
+    {
+        "pack_format": 5,
+        "game_versions": "1.15-1.16.1"
+    },
+    {
+        "pack_format": 6,
+        "game_versions": "1.16.2-1.16.5"
+    },
+    {
+        "pack_format": 7,
+        "game_versions": "1.17"
+    },
+    {
+        "pack_format": 8,
+        "game_versions": "1.18+"
+    }
 ]
+
 
 class PackFormat:
     def __init__(self, pack_format: int, game_versions: str):
