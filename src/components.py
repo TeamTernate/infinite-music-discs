@@ -16,6 +16,7 @@ from src import generator
 from src.generator import Status
 from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties
 from src.definitions import StatusMessageDict, DigitNameDict, CSS_STYLESHEET
+from src.packformats import get_game_versions
 
 
 
@@ -1253,6 +1254,7 @@ class SettingsSelector(QtWidgets.QWidget):
         elif(self._type == SettingType.DROPDOWN):
             self._parent.setObjectName("DROPDOWN")
             self._widget = QtWidgets.QComboBox(self)
+            self._widget.view().setMinimumSize(len(max(params, key=len) * 8), self._widget.height())
 
             if not params == None:
                 self._widget.addItems(params)
@@ -1317,7 +1319,7 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
         self._childLayout.addWidget(SettingsListEntry('pack', "Pack icon (optional)", SettingType.PACKPNG))
-        #self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, ['1.17', '1.16']))
+        self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, get_game_versions()))
         self._childLayout.addWidget(SettingsListEntry('zip', "Generate pack as .zip", SettingType.CHECK))
         self._childLayout.addWidget(SettingsListEntry('mix_mono', "Mix stereo tracks to mono", SettingType.CHECK))
         #self._childLayout.addWidget(SettingsListEntry('keep_tmp', "Keep intermediate converted files", SettingType.CHECK))
