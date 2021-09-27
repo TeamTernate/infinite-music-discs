@@ -14,9 +14,9 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 
 from src import generator
 from src.generator import Status
-from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties, \
-    get_game_versions
+from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties
 from src.definitions import StatusMessageDict, DigitNameDict, CSS_STYLESHEET
+from src.packformats import get_game_versions
 
 
 

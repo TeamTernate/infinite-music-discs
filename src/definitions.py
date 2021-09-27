@@ -3,11 +3,9 @@
 #
 #Infinite Music Discs constants definition module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
-import json
 import re
 import sys
 from enum import Enum
-from typing import List
 
 from src.generator import Status
 
@@ -39,32 +37,6 @@ class FileExt():
     WAV = 'wav'
     OGG = 'ogg'
     TXT = 'txt'
-
-
-class PackFormat:
-    def __init__(self, pack_format: int, game_versions: str):
-        self.pack_format = pack_format,
-        self.game_versions = game_versions
-
-
-def get_pack_formats() -> List[PackFormat]:
-    file = open("data/pack_formats.json")
-    data = json.load(file)
-    pack_formats = []
-    for elm in data:
-        pack_format = elm['pack_format']
-        game_versions = elm['game_versions']
-        pack_formats.append(PackFormat(pack_format, game_versions))
-
-    return pack_formats
-
-
-def get_game_versions():
-    pack_formats = get_pack_formats()
-    versions = []
-    for pformat in pack_formats:
-        versions.append(pformat.game_versions)
-    return versions
 
 
 class Helpers():

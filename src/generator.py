@@ -17,6 +17,8 @@ import tempfile
 
 from mutagen.mp3 import MP3
 
+from src.packformats import get_pack_format_by_version
+
 datapack_name = 'custom_music_discs_dp'
 resourcepack_name = 'custom_music_discs_rp'
 
@@ -27,8 +29,6 @@ datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
 
 tmp_path = None
-pack_format = 7
-
 
 class Status(enum.Enum):
     SUCCESS = 0
@@ -186,6 +186,9 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
     os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
+
+    game_version = user_settings['version']
+    pack_format = get_pack_format_by_version(game_version)
     
     #write 'pack.mcmeta'
     pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w')
