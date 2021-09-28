@@ -3,10 +3,10 @@
 #
 #Infinite Music Discs constants definition module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
+
 import re
 import sys
 from enum import Enum
-
 from src.generator import Status
 
 #constants
@@ -37,7 +37,6 @@ class FileExt():
     WAV = 'wav'
     OGG = 'ogg'
     TXT = 'txt'
-
 
 class Helpers():
     def data_path():
