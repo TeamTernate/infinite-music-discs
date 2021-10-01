@@ -16,9 +16,7 @@ import pyffmpeg
 import tempfile
 
 from mutagen.mp3 import MP3
-
 from src.commands import ReplaceItemCommand, ItemSlot
-from src.packformats import get_pack_format_by_version
 
 datapack_name = 'custom_music_discs_dp'
 resourcepack_name = 'custom_music_discs_rp'
@@ -188,8 +186,7 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
     os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
 
-    game_version = user_settings['version']
-    pack_format = get_pack_format_by_version(game_version)
+    pack_format = user_settings['version']
 
     #write 'pack.mcmeta'
     pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w')
@@ -263,7 +260,7 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
 
         # Create command, and add command as string to the rest of the command.
         item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
-        cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_game_version(user_settings['version']) + '\n'
+        cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_pack_format(pack_format) + '\n'
 
         set_disc_track.write(cmd_str % (i, i, track.replace('"', '')))
 
@@ -359,8 +356,7 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, us
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
 
-    game_version = user_settings['version']
-    pack_format = get_pack_format_by_version(game_version)
+    pack_format = user_settings['version']
 
     #write 'pack.mcmeta'
     pack = open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w')

@@ -112,6 +112,15 @@ DigitNameDict = {
     '0':    'zero'
 }
 
+#dictionary to associate game version : pack format version
+PackFormatsDict = {
+    '1.18':             8,
+    '1.17':             7,
+    '1.16.2 - 1.16.5':  6,
+    '1.16 - 1.16.1':    5,
+    '1.15':             5
+}
+
 
 
 #CSS sheets

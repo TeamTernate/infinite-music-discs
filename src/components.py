@@ -15,8 +15,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 from src import generator
 from src.generator import Status
 from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties
-from src.definitions import StatusMessageDict, DigitNameDict, CSS_STYLESHEET
-from src.packformats import get_game_versions
+from src.definitions import StatusMessageDict, DigitNameDict, PackFormatsDict, CSS_STYLESHEET
 
 
 
@@ -1257,7 +1256,7 @@ class SettingsSelector(QtWidgets.QWidget):
             self._widget.view().setMinimumSize(len(max(params, key=len) * 8), self._widget.height())
 
             if not params == None:
-                self._widget.addItems(params)
+                self._widget.addItems(params.keys())
 
     def getWidget(self):
         return self._widget
@@ -1270,7 +1269,7 @@ class SettingsSelector(QtWidgets.QWidget):
         elif(self._type == SettingType.RADIO):
             return self._widget.isChecked()
         elif(self._type == SettingType.DROPDOWN):
-            return self._widget.currentText()
+            return PackFormatsDict[ self._widget.currentText() ]
 
 
 
@@ -1319,7 +1318,7 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
         self._childLayout.addWidget(SettingsListEntry('pack', "Pack icon (optional)", SettingType.PACKPNG))
-        self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, get_game_versions()))
+        self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, PackFormatsDict))
         self._childLayout.addWidget(SettingsListEntry('zip', "Generate pack as .zip", SettingType.CHECK))
         self._childLayout.addWidget(SettingsListEntry('mix_mono', "Mix stereo tracks to mono", SettingType.CHECK))
         #self._childLayout.addWidget(SettingsListEntry('keep_tmp', "Keep intermediate converted files", SettingType.CHECK))
