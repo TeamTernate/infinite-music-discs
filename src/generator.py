@@ -17,6 +17,9 @@ import tempfile
 
 from mutagen.mp3 import MP3
 
+from src.commands import ReplaceItemCommand, ItemSlot
+from src.packformats import get_pack_format_by_version
+
 datapack_name = 'custom_music_discs_dp'
 resourcepack_name = 'custom_music_discs_rp'
 
@@ -27,8 +30,6 @@ datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
 
 tmp_path = None
-pack_format = 7
-
 
 class Status(enum.Enum):
     SUCCESS = 0
@@ -186,23 +187,26 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
     os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
-    
+
+    game_version = user_settings['version']
+    pack_format = get_pack_format_by_version(game_version)
+
     #write 'pack.mcmeta'
     pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w')
     pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(datapack_desc % len(internal_names))}}, indent=4))
     pack.close()
-    
+
     #write 'load.json'
     load = open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'load.json'), 'w')
     load.write(json.dumps({'values':['{}:setup_load'.format(datapack_name)]}, indent=4))
     load.close()
-    
+
     #write 'tick.json'
     tick = open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'tick.json'), 'w')
     tick.write(json.dumps({'values':['{}:detect_play_tick'.format(datapack_name), '{}:detect_stop_tick'.format(datapack_name)]}, indent=4))
     tick.close()
-    
-    
+
+
     #write 'setup_load.mcfunction'
     setup_load = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w')
     setup_load.writelines(['scoreboard objectives add usedDisc minecraft.used:minecraft.music_disc_11\n',
@@ -210,7 +214,7 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
                            '\n',
                            'tellraw @a {"text":"Custom Music Discs v1.9 by link2_thepast","color":"yellow"}\n'])
     setup_load.close()
-    
+
     #write 'detect_play_tick.mcfunction'
     detect_play_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'detect_play_tick.mcfunction'), 'w')
     detect_play_tick.writelines(['execute as @a[scores={usedDisc=0}] run scoreboard players set @s heldDisc -1\n',
@@ -222,45 +226,49 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
                                  'execute as @a[scores={usedDisc=2..}] run scoreboard players set @s usedDisc 0\n',
                                  'scoreboard players add @a[scores={usedDisc=1}] usedDisc 1\n'])
     detect_play_tick.close()
-    
+
     #write 'disc_play.mcfunction'
     disc_play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'disc_play.mcfunction'), 'w')
-    
+
     for i, name in enumerate(internal_names):
         i+=1
-        
+
         disc_play.write('execute as @s[scores={heldDisc=%d}] run function %s:play_%s\n' % (i, datapack_name, name))
-        
+
     disc_play.close()
-    
+
     #write 'detect_stop_tick.mcfunction'
     detect_stop_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'detect_stop_tick.mcfunction'), 'w')
-    
+
     detect_stop_tick.writelines(['execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] if block ~ ~-1 ~ minecraft:jukebox run function custom_music_discs_dp:disc_stop\n',
                                  'execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] if block ~ ~ ~ minecraft:jukebox run function custom_music_discs_dp:disc_stop\n',
                                  'execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] run tag @s add old\n'])
     detect_stop_tick.close()
-    
+
     #write 'disc_stop.mcfunction'
     disc_stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'disc_stop.mcfunction'), 'w')
-    
+
     for i, name in enumerate(internal_names):
         i+=1
-        
+
         disc_stop.write('execute as @s[nbt={Item:{tag:{CustomModelData:%d}}}] at @s run stopsound @a[distance=..64] record minecraft:music_disc.%s\n' % (i, name))
-    
+
     disc_stop.close()
-    
+
     #write 'set_disc_track.mcfunction'
     set_disc_track = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'set_disc_track.mcfunction'), 'w')
-    
+
     for i, track in enumerate(titles):
         i+=1
-        
-        set_disc_track.write('execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run item replace entity @s weapon.mainhand with minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}\n' % (i, i, track.replace('"', '')))
-    
+
+        # Create command, and add command as string to the rest of the command.
+        item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
+        cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_game_version(user_settings['version']) + '\n'
+
+        set_disc_track.write(cmd_str % (i, i, track.replace('"', '')))
+
     set_disc_track.close()
-    
+
     #write 'play_*.mcfunction' files
     for i, name in enumerate(internal_names):
         play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_%s.mcfunction' % name), 'w')
@@ -272,31 +280,31 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     #write 'give_*_disc.mcfunction' files
     for i, track in enumerate(titles):
         i+=1
-        
+
         give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % internal_names[i-1]), 'w')
         give.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (i, track))
         give.close()
-    
+
     #write 'give_all_discs.mcfunction'
     give_all = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_all_discs.mcfunction'), 'w')
-    
+
     for i, track in enumerate(titles):
         i+=1
-        
+
         give_all.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (i, track))
-    
+
     give_all.close()
-    
+
     #write 'creeper.json'
     creeper = open(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'), 'w')
-    
+
     creeper_mdentries = []
     creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':'minecraft:creeper_drop_music_discs', 'expand':True})
     for i, track in enumerate(titles):
         i+=1
-        
+
         creeper_mdentries.append({'type':'minecraft:item', 'weight':1, 'name':'minecraft:music_disc_11', 'functions':[{'function':'minecraft:set_nbt', 'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (i, track.replace('"', ''))}]})
-    
+
     creeper_normentries = [{'type':'minecraft:item','functions':[{'function':'minecraft:set_count', 'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}}, {'function':'minecraft:looting_enchant', 'count':{'min':0.0, 'max':1.0}}], 'name':'minecraft:gunpowder'}]
     creeper.write(json.dumps({'type':'minecraft:entity', 'pools':[{'rolls':1, 'entries':creeper_normentries}, {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{'condition':'minecraft:entity_properties', 'predicate':{'type':'#minecraft:skeletons'}, 'entity':'killer'}]}]}, indent=4))
     creeper.close()
@@ -350,49 +358,52 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, us
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
-    
+
+    game_version = user_settings['version']
+    pack_format = get_pack_format_by_version(game_version)
+
     #write 'pack.mcmeta'
     pack = open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w')
     pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(resourcepack_desc % len(internal_names))}}, indent=4))
     pack.close()
-    
+
     #write 'sounds.json'
     pack = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w')
     pack.write('{')
-    
+
     for i, name in enumerate(internal_names):
         pack.write('\n"music_disc.{}": '.format(name))
         pack.write(json.dumps({'sounds': [{'name': 'records/{}'.format(name), 'stream':True}]}, indent=4))
-        
+
         if i < len(internal_names)-1:
             pack.write(',\n')
-    
+
     pack.write('\n}')
     pack.close()
-    
+
     #write 'music_disc_11.json'
     music_disc_11 = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'), 'w')
-    
+
     json_list = []
     for i, name in enumerate(internal_names):
         i+=1
-        
+
         json_list.append({'predicate': {'custom_model_data':i}, 'model': 'item/music_disc_{}'.format(name)})
-    
+
     music_disc_11.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_11'}, 'overrides': json_list}, indent=4))
     music_disc_11.close()
-    
+
     #write 'music_disc_*.json' files
     for name in internal_names:
         music_disc = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_%s.json' % name), 'w')
         music_disc.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_{}'.format(name)}}, indent=4))
         music_disc.close()
-    
+
     #copy sound and texture files
     for i, name in enumerate(internal_names):
         shutil.copyfile(track_files[i], os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records', '%s.ogg' % name))
         shutil.copyfile(texture_files[i], os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item', 'music_disc_%s.png' % name))
-    
+
     #copy pack.png
     try:
         if 'pack' in user_settings:
@@ -434,7 +445,7 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, us
     if cleanup_tmp:
         shutil.rmtree(tmp_path, ignore_errors=True)
         tmp_path = None
-    
+
     return Status.SUCCESS
 
 
