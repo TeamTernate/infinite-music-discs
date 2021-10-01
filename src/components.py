@@ -858,14 +858,24 @@ class DiscListEntry(QtWidgets.QFrame):
         trackLayout.setContentsMargins(5, 5, 0, 5)
         layout.addLayout(trackLayout)
 
-        #container layouts for track title and internal name labels
+        #scroll area to prevent internal name label from resizing DiscListEntry
+        iNameScrollArea = QtWidgets.QScrollArea(self)
+        iNameScrollArea.setWidget(self._lblIName)
+        iNameScrollArea.setWidgetResizable(True)
+        iNameScrollArea.setMinimumHeight(self._lblIName.height())
+        iNameScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        iNameScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        iNameScrollArea.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Maximum))
+
+        #container layouts for track title, internal name label, and track delete button
         self._leTitle.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
 
         ulLayout = QtWidgets.QHBoxLayout()
-        ulLayout.addWidget(self._lblIName, 1)
+        ulLayout.addWidget(iNameScrollArea, 1)
         ulLayout.addWidget(self._btnDelete, 0, Qt.AlignRight)
-        ulLayout.setSpacing(0)
+        ulLayout.setSpacing(10)
         ulLayout.setContentsMargins(0, 10, 0, 0)
+
         txtLayout = QtWidgets.QVBoxLayout()
         txtLayout.addWidget(self._leTitle, 1)
         txtLayout.addLayout(ulLayout)

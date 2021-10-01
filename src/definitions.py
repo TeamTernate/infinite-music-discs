@@ -525,6 +525,7 @@ QFocusLineEdit:focus {
 QLabel#INameLabel {
     color: gray;
     font-style: italic;
+    background-color: rgb(48, 48, 48);
 }
 
 DeleteButton {
