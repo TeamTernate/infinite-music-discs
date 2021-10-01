@@ -517,6 +517,10 @@ QMultiDragDropLineEdit[alpha="1"] {
     border: 1px solid rgba(51, 178, 45, 0.1);
 }
 
+QFocusLineEdit {
+    border: 1px solid rgb(48, 48, 48);
+}
+
 QFocusLineEdit:focus {
     color: white;
     border: 1px solid lightgray;
