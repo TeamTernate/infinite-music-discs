@@ -25,17 +25,11 @@ class ItemSlot(Enum):
     HORSE_CHEST = "horse.chest"
     HORSE_ARMOR = "horse.armor"
 
-    change_version = 7
-
-    # Returns item_slot.slotNo if version is 1.17+ else slot.item_slot.slotNo
     def get_value_by_pack_format(self, pack_format, slot_id: int = None):
-        if pack_format >= self.change_version.value:
-            if slot_id is None:
-                return self.value
-            else:
-                return self.value + '.' + str(slot_id)
+        if slot_id is None:
+            return self.value
         else:
-            return "slot." + self.value + (" " + str(slot_id) if slot_id is not None else " 0")
+            return self.value + '.' + str(slot_id)
 
 
 

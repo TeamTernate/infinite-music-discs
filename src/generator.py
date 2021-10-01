@@ -295,8 +295,12 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     #write 'creeper.json'
     creeper = open(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'), 'w')
 
+    discs_tag = 'minecraft:creeper_drop_music_discs'
+    if pack_format < 6:
+        discs_tag = 'minecraft:music_discs'
+
     creeper_mdentries = []
-    creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':'minecraft:creeper_drop_music_discs', 'expand':True})
+    creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':discs_tag, 'expand':True})
     for i, track in enumerate(titles):
         i+=1
 
