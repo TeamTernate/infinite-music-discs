@@ -79,6 +79,20 @@ class StyleProperties():
     HOVER =     'hover'
     ERROR =     'error'
 
+#class to contain most of the UI-displayed strings
+class DisplayStrings():
+    STR_PACKPNG_TITLE =     "Pack icon (optional)"
+    STR_VERSION_TITLE =     "Game version"
+    STR_ZIP_TITLE =         "Generate pack as .zip"
+    STR_MIXMONO_TITLE =     "Mix stereo tracks to mono"
+    STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
+
+    STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you have a 'pack.png' in the same folder as the app."
+    STR_VERSION_TOOLTIP =   "The version of Minecraft in which your pack will work best."
+    STR_ZIP_TOOLTIP =       "Packs are generated as .zip files instead of folders."
+    STR_MIXMONO_TOOLTIP =   "Tracks play near the jukebox, not 'inside your head'. May reduce audio quality."
+    STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."
+
 #dictionary to associate Status : status message string
 StatusMessageDict = {
     Status.SUCCESS:                 "Successfully generated datapack and resourcepack!",

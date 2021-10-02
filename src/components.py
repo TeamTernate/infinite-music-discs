@@ -14,7 +14,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 
 from src import generator
 from src.generator import Status
-from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties
+from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties, DisplayStrings
 from src.definitions import StatusMessageDict, DigitNameDict, PackFormatsDict, CSS_STYLESHEET
 
 
@@ -1330,11 +1330,11 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.setSpacing(0)
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
-        self._childLayout.addWidget(SettingsListEntry('pack', "Pack icon (optional)", SettingType.PACKPNG, "Optional in-game icon. Auto-fills if you have a 'pack.png' in the same folder as the app."))
-        self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, "The version of Minecraft in which your pack will work best.", PackFormatsDict))
-        self._childLayout.addWidget(SettingsListEntry('zip', "Generate pack as .zip", SettingType.CHECK, "Packs are generated as .zip files instead of folders."))
-        self._childLayout.addWidget(SettingsListEntry('mix_mono', "Mix stereo tracks to mono", SettingType.CHECK, "Tracks play near the jukebox instead of 'inside your head'."))
-        #self._childLayout.addWidget(SettingsListEntry('keep_tmp', "Keep intermediate converted files", SettingType.CHECK))
+        self._childLayout.addWidget(SettingsListEntry('pack',       DisplayStrings.STR_PACKPNG_TITLE,   SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TOOLTIP))
+        self._childLayout.addWidget(SettingsListEntry('version',    DisplayStrings.STR_VERSION_TITLE,   SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TOOLTIP, PackFormatsDict))
+        self._childLayout.addWidget(SettingsListEntry('zip',        DisplayStrings.STR_ZIP_TITLE,       SettingType.CHECK,      DisplayStrings.STR_ZIP_TOOLTIP))
+        self._childLayout.addWidget(SettingsListEntry('mix_mono',   DisplayStrings.STR_MIXMONO_TITLE,   SettingType.CHECK,      DisplayStrings.STR_MIXMONO_TOOLTIP))
+        #self._childLayout.addWidget(SettingsListEntry('keep_tmp',  DisplayStrings.STR_KEEPTMP_TITLE,   SettingType.CHECK,      DisplayStrings.STR_KEEPTMP_TOOLTIP))
         self._childLayout.addStretch()
 
         #child widget, contains child layout
