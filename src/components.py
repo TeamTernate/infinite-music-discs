@@ -1263,7 +1263,7 @@ class SettingsSelector(QtWidgets.QWidget):
         elif(self._type == SettingType.DROPDOWN):
             self._parent.setObjectName("DROPDOWN")
             self._widget = QtWidgets.QComboBox(self)
-            self._widget.view().setMinimumSize(len(max(params, key=len) * 8), self._widget.height())
+            self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
 
             if not params == None:
                 self._widget.addItems(params.keys())
@@ -1284,7 +1284,7 @@ class SettingsSelector(QtWidgets.QWidget):
 
 
 class SettingsListEntry(QtWidgets.QFrame):
-    def __init__(self, key, label, settingType = SettingType.PACKPNG, params = None, parent = None):
+    def __init__(self, key, label, settingType = SettingType.PACKPNG, tooltip = None, params = None, parent = None):
         super(SettingsListEntry, self).__init__(parent)
 
         self._parent = parent
@@ -1296,6 +1296,9 @@ class SettingsListEntry(QtWidgets.QFrame):
         layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(20)
         layout.setContentsMargins(5, 5, 5, 5)
+
+        if tooltip is not None:
+            self.setToolTip(tooltip)
 
         if not settingType == SettingType.PACKPNG:
             layout.setContentsMargins(50, -1, -1, -1)
@@ -1327,10 +1330,10 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.setSpacing(0)
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
-        self._childLayout.addWidget(SettingsListEntry('pack', "Pack icon (optional)", SettingType.PACKPNG))
-        self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, PackFormatsDict))
-        self._childLayout.addWidget(SettingsListEntry('zip', "Generate pack as .zip", SettingType.CHECK))
-        self._childLayout.addWidget(SettingsListEntry('mix_mono', "Mix stereo tracks to mono", SettingType.CHECK))
+        self._childLayout.addWidget(SettingsListEntry('pack', "Pack icon (optional)", SettingType.PACKPNG, "Optional in-game icon. Auto-fills if you have a 'pack.png' in the same folder as the app."))
+        self._childLayout.addWidget(SettingsListEntry('version', "Game version", SettingType.DROPDOWN, "The version of Minecraft in which your pack will work best.", PackFormatsDict))
+        self._childLayout.addWidget(SettingsListEntry('zip', "Generate pack as .zip", SettingType.CHECK, "Packs are generated as .zip files instead of folders."))
+        self._childLayout.addWidget(SettingsListEntry('mix_mono', "Mix stereo tracks to mono", SettingType.CHECK, "Tracks play near the jukebox instead of 'inside your head'."))
         #self._childLayout.addWidget(SettingsListEntry('keep_tmp', "Keep intermediate converted files", SettingType.CHECK))
         self._childLayout.addStretch()
 

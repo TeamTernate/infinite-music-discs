@@ -550,6 +550,13 @@ ArrowButton {
 ArrowButton:hover {
     background-color: rgb(96, 96, 96);
 }
+
+QToolTip {
+    border: 0;
+    color: white;
+    font-size: 17px;
+    background-color: rgb(6, 6, 6);
+}
 """.replace('./', Helpers.data_path() )
 
 
