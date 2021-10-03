@@ -169,9 +169,9 @@ class QFocusLineEdit(QMultiDragDropLineEdit):
 
 
 
-#child of QLineEdit with integer-only filtering and range limiting
+#child of QFocusLineEdit with integer-only filtering and range limiting
 # currently positive integers only
-class QPosIntLineEdit(QtWidgets.QLineEdit):
+class QPosIntLineEdit(QFocusLineEdit):
     def __init__(self, minInt = 0, maxInt = float('inf'), parent = None):
         super(QPosIntLineEdit, self).__init__(str(minInt), parent)
 
@@ -180,7 +180,7 @@ class QPosIntLineEdit(QtWidgets.QLineEdit):
 
         #create validator to restrict input to integers
         # QRegExpValidator is more flexible than QIntValidator
-        regexp = QtCore.QRegExp('(^[0-9]{0,10}$|^$)')
+        regexp = QtCore.QRegExp('(^[0-9]{0,8}$|^$)')
         validator = QtGui.QRegExpValidator(regexp)
         self.setValidator(validator)
 

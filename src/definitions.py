@@ -485,7 +485,7 @@ QFrame#FileButtonFrame:hover {
     background-color: rgb(72, 72, 72);
 }
 
-QLineEdit#TitleLineEdit {
+QLineEdit {
     padding-left: 10px;
     padding-right: 10px;
 
@@ -543,6 +543,27 @@ QFocusLineEdit {
 QFocusLineEdit:focus {
     color: white;
     border: 1px solid lightgray;
+}
+
+QPosIntLineEdit {
+    padding-left: 0px;
+    padding-right: 0px;
+
+    width: 80px;
+    height: 30px;
+
+    color: white;
+    border-radius: 0px;
+    border: 1px solid rgb(100, 100, 100);
+    background-color: rgb(48, 48, 48);
+}
+
+QPosIntLineEdit:hover {
+    background-color: rgb(72, 72, 72);
+}
+
+QPosIntLineEdit:focus {
+    background-color: rgb(6, 6, 6);
 }
 
 QLabel#INameLabel {
