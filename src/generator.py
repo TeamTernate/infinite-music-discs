@@ -26,6 +26,7 @@ resourcepack_name_zip = resourcepack_name + '.zip'
 
 datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
+default_pack_format = 8
 
 tmp_path = None
 
@@ -186,7 +187,8 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
     os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
 
-    pack_format = user_settings['version']
+    pack_format = user_settings.get('version', default_pack_format)
+    offset = user_settings.get('offset', 0)
 
     #write 'pack.mcmeta'
     pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w')
@@ -228,9 +230,9 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     disc_play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'disc_play.mcfunction'), 'w')
 
     for i, name in enumerate(internal_names):
-        i+=1
+        j = i + offset + 1
 
-        disc_play.write('execute as @s[scores={heldDisc=%d}] run function %s:play_%s\n' % (i, datapack_name, name))
+        disc_play.write('execute as @s[scores={heldDisc=%d}] run function %s:play_%s\n' % (j, datapack_name, name))
 
     disc_play.close()
 
@@ -246,9 +248,9 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     disc_stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'disc_stop.mcfunction'), 'w')
 
     for i, name in enumerate(internal_names):
-        i+=1
+        j = i + offset + 1
 
-        disc_stop.write('execute as @s[nbt={Item:{tag:{CustomModelData:%d}}}] at @s run stopsound @a[distance=..64] record minecraft:music_disc.%s\n' % (i, name))
+        disc_stop.write('execute as @s[nbt={Item:{tag:{CustomModelData:%d}}}] at @s run stopsound @a[distance=..64] record minecraft:music_disc.%s\n' % (j, name))
 
     disc_stop.close()
 
@@ -256,13 +258,13 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     set_disc_track = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'set_disc_track.mcfunction'), 'w')
 
     for i, track in enumerate(titles):
-        i+=1
+        j = i + offset + 1
 
         # Create command, and add command as string to the rest of the command.
         item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
         cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_pack_format(pack_format) + '\n'
 
-        set_disc_track.write(cmd_str % (i, i, track.replace('"', '')))
+        set_disc_track.write(cmd_str % (j, j, track.replace('"', '')))
 
     set_disc_track.close()
 
@@ -276,19 +278,19 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
 
     #write 'give_*_disc.mcfunction' files
     for i, track in enumerate(titles):
-        i+=1
+        j = i + offset + 1
 
-        give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % internal_names[i-1]), 'w')
-        give.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (i, track))
+        give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % internal_names[i]), 'w')
+        give.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, track))
         give.close()
 
     #write 'give_all_discs.mcfunction'
     give_all = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_all_discs.mcfunction'), 'w')
 
     for i, track in enumerate(titles):
-        i+=1
+        j = i + offset + 1
 
-        give_all.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (i, track))
+        give_all.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, track))
 
     give_all.close()
 
@@ -302,9 +304,9 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     creeper_mdentries = []
     creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':discs_tag, 'expand':True})
     for i, track in enumerate(titles):
-        i+=1
+        j = i + offset + 1
 
-        creeper_mdentries.append({'type':'minecraft:item', 'weight':1, 'name':'minecraft:music_disc_11', 'functions':[{'function':'minecraft:set_nbt', 'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (i, track.replace('"', ''))}]})
+        creeper_mdentries.append({'type':'minecraft:item', 'weight':1, 'name':'minecraft:music_disc_11', 'functions':[{'function':'minecraft:set_nbt', 'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track.replace('"', ''))}]})
 
     creeper_normentries = [{'type':'minecraft:item','functions':[{'function':'minecraft:set_count', 'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}}, {'function':'minecraft:looting_enchant', 'count':{'min':0.0, 'max':1.0}}], 'name':'minecraft:gunpowder'}]
     creeper.write(json.dumps({'type':'minecraft:entity', 'pools':[{'rolls':1, 'entries':creeper_normentries}, {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{'condition':'minecraft:entity_properties', 'predicate':{'type':'#minecraft:skeletons'}, 'entity':'killer'}]}]}, indent=4))
@@ -360,7 +362,8 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, us
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
 
-    pack_format = user_settings['version']
+    pack_format = user_settings.get('version', default_pack_format)
+    offset = user_settings.get('offset', 0)
 
     #write 'pack.mcmeta'
     pack = open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w')
@@ -386,9 +389,9 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, us
 
     json_list = []
     for i, name in enumerate(internal_names):
-        i+=1
+        j = i + offset + 1
 
-        json_list.append({'predicate': {'custom_model_data':i}, 'model': 'item/music_disc_{}'.format(name)})
+        json_list.append({'predicate': {'custom_model_data':j}, 'model': 'item/music_disc_{}'.format(name)})
 
     music_disc_11.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_11'}, 'overrides': json_list}, indent=4))
     music_disc_11.close()

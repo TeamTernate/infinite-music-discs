@@ -187,6 +187,12 @@ class QPosIntLineEdit(QFocusLineEdit):
         self.editingFinished.connect(self.capTop)
         self.editingFinished.connect(self.capBottom)
 
+    def text_int(self):
+        try:
+            return int(self.text())
+        except ValueError:
+            return self._min
+
     def capBottom(self):
         try:
             i_text = int(self.text())
@@ -1337,7 +1343,7 @@ class SettingsSelector(QtWidgets.QWidget):
         elif(self._type == SettingType.DROPDOWN):
             return PackFormatsDict[ self._widget.currentText() ]
         elif(self._type == SettingType.NUM_ENTRY):
-            return int(self._widget.text())
+            return self._widget.text_int()
         elif(self._type == SettingType.TXT_ENTRY):
             return self._widget.text()
 
