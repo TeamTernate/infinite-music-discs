@@ -90,7 +90,7 @@ class DisplayStrings():
     STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you have a 'pack.png' in the same folder as the app."
     STR_VERSION_TOOLTIP =   "The version of Minecraft in which your pack will work best."
     STR_ZIP_TOOLTIP =       "Packs are generated as .zip files instead of folders."
-    STR_MIXMONO_TOOLTIP =   "Tracks play near the jukebox, not 'inside your head'. May reduce audio quality."
+    STR_MIXMONO_TOOLTIP =   "Tracks play near the jukebox, not 'inside your head'."
     STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."
 
 #dictionary to associate Status : status message string
@@ -105,7 +105,7 @@ StatusMessageDict = {
     Status.BAD_INTERNAL_NAME:       "Invalid track name. Make sure all tracks show a subtitle.",
     Status.PACK_IMAGE_MISSING:      "Couldn't find pack icon file.",
     Status.BAD_PACK_IMAGE_TYPE:     "Pack icon is not in a supported format.",
-    Status.BAD_OGG_CONVERT:         "Failed to convert some tracks to .ogg format.",
+    Status.BAD_OGG_CONVERT:         "Failed to convert some tracks to '.ogg' format.",
     Status.BAD_ZIP:                 "Failed to generate as '.zip'. Packs have been left as folders.",
     Status.IMAGE_FILE_NOT_GIVEN:    "Some tracks are missing an icon.",
     Status.TRACK_FILE_NOT_GIVEN:    "Some tracks are missing a music file.",

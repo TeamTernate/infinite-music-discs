@@ -1298,7 +1298,8 @@ class SettingsListEntry(QtWidgets.QFrame):
         layout.setContentsMargins(5, 5, 5, 5)
 
         if tooltip is not None:
-            self.setToolTip(tooltip)
+            self._label.setToolTip(tooltip)
+            self._selector._widget.setToolTip(tooltip)
 
         if not settingType == SettingType.PACKPNG:
             layout.setContentsMargins(50, -1, -1, -1)
