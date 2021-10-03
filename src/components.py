@@ -205,6 +205,9 @@ class QPosIntLineEdit(QFocusLineEdit):
 
         self.setText(str(i_text))
 
+    def supportsFileType(self, ext):
+        return False
+
 
 
 #button for generating datapack/resourcepack
@@ -1230,6 +1233,13 @@ class AnimatedTabBar(QtWidgets.QTabBar):
         style.drawControl(style.CE_TabBarTabLabel, tab, qp, self)
 
     def tabChanged(self, index):
+        #clear focused widget from previous tab
+        focusWidget = QtWidgets.QApplication.focusWidget()
+
+        if focusWidget is not None:
+            focusWidget.clearFocus()
+
+        #start transition animation
         if self.animations:
             self.animations[index].start()
 

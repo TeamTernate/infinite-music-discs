@@ -563,7 +563,7 @@ QPosIntLineEdit:hover {
 }
 
 QPosIntLineEdit:focus {
-    background-color: rgb(6, 6, 6);
+    background-color: rgb(32, 32, 32);
 }
 
 QLabel#INameLabel {
