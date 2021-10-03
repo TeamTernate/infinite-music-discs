@@ -13,6 +13,7 @@ from src.generator import Status
 class Constants():
     MAX_DRAW_MULTI_DRAGDROP = 10
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
+    CUSTOM_MODEL_DATA_MAX = 16777000
 
 
 
@@ -30,6 +31,8 @@ class SettingType(Enum):
     CHECK = 2
     RADIO = 3
     DROPDOWN = 4
+    NUM_ENTRY = 5
+    TXT_ENTRY = 6
 
 class FileExt():
     PNG = 'png'
@@ -83,12 +86,14 @@ class StyleProperties():
 class DisplayStrings():
     STR_PACKPNG_TITLE =     "Pack icon (optional)"
     STR_VERSION_TITLE =     "Game version"
+    STR_OFFSET_TITLE =      "CustomModelData offset"
     STR_ZIP_TITLE =         "Generate pack as .zip"
     STR_MIXMONO_TITLE =     "Mix stereo tracks to mono"
     STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
 
     STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you have a 'pack.png' in the same folder as the app."
     STR_VERSION_TOOLTIP =   "The version of Minecraft in which your pack will work best."
+    STR_OFFSET_TOOLTIP =    "Helps prevent discs in multiple packs from colliding with each other."
     STR_ZIP_TOOLTIP =       "Packs are generated as .zip files instead of folders."
     STR_MIXMONO_TOOLTIP =   "Tracks play near the jukebox, not 'inside your head'."
     STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."

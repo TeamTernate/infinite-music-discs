@@ -169,6 +169,44 @@ class QFocusLineEdit(QMultiDragDropLineEdit):
 
 
 
+#child of QLineEdit with integer-only filtering and range limiting
+# currently positive integers only
+class QPosIntLineEdit(QtWidgets.QLineEdit):
+    def __init__(self, minInt = 0, maxInt = float('inf'), parent = None):
+        super(QPosIntLineEdit, self).__init__(str(minInt), parent)
+
+        self._min = minInt
+        self._max = maxInt
+
+        #create validator to restrict input to integers
+        # QRegExpValidator is more flexible than QIntValidator
+        regexp = QtCore.QRegExp('(^[0-9]{0,10}$|^$)')
+        validator = QtGui.QRegExpValidator(regexp)
+        self.setValidator(validator)
+
+        self.editingFinished.connect(self.capTop)
+        self.editingFinished.connect(self.capBottom)
+
+    def capBottom(self):
+        try:
+            i_text = int(self.text())
+            i_text = max(i_text, self._min)
+        except ValueError:
+            i_text = self._min
+
+        self.setText(str(i_text))
+
+    def capTop(self):
+        try:
+            i_text = int(self.text())
+            i_text = min(i_text, self._max)
+        except ValueError:
+            i_text = self._min
+
+        self.setText(str(i_text))
+
+
+
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
 
@@ -1268,6 +1306,14 @@ class SettingsSelector(QtWidgets.QWidget):
             if not params == None:
                 self._widget.addItems(params.keys())
 
+        elif(self._type == SettingType.NUM_ENTRY):
+            self._parent.setObjectName("NUM_ENTRY")
+            self._widget = QPosIntLineEdit(0, params, self)
+
+        elif(self._type == SettingType.TXT_ENTRY):
+            self._parent.setObjectName("TXT_ENTRY")
+            self._widget = QtWidgets.QLineEdit(self)
+
     def getWidget(self):
         return self._widget
 
@@ -1280,6 +1326,10 @@ class SettingsSelector(QtWidgets.QWidget):
             return self._widget.isChecked()
         elif(self._type == SettingType.DROPDOWN):
             return PackFormatsDict[ self._widget.currentText() ]
+        elif(self._type == SettingType.NUM_ENTRY):
+            return int(self._widget.text())
+        elif(self._type == SettingType.TXT_ENTRY):
+            return self._widget.text()
 
 
 
@@ -1333,6 +1383,7 @@ class SettingsList(QtWidgets.QWidget):
 
         self._childLayout.addWidget(SettingsListEntry('pack',       DisplayStrings.STR_PACKPNG_TITLE,   SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TOOLTIP))
         self._childLayout.addWidget(SettingsListEntry('version',    DisplayStrings.STR_VERSION_TITLE,   SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TOOLTIP, PackFormatsDict))
+        self._childLayout.addWidget(SettingsListEntry('offset',     DisplayStrings.STR_OFFSET_TITLE,    SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TOOLTIP, Constants.CUSTOM_MODEL_DATA_MAX))
         self._childLayout.addWidget(SettingsListEntry('zip',        DisplayStrings.STR_ZIP_TITLE,       SettingType.CHECK,      DisplayStrings.STR_ZIP_TOOLTIP))
         self._childLayout.addWidget(SettingsListEntry('mix_mono',   DisplayStrings.STR_MIXMONO_TITLE,   SettingType.CHECK,      DisplayStrings.STR_MIXMONO_TOOLTIP))
         #self._childLayout.addWidget(SettingsListEntry('keep_tmp',  DisplayStrings.STR_KEEPTMP_TITLE,   SettingType.CHECK,      DisplayStrings.STR_KEEPTMP_TOOLTIP))
