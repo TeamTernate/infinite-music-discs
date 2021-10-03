@@ -452,14 +452,14 @@ class GenerateButton(QtWidgets.QPushButton):
                        '': None}
 
         #end recursion if property could not be found
-        if style == None:
+        if style is None:
             return ''
 
         #get property from style dictionary
         prop_val = self._styleDict[style].get(prop)
 
         #if property could not be found, recurse until it is
-        if prop_val == None:
+        if prop_val is None:
             return self.getCSSProperty(prop, inheritDict[style])
 
         #convert color-type properties into QColor
@@ -1313,7 +1313,7 @@ class SettingsSelector(QtWidgets.QWidget):
             self._widget = QtWidgets.QComboBox(self)
             self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
 
-            if not params == None:
+            if params is not None:
                 self._widget.addItems(params.keys())
 
         elif(self._type == SettingType.NUM_ENTRY):
