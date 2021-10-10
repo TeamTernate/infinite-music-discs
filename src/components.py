@@ -593,7 +593,7 @@ class DragDropButton(QtWidgets.QPushButton):
         self.setImage(self._file)
 
     def sizeHint(self):
-        return(QSize(75, 75))
+        return(QSize(80, 80))
 
     def mousePressEvent(self, event):
         event.accept()
