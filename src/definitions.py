@@ -91,7 +91,7 @@ class DisplayStrings():
     STR_MIXMONO_TITLE =     "Mix stereo tracks to mono"
     STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
 
-    STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you have a 'pack.png' in the same folder as the app."
+    STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you put a 'pack.png' in the same folder as the app."
     STR_VERSION_TOOLTIP =   "The version of Minecraft in which your pack will work best."
     STR_OFFSET_TOOLTIP =    "Helps prevent discs in multiple packs from colliding with each other."
     STR_ZIP_TOOLTIP =       "Packs are generated as .zip files instead of folders."
