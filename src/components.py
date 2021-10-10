@@ -1052,7 +1052,7 @@ class NewDiscEntry(QtWidgets.QFrame):
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self._btnAdd, 1)
         layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(5, 0, 5, 0)
 
         self.setLayout(layout)
 
