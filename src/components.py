@@ -506,6 +506,13 @@ class DeleteButton(QtWidgets.QPushButton):
     def sizeHint(self):
         return QSize(25, 25)
 
+    def clearHoverState(self):
+        #button may have moved away from mouse, force clear hover state
+        self.setAttribute(Qt.WA_UnderMouse, False)
+        self.repaint()
+
+
+
 #button for reordering track list elements
 class ArrowButton(QtWidgets.QPushButton):
 
@@ -981,6 +988,9 @@ class DiscListEntry(QtWidgets.QFrame):
     def sizeHint(self):
         return QSize(350, 87.5)
 
+    def leaveEvent(self, event):
+        self._btnDelete.clearHoverState()
+
     def listReorderEvent(self, count):
         index = self.getIndex()
         
@@ -1058,7 +1068,7 @@ class NewDiscEntry(QtWidgets.QFrame):
 
 #list of tracks
 class DiscList(QtWidgets.QWidget):
-    
+
     reordered = pyqtSignal(int)
 
     icon_multiDragEnter = pyqtSignal(int, int)
@@ -1098,7 +1108,7 @@ class DiscList(QtWidgets.QWidget):
         scrollArea.setWidget(widget)
         scrollArea.setWidgetResizable(True)
         scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         #layout, contains scroll area
         layout = QtWidgets.QVBoxLayout(self)
