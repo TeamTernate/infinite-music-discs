@@ -18,11 +18,11 @@ import tempfile
 from mutagen.mp3 import MP3
 from src.commands import ReplaceItemCommand, ItemSlot
 
-datapack_name = 'custom_music_discs_dp'
-resourcepack_name = 'custom_music_discs_rp'
+default_pack_name = 'custom_music_discs'
 
-datapack_name_zip = datapack_name + '.zip'
-resourcepack_name_zip = resourcepack_name + '.zip'
+datapack_suffix = '_dp'
+resourcepack_suffix = '_rp'
+zip_suffix = '.zip'
 
 datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
@@ -181,14 +181,19 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
 def generate_datapack(texture_files, track_files, titles, internal_names, user_settings={}):
     global tmp_path
 
+    #read settings
+    pack_format = user_settings.get('version', default_pack_format)
+    offset = user_settings.get('offset', 0)
+
+    datapack_name = user_settings.get('name', default_pack_name)
+    datapack_name = datapack_name + datapack_suffix
+    datapack_name_zip = datapack_name + zip_suffix
+
     #build datapack directory tree
     shutil.rmtree(datapack_name, ignore_errors=True)
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
     os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
     os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
-
-    pack_format = user_settings.get('version', default_pack_format)
-    offset = user_settings.get('offset', 0)
 
     #write 'pack.mcmeta'
     pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w')
@@ -219,7 +224,7 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     detect_play_tick.writelines(['execute as @a[scores={usedDisc=0}] run scoreboard players set @s heldDisc -1\n',
                                  'execute as @a[scores={usedDisc=0},nbt={Inventory:[{Slot:-106b,id:"minecraft:music_disc_11"}]}] store result score @s heldDisc run data get entity @s Inventory[{Slot:-106b}].tag.CustomModelData\n',
                                  'execute as @a[scores={usedDisc=0},nbt={SelectedItem:{id:"minecraft:music_disc_11"}}] store result score @s heldDisc run data get entity @s SelectedItem.tag.CustomModelData\n',
-                                 'execute as @a[scores={usedDisc=2}] run function custom_music_discs_dp:disc_play\n',
+                                 'execute as @a[scores={usedDisc=2}] run function %s:disc_play\n' % (datapack_name),
                                  '\n',
                                  'execute as @a run scoreboard players add @s usedDisc 0\n',
                                  'execute as @a[scores={usedDisc=2..}] run scoreboard players set @s usedDisc 0\n',
@@ -239,8 +244,8 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     #write 'detect_stop_tick.mcfunction'
     detect_stop_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'detect_stop_tick.mcfunction'), 'w')
 
-    detect_stop_tick.writelines(['execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] if block ~ ~-1 ~ minecraft:jukebox run function custom_music_discs_dp:disc_stop\n',
-                                 'execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] if block ~ ~ ~ minecraft:jukebox run function custom_music_discs_dp:disc_stop\n',
+    detect_stop_tick.writelines(['execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] if block ~ ~-1 ~ minecraft:jukebox run function %s:disc_stop\n' % (datapack_name),
+                                 'execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] if block ~ ~ ~ minecraft:jukebox run function %s:disc_stop\n' % (datapack_name),
                                  'execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] run tag @s add old\n'])
     detect_stop_tick.close()
 
@@ -356,14 +361,19 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
 def generate_resourcepack(texture_files, track_files, titles, internal_names, user_settings={}, cleanup_tmp=True):
     global tmp_path
 
+    #read settings
+    pack_format = user_settings.get('version', default_pack_format)
+    offset = user_settings.get('offset', 0)
+
+    resourcepack_name = user_settings.get('name', default_pack_name)
+    resourcepack_name = resourcepack_name + resourcepack_suffix
+    resourcepack_name_zip = resourcepack_name + zip_suffix
+
     #build resourcepack directory tree
     shutil.rmtree(resourcepack_name, ignore_errors=True)
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
     os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
-
-    pack_format = user_settings.get('version', default_pack_format)
-    offset = user_settings.get('offset', 0)
 
     #write 'pack.mcmeta'
     pack = open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w')

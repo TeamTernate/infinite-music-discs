@@ -169,9 +169,16 @@ class QFocusLineEdit(QMultiDragDropLineEdit):
 
 
 
-#child of QFocusLineEdit with integer-only filtering and range limiting
+#dummy child of QFocusLineEdit, mostly for CSS purposes
+class QSettingLineEdit(QFocusLineEdit):
+    def supportsFileType(self, ext):
+        return False
+
+
+
+#child of QSettingLineEdit with integer-only filtering and range limiting
 # currently positive integers only
-class QPosIntLineEdit(QFocusLineEdit):
+class QPosIntLineEdit(QSettingLineEdit):
     def __init__(self, minInt = 0, maxInt = float('inf'), parent = None):
         super(QPosIntLineEdit, self).__init__(str(minInt), parent)
 
@@ -211,8 +218,25 @@ class QPosIntLineEdit(QFocusLineEdit):
 
         self.setText(str(i_text))
 
-    def supportsFileType(self, ext):
-        return False
+
+
+#child of QSettingLineEdit with input filtering
+class QAlphaLineEdit(QSettingLineEdit):
+    def __init__(self, text, parent = None):
+        super(QAlphaLineEdit, self).__init__(text, parent)
+
+        self._defaultText = text
+
+        #create validator to restrict input to lowercase letters and underscores
+        regexp = QtCore.QRegExp('(^[a-z_]*$|^$)')
+        validator = QtGui.QRegExpValidator(regexp)
+        self.setValidator(validator)
+
+        self.editingFinished.connect(self.fillIfEmpty)
+
+    def fillIfEmpty(self):
+        if self.text() == "":
+            self.setText(self._defaultText)
 
 
 
@@ -1338,7 +1362,7 @@ class SettingsSelector(QtWidgets.QWidget):
 
         elif(self._type == SettingType.TXT_ENTRY):
             self._parent.setObjectName("TXT_ENTRY")
-            self._widget = QtWidgets.QLineEdit(self)
+            self._widget = QAlphaLineEdit(params, self)
 
     def getWidget(self):
         return self._widget
@@ -1410,6 +1434,7 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.addWidget(SettingsListEntry('pack',       DisplayStrings.STR_PACKPNG_TITLE,   SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TOOLTIP))
         self._childLayout.addWidget(SettingsListEntry('version',    DisplayStrings.STR_VERSION_TITLE,   SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TOOLTIP, PackFormatsDict))
         self._childLayout.addWidget(SettingsListEntry('offset',     DisplayStrings.STR_OFFSET_TITLE,    SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TOOLTIP, Constants.CUSTOM_MODEL_DATA_MAX))
+        self._childLayout.addWidget(SettingsListEntry('name',       DisplayStrings.STR_PACKNAME_TITLE,  SettingType.TXT_ENTRY,  DisplayStrings.STR_PACKNAME_TOOLTIP, Constants.DEFAULT_PACK_NAME))
         self._childLayout.addWidget(SettingsListEntry('zip',        DisplayStrings.STR_ZIP_TITLE,       SettingType.CHECK,      DisplayStrings.STR_ZIP_TOOLTIP))
         self._childLayout.addWidget(SettingsListEntry('mix_mono',   DisplayStrings.STR_MIXMONO_TITLE,   SettingType.CHECK,      DisplayStrings.STR_MIXMONO_TOOLTIP))
         #self._childLayout.addWidget(SettingsListEntry('keep_tmp',  DisplayStrings.STR_KEEPTMP_TITLE,   SettingType.CHECK,      DisplayStrings.STR_KEEPTMP_TOOLTIP))

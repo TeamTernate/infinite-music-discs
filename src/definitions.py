@@ -14,6 +14,7 @@ class Constants():
     MAX_DRAW_MULTI_DRAGDROP = 10
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
     CUSTOM_MODEL_DATA_MAX = 16777000
+    DEFAULT_PACK_NAME = 'custom_music_discs'
 
 
 
@@ -85,6 +86,7 @@ class StyleProperties():
 #class to contain most of the UI-displayed strings
 class DisplayStrings():
     STR_PACKPNG_TITLE =     "Pack icon (optional)"
+    STR_PACKNAME_TITLE =    "Pack name"
     STR_VERSION_TITLE =     "Game version"
     STR_OFFSET_TITLE =      "CustomModelData offset"
     STR_ZIP_TITLE =         "Generate pack as .zip"
@@ -92,6 +94,7 @@ class DisplayStrings():
     STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
 
     STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you put a 'pack.png' in the same folder as the app."
+    STR_PACKNAME_TOOLTIP =  "The name Minecraft will use to reference your pack."
     STR_VERSION_TOOLTIP =   "The version of Minecraft in which your pack will work best."
     STR_OFFSET_TOOLTIP =    "Helps prevent discs in multiple packs from colliding with each other."
     STR_ZIP_TOOLTIP =       "Packs are generated as .zip files instead of folders."
@@ -548,7 +551,7 @@ QFocusLineEdit:focus {
     border: 1px solid lightgray;
 }
 
-QPosIntLineEdit {
+QSettingLineEdit {
     padding-left: 2px;
     padding-right: 0px;
     padding-top: 0px;
@@ -563,12 +566,16 @@ QPosIntLineEdit {
     background-color: rgb(48, 48, 48);
 }
 
-QPosIntLineEdit:hover {
+QSettingLineEdit:hover {
     background-color: rgb(72, 72, 72);
 }
 
-QPosIntLineEdit:hover:focus {
+QSettingLineEdit:hover:focus {
     background-color: rgb(6, 6, 6);
+}
+
+QAlphaLineEdit {
+    width: 160px;
 }
 
 QLabel#INameLabel {
