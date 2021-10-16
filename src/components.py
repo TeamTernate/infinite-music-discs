@@ -15,7 +15,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 from src import generator
 from src.generator import Status
 from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties, DisplayStrings
-from src.definitions import StatusMessageDict, DigitNameDict, PackFormatsDict, CSS_STYLESHEET
+from src.definitions import StatusMessageDict, StatusStickyDict, DigitNameDict, PackFormatsDict, CSS_STYLESHEET
 
 
 
@@ -1484,6 +1484,8 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         self._widget = relativeWidget
         self._basePos = QPoint(0,0)
 
+        self.sticky = False
+
         self.setProperty(StyleProperties.ERROR, False)
         #self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.setAutoFillBackground(True)
@@ -1530,6 +1532,9 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         self.setText(StatusMessageDict.get(status, 'Unknown error.'))
         self.adjustSize()
 
+        #errors during generation are marked 'sticky' so the user doesn't miss them
+        self.sticky = StatusStickyDict.get(status, False)
+
         self.setProperty(StyleProperties.ERROR, (status != Status.SUCCESS) )
         self.repolish(self)
 
@@ -1543,7 +1548,9 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         self.animation.setStartValue(startRect)
         self.animation.setEndValue(endRect)
         self.animation.start()
-        self.timer.start()
+
+        if not self.sticky:
+            self.timer.start()
 
         self.setVisible(True)
 

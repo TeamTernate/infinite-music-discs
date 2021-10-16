@@ -120,6 +120,25 @@ StatusMessageDict = {
     Status.BAD_MP3_META:            "Failed to remove mp3 metadata while converting."
 }
 
+#dictionary to associate Status : sticky state
+StatusStickyDict = {
+    Status.SUCCESS:                 False,
+    Status.LIST_EMPTY:              False,
+    Status.LIST_UNEVEN_LENGTH:      False,
+    Status.IMAGE_FILE_MISSING:      False,
+    Status.BAD_IMAGE_TYPE:          False,
+    Status.TRACK_FILE_MISSING:      False,
+    Status.BAD_TRACK_TYPE:          False,
+    Status.BAD_INTERNAL_NAME:       False,
+    Status.PACK_IMAGE_MISSING:      False,
+    Status.BAD_PACK_IMAGE_TYPE:     False,
+    Status.BAD_OGG_CONVERT:         True,
+    Status.BAD_ZIP:                 True,
+    Status.IMAGE_FILE_NOT_GIVEN:    False,
+    Status.TRACK_FILE_NOT_GIVEN:    False,
+    Status.BAD_MP3_META:            True
+}
+
 #dictionary to associate digit : digit name
 DigitNameDict = {
     '1':    'one',
