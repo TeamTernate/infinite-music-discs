@@ -6,6 +6,7 @@
 
 import os
 import re
+import unidecode
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -69,7 +70,7 @@ class QDragDropLineEdit(QtWidgets.QLineEdit):
         return []
 
     def getLinesFromFile(self, file):
-        with open(file, 'r') as uf:
+        with open(file, 'r', encoding='utf-8') as uf:
             return list(line.replace('\n', '') for line in uf)
 
     def supportsFileType(self, ext):
@@ -1048,8 +1049,9 @@ class DiscListEntry(QtWidgets.QFrame):
         self._leTitle.setText(filename)
 
     def setSubtitle(self, title):
-        numname_title = ''.join([ DigitNameDict.get(i, i) for i in title.lower() ])
-        internal_name = ''.join([ i for i in numname_title if i.isalpha() ])
+        ascii_name = unidecode.unidecode(title)                                             #transliterate unicode letters to ascii
+        numname_title = ''.join([ DigitNameDict.get(i, i) for i in ascii_name.lower() ])    #convert upper to lower-case, convert numbers to words
+        internal_name = ''.join([ i for i in numname_title if i.isalpha() ])                #strip non-alphabetic characters
         self._lblIName.setText(internal_name)
 
 
