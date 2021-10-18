@@ -920,6 +920,8 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
         self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
 
+        self._leTitle.setMaxLength(Constants.LINE_EDIT_MAX_CHARS)
+
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         #sizePolicy.setHeightForWidth(True)
@@ -1365,6 +1367,7 @@ class SettingsSelector(QtWidgets.QWidget):
         elif(self._type == SettingType.TXT_ENTRY):
             self._parent.setObjectName("TXT_ENTRY")
             self._widget = QAlphaLineEdit(params, self)
+            self._widget.setMaxLength(Constants.LINE_EDIT_MAX_CHARS)
 
     def getWidget(self):
         return self._widget

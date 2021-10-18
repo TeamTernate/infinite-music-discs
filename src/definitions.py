@@ -13,6 +13,7 @@ from src.generator import Status
 class Constants():
     MAX_DRAW_MULTI_DRAGDROP = 10
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
+    LINE_EDIT_MAX_CHARS = 100
     CUSTOM_MODEL_DATA_MAX = 16777000
     DEFAULT_PACK_NAME = 'custom_music_discs'
 
