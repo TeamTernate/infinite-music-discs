@@ -47,6 +47,7 @@ class Status(enum.Enum):
     TRACK_FILE_NOT_GIVEN = 13
     BAD_MP3_META = 14
     BAD_UNICODE_CHAR = 15
+    FFMPEG_CONVERT_FAIL = 16
 
 
 
@@ -158,7 +159,10 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
         return Status.BAD_MP3_META
 
     #convert file
-    ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
+    try:
+        ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
+    except:
+        return Status.FFMPEG_CONVERT_FAIL
 
     #exit if file was not converted successfully
     if not os.path.isfile(out_track):
