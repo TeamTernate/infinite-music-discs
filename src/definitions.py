@@ -16,6 +16,8 @@ class Constants():
     LINE_EDIT_MAX_CHARS = 100
     CUSTOM_MODEL_DATA_MAX = 16777000
     DEFAULT_PACK_NAME = 'custom_music_discs'
+    
+    APP_TITLE = "IMD Datapack Generator - v1.1"
 
 
 
