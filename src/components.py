@@ -1439,7 +1439,7 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.addWidget(SettingsListEntry('pack',       DisplayStrings.STR_PACKPNG_TITLE,   SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TOOLTIP))
         self._childLayout.addWidget(SettingsListEntry('version',    DisplayStrings.STR_VERSION_TITLE,   SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TOOLTIP, PackFormatsDict))
         #self._childLayout.addWidget(SettingsListEntry('offset',     DisplayStrings.STR_OFFSET_TITLE,    SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TOOLTIP, Constants.CUSTOM_MODEL_DATA_MAX))
-        #self._childLayout.addWidget(SettingsListEntry('name',       DisplayStrings.STR_PACKNAME_TITLE,  SettingType.TXT_ENTRY,  DisplayStrings.STR_PACKNAME_TOOLTIP, Constants.DEFAULT_PACK_NAME))
+        self._childLayout.addWidget(SettingsListEntry('name',       DisplayStrings.STR_PACKNAME_TITLE,  SettingType.TXT_ENTRY,  DisplayStrings.STR_PACKNAME_TOOLTIP, Constants.DEFAULT_PACK_NAME))
         self._childLayout.addWidget(SettingsListEntry('zip',        DisplayStrings.STR_ZIP_TITLE,       SettingType.CHECK,      DisplayStrings.STR_ZIP_TOOLTIP))
         self._childLayout.addWidget(SettingsListEntry('mix_mono',   DisplayStrings.STR_MIXMONO_TITLE,   SettingType.CHECK,      DisplayStrings.STR_MIXMONO_TOOLTIP))
         #self._childLayout.addWidget(SettingsListEntry('keep_tmp',  DisplayStrings.STR_KEEPTMP_TITLE,   SettingType.CHECK,      DisplayStrings.STR_KEEPTMP_TOOLTIP))
