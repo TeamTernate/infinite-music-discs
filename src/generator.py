@@ -15,7 +15,7 @@ import zipfile
 import pyffmpeg
 import tempfile
 
-from mutagen.mp3 import MP3
+from mutagen.mp3 import MP3, HeaderNotFoundError
 from src.commands import ReplaceItemCommand, ItemSlot
 
 default_pack_name = 'custom_music_discs'
@@ -148,11 +148,15 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
     #copy file to temp work directory
     shutil.copyfile(track, tmp_track)
 
-    #strip ID3 metadata from mp3
+    #strip any ID3 metadata from mp3
     if '.mp3' in tmp_track:
-        meta_mp3 = MP3(tmp_track)
-        meta_mp3.delete()
-        meta_mp3.save()
+        try:
+            meta_mp3 = MP3(tmp_track)
+            meta_mp3.delete()
+            meta_mp3.save()
+        except HeaderNotFoundError:
+            #no metadata to be removed, ignore
+            pass
 
     #exit if metadata removal failed
     if not os.path.isfile(tmp_track):
