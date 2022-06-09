@@ -136,7 +136,8 @@ if tail -1 tmp/latest.log | grep successfully >/dev/null; then
 else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
-    read -p "Do you want to view the log? (Y/N) " -n 1 -r
+    printf "%b %bDo you want to view the log? (Y/N) %b" "${QUESTION}"
+    read -n 1 -r
 
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
