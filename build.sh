@@ -26,7 +26,7 @@ requestSudo() {
 }
 
 #Install dev dependencies
-if ! [ -f tmp/.environment_setup_complete ]; then
+if ! [ -f .environment_setup_complete ]; then
     printf "%b %bSetting up build environment...%b\\n" "${INFO}"
     printf "%b %bChecking Python version...%b\\n" "${INFO}"
 
@@ -115,7 +115,7 @@ if ! [ -f tmp/.environment_setup_complete ]; then
     #Create a directory for storing temporary files
     mkdir tmp
     #Create an empty file so that environment setup does not happen again
-    touch tmp/.environment_setup_complete
+    touch .environment_setup_complete
 
     printf "%b %bDone installing dependencies!%b\\n" "${TICK}" "${COL_LIGHT_GREEN}" "${COL_NC}"
 fi
@@ -149,6 +149,6 @@ else
 
     #Silently remove .environment_setup_complete to force dependency checks in the next run
     if ! tail -1 build/latest.log | grep user >/dev/null; then
-        rm tmp/.environment_setup_complete
+        rm .environment_setup_complete
     fi
 fi
