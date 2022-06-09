@@ -110,10 +110,6 @@ if ! [ -f .environment_setup_complete ]; then
         exit 22
     fi
 
-    #Make sure tmp does not already exist
-    rm -rf tmp
-    #Create a directory for storing temporary files
-    mkdir tmp
     #Create an empty file so that environment setup does not happen again
     touch .environment_setup_complete
 
