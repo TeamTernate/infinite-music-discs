@@ -148,5 +148,7 @@ else
     fi
 
     #Silently remove .environment_setup_complete to force dependency checks in the next run
-    rm tmp/.environment_setup_complete
+    if ! tail -1 tmp/latest.log | grep user >/dev/null; then
+        rm tmp/.environment_setup_complete
+    fi
 fi
