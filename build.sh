@@ -10,7 +10,7 @@ INFO="${COL_NC}[${COL_LIGHT_YELLOW}i${COL_NC}]"
 QUESTION="${COL_NC}[${COL_LIGHT_BLUE}?${COL_NC}]"
 
 #Print ASCII logo and branding
-. data/ascii
+. ascii
 
 printf "$IMD_GUI_LOGO"
 printf "$IMD_GUI_BRANDING"
