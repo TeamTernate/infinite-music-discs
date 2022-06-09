@@ -44,6 +44,7 @@ if ! [ -f .environment_setup_complete ]; then
     if ! hash pip3 2>/dev/null; then
         printf "%b %bpip3 is not installed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
+        #Ask the user if he wants to install it
         printf "%b %bDo you want to install it? (y/n) %b" "${QUESTION}"
         read -n 1 -r
         printf "\n"
@@ -126,12 +127,13 @@ pyinstaller main.pyw --onefile --clean --noconfirm \
     --icon "data/jukebox_256.ico" \
     --distpath bin 2>build/latest.log \
 
-#Print success message
+#Determine if build has succeeded or failed
 if tail -1 build/latest.log | grep successfully >/dev/null; then
     printf "%b %bBuild succeeded!%b\\n" "${TICK}" "${COL_LIGHT_GREEN}" "${COL_NC}"
 else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
+    #Ask the user if he wants to view the log
     printf "%b %bDo you want to view the log? (y/n) %b" "${QUESTION}"
     read -n 1 -r
     printf "\n"
