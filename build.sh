@@ -1,11 +1,13 @@
 #!/bin/bash
 COL_NC='\e[0m' # No Color
-COL_LIGHT_GREEN='\e[1;32m'
 COL_LIGHT_RED='\e[1;31m'
+COL_LIGHT_GREEN='\e[1;32m'
+COL_LIGHT_BLUE='\e[1;94m'
 COL_LIGHT_YELLOW='\e[1;93m'
 TICK="${COL_NC}[${COL_LIGHT_GREEN}✓${COL_NC}]"
 CROSS="${COL_NC}[${COL_LIGHT_RED}✗${COL_NC}]"
 INFO="${COL_NC}[${COL_LIGHT_YELLOW}i${COL_NC}]"
+QUESTION="${COL_NC}[${COL_LIGHT_BLUE}?${COL_NC}]"
 
 #Print ASCII logo and branding
 . data/ascii
@@ -41,8 +43,9 @@ if ! [ -f tmp/.environment_setup_complete ]; then
     #Check if pip3 is installed
     if ! hash pip3 2>/dev/null; then
         printf "%b %bpip3 is not installed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
-        read -p "Do you want to install it? (yes/no) " -n 1 -r
-        echo
+
+        printf "%b %bDo you want to install it? (Y/N) %b" "${QUESTION}"
+        read -n 1 -r
         echo
 
         if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -132,6 +135,16 @@ if tail -1 tmp/latest.log | grep successfully >/dev/null; then
     printf "%b %bBuild succeeded!%b\\n" "${TICK}" "${COL_LIGHT_GREEN}" "${COL_NC}"
 else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
+
+    read -p "Do you want to view the log? (Y/N) " -n 1 -r
+
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        echo
+        echo "--- Log Start ---"
+        cat tmp/latest.log
+        echo "--- Log End ---"
+    fi
 
     #Silently remove .environment_setup_complete to force dependency checks in the next run
     rm tmp/.environment_setup_complete
