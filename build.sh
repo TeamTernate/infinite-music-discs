@@ -44,7 +44,7 @@ if ! [ -f .environment_setup_complete ]; then
     if ! hash pip3 2>/dev/null; then
         printf "%b %bpip3 is not installed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
-        printf "%b %bDo you want to install it? (Y/N) %b" "${QUESTION}"
+        printf "%b %bDo you want to install it? (y/n) %b" "${QUESTION}"
         read -n 1 -r
         echo
 
@@ -136,7 +136,7 @@ if tail -1 build/latest.log | grep successfully >/dev/null; then
 else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
-    printf "%b %bDo you want to view the log? (Y/N) %b" "${QUESTION}"
+    printf "%b %bDo you want to view the log? (y/n) %b" "${QUESTION}"
     read -n 1 -r
 
     if [[ $REPLY =~ ^[Yy]$ ]]
