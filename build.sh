@@ -19,9 +19,9 @@ printf "$IMD_GUI_DESCRIPTION"
 requestSudo() {
     #Request sudo privilleges
     if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-        echo "The script is not running as root."
-        echo "Requesting sudo privilleges..."
-        sudo echo -n
+        printf "The script is not running as root.\n"
+        printf "Requesting sudo privilleges..."
+        printf "\n"
     fi
 }
 
@@ -46,7 +46,7 @@ if ! [ -f .environment_setup_complete ]; then
 
         printf "%b %bDo you want to install it? (y/n) %b" "${QUESTION}"
         read -n 1 -r
-        echo
+        printf "\n"
 
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             printf "%b %bInstalling pip...%b\\n" "${INFO}"
@@ -138,13 +138,13 @@ else
 
     printf "%b %bDo you want to view the log? (y/n) %b" "${QUESTION}"
     read -n 1 -r
+    printf "\n"
 
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
-        echo
-        echo "--- Log Start ---"
+        printf "%b--- Log Start ---"
         cat build/latest.log
-        echo "--- Log End ---"
+        printf "%b--- Log End ---"
     fi
 
     #Silently remove .environment_setup_complete to force dependency checks in the next run
