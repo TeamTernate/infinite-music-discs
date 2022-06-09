@@ -17,7 +17,7 @@ printf "$IMD_GUI_BRANDING"
 printf "$IMD_GUI_DESCRIPTION"
 
 requestSudo() {
-    #Request sudo privilleges
+    #Request sudo privileges
     if [[ $(/usr/bin/id -u) -ne 0 ]]; then
         printf "The script is not running as root.\n"
         printf "Requesting sudo privilleges..."
