@@ -20,7 +20,7 @@ requestSudo() {
     #Request sudo privileges
     if [[ $(/usr/bin/id -u) -ne 0 ]]; then
         printf "The script is not running as root.\n"
-        printf "Requesting sudo privilleges..."
+        printf "Requesting sudo privileges..."
         printf "\n"
     fi
 }
