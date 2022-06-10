@@ -136,6 +136,7 @@ else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
     #Silently remove .environment_setup_complete to force dependency checks in the next run
+    #Does not occur when it has been aborted by the user
     if ! tail -1 build/latest.log | grep user >/dev/null; then
         rm .environment_setup_complete
     fi
