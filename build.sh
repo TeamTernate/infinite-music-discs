@@ -125,25 +125,15 @@ pyinstaller main.pyw --onefile --clean --noconfirm \
     --add-data "data/*:data" \
     --name "imd-gui" \
     --icon "data/jukebox_256.ico" \
-    --distpath bin 2>build/latest.log \
+    --distpath bin \
+    #Log pyinstaller's output
+    2>&1 | tee build/latest.log
 
 #Determine if build has succeeded or failed
 if tail -1 build/latest.log | grep successfully >/dev/null; then
     printf "%b %bBuild succeeded!%b\\n" "${TICK}" "${COL_LIGHT_GREEN}" "${COL_NC}"
 else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
-
-    #Ask the user if he wants to view the log
-    printf "%b %bDo you want to view the log? (y/n) %b" "${QUESTION}"
-    read -n 1 -r
-    printf "\n"
-
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        printf "%b--- Log Start ---"
-        cat build/latest.log
-        printf "%b--- Log End ---"
-    fi
 
     #Silently remove .environment_setup_complete to force dependency checks in the next run
     if ! tail -1 build/latest.log | grep user >/dev/null; then
