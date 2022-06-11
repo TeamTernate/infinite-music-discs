@@ -754,9 +754,9 @@ class FileButton(DragDropButton):
 
         #set accepted file types based on button function
         if(self._type == ButtonType.IMAGE or self._type == ButtonType.PACKPNG):
-            fileTypeStr = "Image files (*.png)"
+            fileTypeStr = Constants.FILTER_IMAGE
         else:
-            fileTypeStr = "Music files (*.mp3; *.wav; *.ogg)"
+            fileTypeStr = Constants.FILTER_MUSIC
 
         f = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '.', fileTypeStr)
 
@@ -866,7 +866,7 @@ class NewDiscButton(DragDropButton):
         super(NewDiscButton, self).mousePressEvent(event)
 
         #new disc button only accepts music files on click
-        fileTypeStr = "Music files (*.mp3; *.wav; *.ogg)"
+        fileTypeStr = Constants.FILTER_MUSIC
 
         #allow multiple files
         f = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open file', '.', fileTypeStr)
