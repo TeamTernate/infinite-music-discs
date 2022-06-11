@@ -16,7 +16,6 @@ custom_music_discs_rp/*
 src/custom_music_discs_dp/*
 src/custom_music_discs_rp/*
 
-tmp/*
 imd-tmp/*
 src/tmp/*
 src/imd-tmp/*
@@ -24,3 +23,7 @@ src/imd-tmp/*
 *.pyc
 *.spec
 *.zip
+
+#Linux build script
+tmp/*
+.environment_setup_complete

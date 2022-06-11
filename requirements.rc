@@ -1,5 +1,5 @@
-pyffmpeg~=2.0.5.1
-pyinstaller~=4.3
-PyQt5~=5.15.4
+pyffmpeg~=2.3
+pyinstaller~=5.1
+PyQt5~=5.15.6
 mutagen~=1.45.1
-unidecode~=1.3.2
+unidecode~=1.3.4
