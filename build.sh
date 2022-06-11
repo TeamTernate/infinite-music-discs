@@ -1,4 +1,6 @@
 #!/bin/bash
+#Linux build script by GEROGIANNIS and lefterisgar
+
 COL_NC='\e[0m' # No Color
 COL_LIGHT_RED='\e[1;31m'
 COL_LIGHT_GREEN='\e[1;32m'
