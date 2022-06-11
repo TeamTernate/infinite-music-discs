@@ -120,14 +120,17 @@ fi
 printf "%b %bBuilding package...%b\\n" "${INFO}" "${COL_LIGHT_YELLOW}"
 
 #Build the package, using the official instructions
+#Log pyinstaller output to both console and a logfile with tee
+#  note that pyinstaller cannot log to build/ directly
 pyinstaller main.pyw --onefile --clean --noconfirm \
     --version-file "version.rc" \
     --add-data "data/*:data" \
     --name "imd-gui" \
     --icon "data/jukebox_256.ico" \
     --distpath bin \
-    #Log pyinstaller's output
-    2>&1 | tee build/latest.log
+    2>&1 | tee tmp-build-latest.log
+
+mv tmp-build-latest.log build/latest.log
 
 #Determine if build has succeeded or failed
 if tail -1 build/latest.log | grep successfully >/dev/null; then
@@ -135,7 +138,7 @@ if tail -1 build/latest.log | grep successfully >/dev/null; then
 else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
-    #Silently remove .environment_setup_complete to force dependency checks in the next run
+    #Silently remove .environment_setup_complete to force dependency checks next time, in case of failure
     #Does not occur when it has been aborted by the user
     if ! tail -1 build/latest.log | grep user >/dev/null; then
         rm .environment_setup_complete
