@@ -18,6 +18,7 @@ Download `imd-gui.zip` from the latest release, under Assets. Extract the .zip t
 
 Download `imd-gui.tar.gz` from the latest release, under Assets. Extract the tarball to a work folder, make `imd-gui` executable, and run it:
 ```bash
+$ tar -xvf imd-gui.tar.gz
 $ chmod +x imd-gui
 $ ./imd-gui
 ```
@@ -60,4 +61,4 @@ Others:
 #### Notes for Linux users:
 - If your distribution ships Python 3 by default, then you don't need to do anything prior to running the script.
 - The script will auto-install all the required dependencies. You might need to provide your sudo password.
-- A tmp directory will be created (inside the cloned repository) where logs and other temporary files will be stored.
+- A tmp directory will be created (inside the cloned repository) where temporary files will be stored.
