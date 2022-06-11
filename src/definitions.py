@@ -180,7 +180,9 @@ CentralWidget {
 }
 
 
-
+/*
+Following CSS is parsed separately by a regex, commented out to reduce
+warnings about unknown property names on Linux
 GenerateButton {
     border: 0;
     background-color: rgb(32,32,32);
@@ -209,6 +211,7 @@ GenerateButton[disabled="true"] {
     border-bottom-color: rgb(22,52,31);
     button-color: rgb(41,93,52);
 }
+*/
 
 QFrame#GenFrame {
     background-color: rgb(32, 32, 32);

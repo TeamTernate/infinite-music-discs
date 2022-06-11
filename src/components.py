@@ -687,7 +687,8 @@ class DragDropButton(QtWidgets.QPushButton):
         else:
             pass
 
-        self._img.setPixmap(self.getScaledImage(QtGui.QPixmap(imgPath)))
+        if not imgPath == '':
+          self._img.setPixmap(self.getScaledImage(QtGui.QPixmap(imgPath)))
 
     def getScaledImage(self, pixmap):
         return pixmap.scaled(self._img.frameGeometry().width(), self._img.frameGeometry().height(), Qt.KeepAspectRatio)
@@ -1013,7 +1014,7 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnDownArrow.setObjectName('ArrowDown')
 
     def sizeHint(self):
-        return QSize(350, 87.5)
+        return QSize(350, 87)
 
     def leaveEvent(self, event):
         self._btnDelete.clearHoverState()
@@ -1087,7 +1088,7 @@ class NewDiscEntry(QtWidgets.QFrame):
         self.setObjectName('NewDiscEntry')
 
     def sizeHint(self):
-        return QSize(350, 87.5)
+        return QSize(350, 87)
 
     def heightForWidth(self, width):
         return width * 0.375
