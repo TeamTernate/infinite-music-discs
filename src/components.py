@@ -290,7 +290,7 @@ class GenerateButton(QtWidgets.QPushButton):
 
         #container widgets and layouts
         lytLabel = QtWidgets.QVBoxLayout()
-        lytLabel.setContentsMargins(0, 0, 0, 10)
+        lytLabel.setContentsMargins(0, 0, 0, 0)
         lytLabel.addStretch()
         lytLabel.addWidget(self._label)
         lytLabel.addStretch()
