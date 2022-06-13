@@ -191,7 +191,7 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
     global tmp_path
 
     #read settings
-    pack_format = user_settings.get('version', default_pack_format)
+    pack_format = user_settings.get('version').get('dp', default_pack_format)
     offset = user_settings.get('offset', 0)
 
     datapack_name = user_settings.get('name', default_pack_name)
@@ -376,7 +376,7 @@ def generate_resourcepack(texture_files, track_files, titles, internal_names, us
     global tmp_path
 
     #read settings
-    pack_format = user_settings.get('version', default_pack_format)
+    pack_format = user_settings.get('version').get('rp', default_pack_format)
     offset = user_settings.get('offset', 0)
 
     resourcepack_name = user_settings.get('name', default_pack_name)
