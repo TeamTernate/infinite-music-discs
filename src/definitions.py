@@ -15,7 +15,7 @@ class Constants():
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
     LINE_EDIT_MAX_CHARS = 100
     CUSTOM_MODEL_DATA_MAX = 16777000
-    DEFAULT_PACK_NAME = 'custom_music_discs'
+    DEFAULT_PACK_NAME = 'infinite_music_discs'
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
     

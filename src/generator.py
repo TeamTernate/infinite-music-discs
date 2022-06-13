@@ -18,7 +18,7 @@ import tempfile
 from mutagen.mp3 import MP3, HeaderNotFoundError
 from src.commands import ReplaceItemCommand, ItemSlot
 
-default_pack_name = 'custom_music_discs'
+default_pack_name = 'infinite_music_discs'
 
 datapack_suffix = '_dp'
 resourcepack_suffix = '_rp'
@@ -226,7 +226,7 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
         setup_load.writelines(['scoreboard objectives add usedDisc minecraft.used:minecraft.music_disc_11\n',
                                'scoreboard objectives add heldDisc dummy\n',
                                '\n',
-                               'tellraw @a {"text":"Custom Music Discs v1.9 by link2_thepast","color":"yellow"}\n'])
+                               'tellraw @a {"text":"Infinite Music Discs v1.9 by link2_thepast","color":"yellow"}\n'])
         setup_load.close()
 
         #write 'detect_play_tick.mcfunction'
