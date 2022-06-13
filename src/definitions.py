@@ -19,7 +19,7 @@ class Constants():
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
     
-    APP_TITLE = "IMD Datapack Generator - v1.1"
+    APP_TITLE = "IMD Datapack Generator - v1.2"
 
 
 
