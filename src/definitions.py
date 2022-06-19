@@ -60,7 +60,7 @@ class Helpers():
             return sys._MEIPASS.replace('\\', '/') + '/'
 
         #if pyw, use local 'data' directory
-        except Exception:
+        except AttributeError:
             return './'
 
     def natural_keys(text):
