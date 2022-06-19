@@ -182,16 +182,7 @@ PackFormatsDict = {
 
 
 #CSS sheets
-CSS_STYLESHEET = """
-CentralWidget {
-    padding: 0;
-    border: 0;
-}
-
-
-/*
-Following CSS is parsed separately by a regex, commented out to reduce
-warnings about unknown property names on Linux
+GB_CSS_STYLESHEET = """
 GenerateButton {
     border: 0;
     background-color: rgb(32,32,32);
@@ -220,7 +211,15 @@ GenerateButton[disabled="true"] {
     border-bottom-color: rgb(22,52,31);
     button-color: rgb(41,93,52);
 }
-*/
+"""
+
+
+
+CSS_STYLESHEET = """
+CentralWidget {
+    padding: 0;
+    border: 0;
+}
 
 QFrame#GenFrame {
     background-color: rgb(32, 32, 32);

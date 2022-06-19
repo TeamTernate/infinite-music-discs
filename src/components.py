@@ -16,7 +16,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 from src import generator
 from src.generator import Status
 from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties, DisplayStrings
-from src.definitions import StatusMessageDict, StatusStickyDict, DigitNameDict, PackFormatsDict, CSS_STYLESHEET
+from src.definitions import StatusMessageDict, StatusStickyDict, DigitNameDict, PackFormatsDict, GB_CSS_STYLESHEET, CSS_STYLESHEET
 
 
 
@@ -316,7 +316,7 @@ class GenerateButton(QtWidgets.QPushButton):
         self._label.setObjectName('GenLabel')
         self._progress.setObjectName('GenProgress')
 
-        self.setStyleSheet(CSS_STYLESHEET)
+        self._styleSheet = GB_CSS_STYLESHEET
         self._styleDict = self.getStyleSheetDict()
 
     def sizeHint(self):
@@ -445,7 +445,7 @@ class GenerateButton(QtWidgets.QPushButton):
     #parse this widget's CSS properties into a dictionary
     def getStyleSheetDict(self):
         ssDict = {}
-        ss = self.styleSheet()
+        ss = self._styleSheet
 
         #capture CSS groups with regex
         matches = re.findall(self.REGEX_CAPTURE, ss, flags=re.DOTALL)
