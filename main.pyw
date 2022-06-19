@@ -7,6 +7,7 @@
 import sys
 import ctypes
 import platform
+import logging
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -35,11 +36,20 @@ class UI(QtWidgets.QMainWindow):
 def except_hook(cls, exception, traceback):
     sys.__excepthook__(cls, exception, traceback)
 
+    if issubclass(cls, KeyboardInterrupt):
+        return
+
+    logger.critical(Constants.LOG_EXC_MSG, exc_info=(cls, exception, traceback))
+
 
 
 if __name__ == "__main__":
+    # log exceptions to console and a logfile
+    logger = logging.getLogger(__name__)
+    logger.addHandler( logging.FileHandler(Constants.LOG_FILE_NAME, delay=True) )
     sys.excepthook = except_hook
 
+    #platform-specific behaviors
     sys_os = platform.system()
     if sys_os == 'Windows':
         app_id = 'teamternate.imd.imd_gui.01'
@@ -53,6 +63,7 @@ if __name__ == "__main__":
         #linux behavior here
         pass
 
+    #init app and begin
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     

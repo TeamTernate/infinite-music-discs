@@ -7,6 +7,7 @@
 import re
 import sys
 from enum import Enum
+from datetime import datetime
 from src.generator import Status
 
 #constants
@@ -15,11 +16,15 @@ class Constants():
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
     LINE_EDIT_MAX_CHARS = 100
     CUSTOM_MODEL_DATA_MAX = 16777000
-    DEFAULT_PACK_NAME = 'infinite_music_discs'
+    DEFAULT_PACK_NAME = "infinite_music_discs"
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
     
     APP_TITLE = "IMD Datapack Generator - v1.2"
+
+    TIMESTAMP = datetime.now().strftime("%m-%d-%Y_%H%M%S")
+    LOG_EXC_MSG = ""
+    LOG_FILE_NAME = "imd-exception_" + TIMESTAMP + ".log"
 
 
 

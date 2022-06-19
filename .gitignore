@@ -23,6 +23,7 @@ src/imd-tmp/*
 *.pyc
 *.spec
 *.zip
+*.log
 
 #Linux build script
 tmp/*
