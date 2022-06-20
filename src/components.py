@@ -1357,6 +1357,10 @@ class SettingsSelector(QtWidgets.QWidget):
             self._parent.setObjectName("DROPDOWN")
             self._widget = QtWidgets.QComboBox(self)
             self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
+            
+            #on Linux, the QComboBox QAbstractItemView popup does not automatically hide on window movement.
+            #  manually trigger the popup hide if a "window moved" signal is received
+            self._parent.windowMoved.connect(self._widget.hidePopup)
 
             if params is not None:
                 self._widget.addItems(params.keys())
@@ -1390,6 +1394,8 @@ class SettingsSelector(QtWidgets.QWidget):
 
 
 class SettingsListEntry(QtWidgets.QFrame):
+    windowMoved = QtCore.pyqtSignal()
+    
     def __init__(self, key, label, settingType = SettingType.PACKPNG, tooltip = None, params = None, parent = None):
         super(SettingsListEntry, self).__init__(parent)
 
@@ -1415,6 +1421,10 @@ class SettingsListEntry(QtWidgets.QFrame):
         layout.addStretch(1)
 
         self.setLayout(layout)
+        
+        #provide child SettingsSelector with a "window moved" signal
+        if self._parent is not None:
+            self._parent.windowMoved.connect(self.windowMoved)
 
         self._label.setObjectName('SettingLabel')
 
@@ -1427,6 +1437,8 @@ class SettingsListEntry(QtWidgets.QFrame):
 
 
 class SettingsList(QtWidgets.QWidget):
+    windowMoved = QtCore.pyqtSignal()
+
     def __init__(self, parent = None):
         super(SettingsList, self).__init__(parent)
 
@@ -1438,7 +1450,7 @@ class SettingsList(QtWidgets.QWidget):
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
         self._childLayout.addWidget(SettingsListEntry('pack',       DisplayStrings.STR_PACKPNG_TITLE,   SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TOOLTIP))
-        self._childLayout.addWidget(SettingsListEntry('version',    DisplayStrings.STR_VERSION_TITLE,   SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TOOLTIP, PackFormatsDict))
+        self._childLayout.addWidget(SettingsListEntry('version',    DisplayStrings.STR_VERSION_TITLE,   SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TOOLTIP, PackFormatsDict, self))
         #self._childLayout.addWidget(SettingsListEntry('offset',     DisplayStrings.STR_OFFSET_TITLE,    SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TOOLTIP, Constants.CUSTOM_MODEL_DATA_MAX))
         self._childLayout.addWidget(SettingsListEntry('name',       DisplayStrings.STR_PACKNAME_TITLE,  SettingType.TXT_ENTRY,  DisplayStrings.STR_PACKNAME_TOOLTIP, Constants.DEFAULT_PACK_NAME))
         self._childLayout.addWidget(SettingsListEntry('zip',        DisplayStrings.STR_ZIP_TITLE,       SettingType.CHECK,      DisplayStrings.STR_ZIP_TOOLTIP))
@@ -1464,6 +1476,9 @@ class SettingsList(QtWidgets.QWidget):
         layout.addWidget(scrollArea)
 
         self.setLayout(layout)
+
+        #provide settings entries (especially those with QComboBox selectors) with a "window moved" signal
+        self._parent.windowMoved.connect(self.windowMoved)
 
         self.setObjectName('SettingsList')
         widget.setObjectName('SettingsChildWidget')
@@ -1578,6 +1593,8 @@ class StatusDisplayWidget(QtWidgets.QLabel):
 
 #primary container widget
 class CentralWidget(QtWidgets.QWidget):
+    windowMoved = QtCore.pyqtSignal()
+
     def __init__(self, parent = None):
         super(CentralWidget, self).__init__(parent)
 
@@ -1588,11 +1605,11 @@ class CentralWidget(QtWidgets.QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         #list of music disc tracks
-        self._discList = DiscList()
+        self._discList = DiscList(self)
         self._discList.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
 
         #generation settings
-        self._settingsList = SettingsList()
+        self._settingsList = SettingsList(self)
         self._settingsList.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
 
         #tabs to switch between track list and settings
@@ -1634,6 +1651,10 @@ class CentralWidget(QtWidgets.QWidget):
         btnFrame.setObjectName('GenFrame')
 
         self.setStyleSheet(CSS_STYLESHEET)
+
+        #provide children with a "window moved" signal
+        #  widgets never move relative to their containing window, and cannot detect window movement on their own
+        self._parent.moved.connect(self.windowMoved)
 
         #status display bar
         self._status = StatusDisplayWidget('', btnFrame, self)

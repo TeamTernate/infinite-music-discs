@@ -18,6 +18,8 @@ from src.components import CentralWidget
 
 class UI(QtWidgets.QMainWindow):
     resized = QtCore.pyqtSignal()
+    moved = QtCore.pyqtSignal()
+    
     def __init__(self):
         super().__init__()
 
@@ -30,6 +32,10 @@ class UI(QtWidgets.QMainWindow):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.resized.emit()
+    
+    def moveEvent(self, event):
+        super().moveEvent(event)
+        self.moved.emit()
 
 
 
