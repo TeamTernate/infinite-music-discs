@@ -36,7 +36,7 @@ class QDragDropLineEdit(QtWidgets.QLineEdit):
 
         for u in event.mimeData().urls():
             u = u.toLocalFile()
-            u = QtCore.QFileInfo(u).completeSuffix()
+            u = QtCore.QFileInfo(u).suffix()
 
             if(self.supportsFileType(u)):
                 event.accept()
@@ -61,7 +61,7 @@ class QDragDropLineEdit(QtWidgets.QLineEdit):
 
         for u in urls:
             uf = u.toLocalFile()
-            uext = QtCore.QFileInfo(uf).completeSuffix()
+            uext = QtCore.QFileInfo(uf).suffix()
 
             if self.supportsFileType(uext):
                 #parse lines from first available text file as titles
@@ -630,7 +630,7 @@ class DragDropButton(QtWidgets.QPushButton):
 
         for u in event.mimeData().urls():
             u = u.toLocalFile()
-            u = QtCore.QFileInfo(u).completeSuffix()
+            u = QtCore.QFileInfo(u).suffix()
 
             if(self.supportsFileType(u)):
                 event.accept()
@@ -665,7 +665,7 @@ class DragDropButton(QtWidgets.QPushButton):
         self.setImage(self._file)
 
     def setImage(self, file):
-        f = QtCore.QFileInfo(file).completeSuffix()
+        f = QtCore.QFileInfo(file).suffix()
 
         assetDict = {
             FileExt.PNG: self._file,
@@ -699,7 +699,7 @@ class DragDropButton(QtWidgets.QPushButton):
 
         for u in urls:
             uf = u.toLocalFile()
-            uext = QtCore.QFileInfo(uf).completeSuffix()
+            uext = QtCore.QFileInfo(uf).suffix()
 
             if self.supportsFileType(uext):
                 f.append(uf)
@@ -1048,8 +1048,8 @@ class DiscListEntry(QtWidgets.QFrame):
         self.setTitle([ fTrack ])
 
     def setTitle(self, fFileList):
-        filename = fFileList[0].split('/')[-1].split('.')[0]
-        self._leTitle.setText(filename)
+        title = QtCore.QFileInfo(fFileList[0]).completeBaseName()
+        self._leTitle.setText(title)
 
     def setSubtitle(self, title):
         ascii_name = unidecode.unidecode(title)                                             #transliterate unicode letters to ascii
