@@ -241,6 +241,14 @@ class QAlphaLineEdit(QSettingLineEdit):
 
 
 
+#child of QLabel with size hint specified
+#prevents tracks with long titles from exceeding window width
+class QSubtitleLabel(QtWidgets.QLabel):
+    def sizeHint(self):
+        return QSize(10, 10)
+
+
+
 #button for generating datapack/resourcepack
 class GenerateButton(QtWidgets.QPushButton):
 
@@ -916,12 +924,14 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnIcon = FileButton(ButtonType.IMAGE, self)
         self._btnTrack = FileButton(ButtonType.TRACK, self)
         self._leTitle = QFocusLineEdit("Track Title", self)
-        self._lblIName = QtWidgets.QLabel("internal name", self)
+        self._lblIName = QSubtitleLabel("internal name", self)
         self._btnDelete = DeleteButton(self)
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
         self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
 
         self._leTitle.setMaxLength(Constants.LINE_EDIT_MAX_CHARS)
+        self._leTitle.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
+        self._lblIName.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
 
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -950,8 +960,6 @@ class DiscListEntry(QtWidgets.QFrame):
         iNameScrollArea.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Maximum))
 
         #container layouts for track title, internal name label, and track delete button
-        self._leTitle.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
-
         ulLayout = QtWidgets.QHBoxLayout()
         ulLayout.addWidget(iNameScrollArea, 1)
         ulLayout.addWidget(self._btnDelete, 0, Qt.AlignRight)
