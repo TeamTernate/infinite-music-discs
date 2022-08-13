@@ -48,6 +48,7 @@ class Status(enum.Enum):
     BAD_MP3_META = 14
     BAD_UNICODE_CHAR = 15
     FFMPEG_CONVERT_FAIL = 16
+    DUP_INTERNAL_NAME = 17
 
 
 
@@ -61,6 +62,10 @@ def validate(texture_files, track_files, titles, internal_names, packpng=''):
     #lists are not empty
     if(len(texture_files) == 0):
         return Status.LIST_EMPTY
+
+    #internal names are all unique
+    if( len(internal_names) > len(set(internal_names)) ):
+        return Status.DUP_INTERNAL_NAME
 
     for i in range(len(texture_files)):
         #image is provided

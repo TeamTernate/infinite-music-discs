@@ -129,7 +129,8 @@ StatusMessageDict = {
     Status.TRACK_FILE_NOT_GIVEN:    "Some tracks are missing a music file.",
     Status.BAD_MP3_META:            "Failed to remove mp3 metadata while converting.",
     Status.BAD_UNICODE_CHAR:        "Couldn't use track name. Try removing uncommon characters.",
-    Status.FFMPEG_CONVERT_FAIL:     "FFmpeg failed while converting a track to '.ogg' format."
+    Status.FFMPEG_CONVERT_FAIL:     "FFmpeg failed while converting a track to '.ogg' format.",
+    Status.DUP_INTERNAL_NAME:       "Some tracks have the same name. Try removing duplicate tracks."
 }
 
 #dictionary to associate Status : sticky state
@@ -150,7 +151,8 @@ StatusStickyDict = {
     Status.TRACK_FILE_NOT_GIVEN:    False,
     Status.BAD_MP3_META:            True,
     Status.BAD_UNICODE_CHAR:        True,
-    Status.FFMPEG_CONVERT_FAIL:     True
+    Status.FFMPEG_CONVERT_FAIL:     True,
+    Status.DUP_INTERNAL_NAME:       True
 }
 
 #dictionary to associate digit : digit name
