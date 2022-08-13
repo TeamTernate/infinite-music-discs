@@ -1703,6 +1703,7 @@ class CentralWidget(QtWidgets.QWidget):
         self._worker.started.connect(lambda: self._btnGen.setCurrentIndex.emit(1))
         self._worker.finished.connect(lambda: self._btnGen.setCurrentIndex.emit(0))
         self._worker.status.connect(self._status.show)
+        self._worker.valid.connect(self._status.hide)
 
         self._worker.min_prog.connect(self._btnGen._progress.setMinimum)
         self._worker.progress.connect(self._btnGen._progress.setValue)
@@ -1726,6 +1727,7 @@ class CentralWidget(QtWidgets.QWidget):
 class GeneratePackWorker(QtCore.QObject):
     started = pyqtSignal()
     finished = pyqtSignal()
+    valid = pyqtSignal()
     status = pyqtSignal(Status)
     min_prog = pyqtSignal(int)
     progress = pyqtSignal(int)
@@ -1763,6 +1765,7 @@ class GeneratePackWorker(QtCore.QObject):
 
         progress += 1
         self.progress.emit(progress)
+        self.valid.emit()
 
         for i in range(len(self._track_files)):
             #wrap string in list to allow C-style passing by reference
