@@ -16,6 +16,11 @@ custom_music_discs_rp/*
 src/custom_music_discs_dp/*
 src/custom_music_discs_rp/*
 
+infinite_music_discs_dp/*
+infinite_music_discs_rp/*
+src/infinite_music_discs_dp/*
+src/infinite_music_discs/rp/*
+
 imd-tmp/*
 src/tmp/*
 src/imd-tmp/*
