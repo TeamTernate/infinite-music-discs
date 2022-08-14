@@ -29,6 +29,7 @@ src/imd-tmp/*
 *.spec
 *.zip
 *.log
+*.exe
 
 #Linux build script
 tmp/*
