@@ -170,7 +170,8 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
     #convert file
     try:
         ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
-    except:
+    except Exception as e:
+        print(e)
         return Status.FFMPEG_CONVERT_FAIL
 
     #exit if file was not converted successfully
