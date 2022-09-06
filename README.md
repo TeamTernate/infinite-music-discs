@@ -12,13 +12,13 @@ Written in Python with a PyQt5 frontend; compiled into runnable binaries with py
 ## How to Install
 ### Windows:
 
-Download `imd-gui.zip` from the latest release, under Assets. Extract the .zip to a work folder and run the executable inside. Follow the video instructions at [https://www.youtube.com/watch?v=zDXSKYvJXmg](https://www.youtube.com/watch?v=zDXSKYvJXmg) to generate a datapack/resourcepack pair; the datapack and resourcepack will be created in the same folder as the executable.
+Download `imd-gui-win64.zip` from the latest release, under Assets. Extract the .zip to a work folder and run the executable inside. Follow the video instructions at [https://www.youtube.com/watch?v=zDXSKYvJXmg](https://www.youtube.com/watch?v=zDXSKYvJXmg) to generate a datapack/resourcepack pair; the datapack and resourcepack will be created in the same folder as the executable.
 
-### Linux (WIP, no release yet):
+### Linux:
 
-Download `imd-gui.tar.gz` from the latest release, under Assets. Extract the tarball to a work folder, make `imd-gui` executable, and run it:
+Download `imd-gui-linux64.tar.gz` from the latest release, under Assets. Extract the tarball to a work folder, make `imd-gui` executable, and run it:
 ```bash
-$ tar -xvf imd-gui.tar.gz
+$ tar -xvf imd-gui-linux64.tar.gz
 $ chmod +x imd-gui
 $ ./imd-gui
 ```
