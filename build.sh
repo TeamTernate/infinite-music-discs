@@ -11,9 +11,10 @@ CROSS="${COL_NC}[${COL_LIGHT_RED}✗${COL_NC}]"
 INFO="${COL_NC}[${COL_LIGHT_YELLOW}i${COL_NC}]"
 QUESTION="${COL_NC}[${COL_LIGHT_BLUE}?${COL_NC}]"
 
-#Print ASCII logo and branding
+#Include ascii file
 . ascii
 
+#Print ASCII logo and branding
 printf "$IMD_GUI_LOGO"
 printf "$IMD_GUI_BRANDING"
 printf "$IMD_GUI_DESCRIPTION"
