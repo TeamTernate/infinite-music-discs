@@ -20,7 +20,7 @@ class Constants():
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
     
-    APP_TITLE = "IMD Datapack Generator - v1.2"
+    APP_TITLE = "IMD Datapack Generator - v1.3"
 
     TIMESTAMP = datetime.now().strftime("%m-%d-%Y_%H%M%S")
     LOG_EXC_MSG = ""
