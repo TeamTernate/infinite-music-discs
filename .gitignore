@@ -32,6 +32,8 @@ src/imd-tmp/*
 *.log
 *.exe
 
+*.code-workspace
+
 #Linux build script
 tmp/*
 .environment_setup_complete
