@@ -25,9 +25,7 @@ class UI(QtWidgets.QMainWindow):
 
         self.setWindowTitle(Constants.APP_TITLE)
         self.setWindowIcon(QtGui.QIcon(Assets.APP_ICON))
-
-        self._centralWidget = CentralWidget(self)
-        self.setCentralWidget(self._centralWidget)
+        self.setCentralWidget( CentralWidget(self) )
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

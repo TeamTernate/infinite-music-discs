@@ -11,6 +11,7 @@ from datetime import datetime
 from src.generator import Status
 
 #constants
+#TODO: use dataclass to store values
 class Constants():
     MAX_DRAW_MULTI_DRAGDROP = 10
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
@@ -52,6 +53,7 @@ class FileExt():
     OGG = 'ogg'
     TXT = 'txt'
 
+#TODO: use dataclass?
 class Helpers():
     def data_path():
         #if exe, locate temp directory
@@ -69,6 +71,7 @@ class Helpers():
     def atoi(text):
         return int(text) if text.isdigit() else text
 
+#TODO: use dataclass?
 class Assets():
     APP_ICON =              Helpers.data_path() + 'data/jukebox_256.ico'
     FONT_MC_LARGE =         Helpers.data_path() + 'data/minecraft-ten.ttf'
@@ -94,6 +97,7 @@ class StyleProperties():
     ERROR =     'error'
 
 #class to contain most of the UI-displayed strings
+#TODO: use dataclass / enum for these?
 class DisplayStrings():
     STR_PACKPNG_TITLE =     "Pack icon (optional)"
     STR_PACKNAME_TITLE =    "Pack name"

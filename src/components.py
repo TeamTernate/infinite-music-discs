@@ -81,6 +81,7 @@ class QDragDropLineEdit(QtWidgets.QLineEdit):
         obj.style().polish(obj)
 
 
+#TODO: this chain is pretty good, try to mimic in others
 #child of QDragDropLineEdit with multi-drag-drop support
 class QMultiDragDropLineEdit(QDragDropLineEdit):
     multiDragEnter = pyqtSignal(int, int)
@@ -250,6 +251,9 @@ class QSubtitleLabel(QtWidgets.QLabel):
 
 
 #button for generating datapack/resourcepack
+#TODO: optimize a lot
+#TODO: don't use properties? what's the point if you're just overriding them with stylesheets anyway
+#TODO: use something other than stylesheet for optimization? or are there built in methods to parse stylesheet?
 class GenerateButton(QtWidgets.QPushButton):
 
     BD_OUTER_WIDTH = 2
@@ -579,6 +583,7 @@ class ArrowButton(QtWidgets.QPushButton):
         index = self._parent.getIndex()
         self.pressed.emit(index)
 
+    #TODO: use a dictionary to associate images with button type
     def setImage(self, btnType, disabled):
         if(btnType == ButtonType.ARROW_UP):
             if disabled:
@@ -675,6 +680,7 @@ class DragDropButton(QtWidgets.QPushButton):
     def setImage(self, file):
         f = QtCore.QFileInfo(file).suffix()
 
+        #TODO: move this somewhere more global ^ top of class maybe
         assetDict = {
             FileExt.PNG: self._file,
             FileExt.OGG: Assets.ICON_OGG,
@@ -682,6 +688,7 @@ class DragDropButton(QtWidgets.QPushButton):
             FileExt.WAV: Assets.ICON_WAV
         }
 
+        #TODO: use another dictionary to nest this decision logic
         imgPath = ''
         if(self._type == ButtonType.IMAGE):
             imgPath = assetDict.get(f, Assets.ICON_ICON_EMPTY)
@@ -726,6 +733,8 @@ class DragDropButton(QtWidgets.QPushButton):
 
 
 
+#TODO: abstract some of the multi-drag-drop stuff here and in the line edit above
+#TODO: both inherit a common multi-drag-drop interface class? multiple inheritance?
 class FileButton(DragDropButton):
 
     multiDragEnter = pyqtSignal(int, int)
@@ -911,6 +920,9 @@ class NewDiscButton(DragDropButton):
 
 
 
+#TODO: create abstract "AbstractListEntry" with common setup code
+#TODO: move some parsing / helper functions to Helpers() class
+#TODO: create data subclass to store magic numbers by name? reduce confusing magic numbers?
 #entry in list of tracks
 class DiscListEntry(QtWidgets.QFrame):
     def __init__(self, parent = None):
@@ -1029,12 +1041,14 @@ class DiscListEntry(QtWidgets.QFrame):
 
     def listReorderEvent(self, count):
         index = self.getIndex()
-        
+
+        #TODO: .setDisabled( index <= 0 )
         if(index <= 0):
             self._btnUpArrow.setDisabled(True)
         else:
             self._btnUpArrow.setDisabled(False)
 
+        #TODO: .setDisabled( index >= count-1 )
         if(index >= count-1):
             self._btnDownArrow.setDisabled(True)
         else:
@@ -1103,6 +1117,7 @@ class NewDiscEntry(QtWidgets.QFrame):
 
 
 
+#TODO: create AbstractList with standard setup for DiscList and SettingsList?
 #list of tracks
 class DiscList(QtWidgets.QWidget):
 
@@ -1339,6 +1354,8 @@ class AnimatedTabBar(QtWidgets.QTabBar):
 
 
 
+#TODO: instead of getWidget(), use factory model to cast return type?
+#TODO: separate settingsselectors into different classes by function?
 class SettingsSelector(QtWidgets.QWidget):
     def __init__(self, settingType = SettingType.PACKPNG, params = None, parent = None):
         super(SettingsSelector, self).__init__(parent)
@@ -1599,6 +1616,7 @@ class StatusDisplayWidget(QtWidgets.QLabel):
 
 
 
+#TODO: standardize where size policies are set - probably inside widget's own init makes more sense
 #primary container widget
 class CentralWidget(QtWidgets.QWidget):
     windowMoved = QtCore.pyqtSignal()
@@ -1688,6 +1706,7 @@ class CentralWidget(QtWidgets.QWidget):
         titles =            []
         internal_names =    []
 
+        #TODO: try to use 1 dictionary instead of parallel lists
         for e in discEntries:
             texture_files.append(e[0])
             track_files.append(e[1])
@@ -1715,9 +1734,7 @@ class CentralWidget(QtWidgets.QWidget):
         self._thread.finished.connect(self._thread.deleteLater)
 
         self._btnGen.setEnabled(False)
-        self._thread.finished.connect(
-            lambda: self._btnGen.setEnabled(True)
-        )
+        self._thread.finished.connect(lambda: self._btnGen.setEnabled(True))
 
         self._thread.start()
 
@@ -1742,6 +1759,7 @@ class GeneratePackWorker(QtCore.QObject):
         self._titles = titles
         self._internal_names = internal_names
 
+    #TODO: make the status returning system more elegant - function to capture status and check that it's not success?
     def generate(self):
         self.started.emit()
 

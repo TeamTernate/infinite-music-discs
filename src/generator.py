@@ -30,6 +30,9 @@ default_pack_format = 8
 
 tmp_path = None
 
+#TODO: design this to be split into multiple variants for v1.x and v2.x
+
+#TODO: integrate fully with GUI, move to definitions.py
 class Status(enum.Enum):
     SUCCESS = 0
     LIST_EMPTY = 1
@@ -193,6 +196,7 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
 
 
 
+#TODO: break into smaller functions so it's easier to understand behavior?
 def generate_datapack(texture_files, track_files, titles, internal_names, user_settings={}):
     global tmp_path
 
