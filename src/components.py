@@ -607,7 +607,7 @@ class ArrowButton(QtWidgets.QPushButton):
 
 #file selection button supporting file drag/drop
 class DragDropButton(QtWidgets.QPushButton):
-    
+
     fileChanged = pyqtSignal(list)
 
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
@@ -920,15 +920,31 @@ class NewDiscButton(DragDropButton):
 
 
 
-#TODO: create abstract "AbstractListEntry" with common setup code
+#abstract class containing common code between DiscList entries
+#inherited by DiscListEntry and NewDiscEntry
+class AbstractDiscListEntry(QtWidgets.QFrame):
+    def __init__(self, parent = None):
+        super().__init__()
+
+        self._parent = parent
+
+        self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        sizePolicy.setHeightForWidth(True)
+        self.setSizePolicy(sizePolicy)
+
+    def sizeHint(self):
+        return QSize(350, 87)
+
+    def heightForWidth(self, width):
+        return width * 0.375
+
 #TODO: move some parsing / helper functions to Helpers() class
 #TODO: create data subclass to store magic numbers by name? reduce confusing magic numbers?
 #entry in list of tracks
-class DiscListEntry(QtWidgets.QFrame):
+class DiscListEntry(AbstractDiscListEntry):
     def __init__(self, parent = None):
-        super(DiscListEntry, self).__init__()
-
-        self._parent = parent
+        super().__init__(parent)
 
         layout = QtWidgets.QHBoxLayout()
 
@@ -944,11 +960,6 @@ class DiscListEntry(QtWidgets.QFrame):
         self._leTitle.setMaxLength(Constants.LINE_EDIT_MAX_CHARS)
         self._leTitle.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
         self._lblIName.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
-
-        self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        #sizePolicy.setHeightForWidth(True)
-        self.setSizePolicy(sizePolicy)
 
         #container layout for icon button
         iconLayout = QtWidgets.QVBoxLayout()
@@ -1033,9 +1044,6 @@ class DiscListEntry(QtWidgets.QFrame):
         self._btnUpArrow.setObjectName('ArrowUp')
         self._btnDownArrow.setObjectName('ArrowDown')
 
-    def sizeHint(self):
-        return QSize(350, 87)
-
     def leaveEvent(self, event):
         self._btnDelete.clearHoverState()
 
@@ -1082,16 +1090,9 @@ class DiscListEntry(QtWidgets.QFrame):
 
 
 #blank entry in list of tracks
-class NewDiscEntry(QtWidgets.QFrame):
+class NewDiscEntry(AbstractDiscListEntry):
     def __init__(self, parent = None):
-        super(NewDiscEntry, self).__init__()
-
-        self._parent = parent
-        
-        self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        sizePolicy.setHeightForWidth(True)
-        self.setSizePolicy(sizePolicy)
+        super().__init__(parent)
 
         self._btnAdd = NewDiscButton(self)
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
@@ -1108,12 +1109,6 @@ class NewDiscEntry(QtWidgets.QFrame):
         self.setLayout(layout)
 
         self.setObjectName('NewDiscEntry')
-
-    def sizeHint(self):
-        return QSize(350, 87)
-
-    def heightForWidth(self, width):
-        return width * 0.375
 
 
 
@@ -1616,6 +1611,9 @@ class StatusDisplayWidget(QtWidgets.QLabel):
 
 
 
+#TODO: move primary widget into its own separate file
+#   separate files for DiscList and SettingsList
+#   generally, separate files for different tabs
 #TODO: standardize where size policies are set - probably inside widget's own init makes more sense
 #primary container widget
 class CentralWidget(QtWidgets.QWidget):
