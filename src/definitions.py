@@ -6,6 +6,7 @@
 
 import re
 import sys
+import unidecode
 from enum import Enum
 from datetime import datetime
 from src.generator import Status
@@ -70,6 +71,12 @@ class Helpers():
 
     def atoi(text):
         return int(text) if text.isdigit() else text
+
+    def to_internal_name(title):
+        ascii_title = unidecode.unidecode(title)                                            #transliterate unicode letters to ascii
+        numname_title = ''.join([ DigitNameDict.get(i, i) for i in ascii_title.lower() ])   #convert upper to lower-case, convert numbers to words
+        internal_name = ''.join([ i for i in numname_title if i.isalpha() ])                #strip non-alphabetic characters
+        return internal_name
 
 #TODO: use dataclass?
 class Assets():

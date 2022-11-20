@@ -6,7 +6,6 @@
 
 import os
 import re
-import unidecode
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -933,6 +932,9 @@ class AbstractDiscListEntry(QtWidgets.QFrame):
         sizePolicy.setHeightForWidth(True)
         self.setSizePolicy(sizePolicy)
 
+        #TODO: start setting object names this way? object names just for QSS anyway, no need for uniqueness
+        #self.setObjectName(type(self).__name__)
+
     def sizeHint(self):
         return QSize(350, 87)
 
@@ -1049,25 +1051,18 @@ class DiscListEntry(AbstractDiscListEntry):
 
     def listReorderEvent(self, count):
         index = self.getIndex()
-
-        #TODO: .setDisabled( index <= 0 )
-        if(index <= 0):
-            self._btnUpArrow.setDisabled(True)
-        else:
-            self._btnUpArrow.setDisabled(False)
-
-        #TODO: .setDisabled( index >= count-1 )
-        if(index >= count-1):
-            self._btnDownArrow.setDisabled(True)
-        else:
-            self._btnDownArrow.setDisabled(False)
+        self._btnUpArrow.setDisabled( index <= 0 )
+        self._btnDownArrow.setDisabled( index >= count-1 )
 
     def deleteSelf(self):
         self._parent.removeDiscEntry(self.getIndex())
 
+    #TODO: too brittle, implement getIndex in parent
     def getIndex(self):
         return self._parent._childLayout.indexOf(self)
 
+    #TODO: return dictionary / dataclass so entries are named?
+    #TODO: inner class factory for generating "entry" object?
     def getEntry(self):
         return [self._btnIcon.getFile(), self._btnTrack.getFile(), self._leTitle.text(), self._lblIName.text()]
 
@@ -1078,14 +1073,12 @@ class DiscListEntry(AbstractDiscListEntry):
         self.setTitle([ fTrack ])
 
     def setTitle(self, fFileList):
+        #TODO: using completeBaseName here breaks if there are "." in the track name
         title = QtCore.QFileInfo(fFileList[0]).completeBaseName()
         self._leTitle.setText(title)
 
     def setSubtitle(self, title):
-        ascii_name = unidecode.unidecode(title)                                             #transliterate unicode letters to ascii
-        numname_title = ''.join([ DigitNameDict.get(i, i) for i in ascii_name.lower() ])    #convert upper to lower-case, convert numbers to words
-        internal_name = ''.join([ i for i in numname_title if i.isalpha() ])                #strip non-alphabetic characters
-        self._lblIName.setText(internal_name)
+        self._lblIName.setText( Helpers.to_internal_name(title) )
 
 
 
@@ -1095,12 +1088,7 @@ class NewDiscEntry(AbstractDiscListEntry):
         super().__init__(parent)
 
         self._btnAdd = NewDiscButton(self)
-        self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
-        self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
 
-        self._btnUpArrow.setDisabled(True)
-        self._btnDownArrow.setDisabled(True)
-        
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self._btnAdd, 1)
         layout.setSpacing(0)

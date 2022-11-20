@@ -4,6 +4,7 @@
 #Infinite Music Discs datapack + resourcepack GUI execution module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+#TODO: drag-dropping a track title with "." in the name causes it to truncate
 import sys
 import ctypes
 import platform
