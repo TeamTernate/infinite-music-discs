@@ -556,7 +556,7 @@ class ArrowButton(QtWidgets.QPushButton):
     pressed = pyqtSignal(int)
 
     #use dictionary to choose appropriate icon, based on button type and disabled status
-    ButtonTypeImageDict = {
+    ImageFromButtonTypeDict = {
         (ButtonType.ARROW_UP, True):    Assets.ICON_ARROW_UP_DIS,
         (ButtonType.ARROW_UP, False):   Assets.ICON_ARROW_UP,
         (ButtonType.ARROW_DOWN, True):  Assets.ICON_ARROW_DOWN_DIS,
@@ -592,7 +592,7 @@ class ArrowButton(QtWidgets.QPushButton):
         self.pressed.emit(index)
 
     def setImage(self, btnType, disabled):
-        img = self.ButtonTypeImageDict[ (btnType, disabled) ]
+        img = self.ImageFromButtonTypeDict[ (btnType, disabled) ]
         self._img.setPixmap(QtGui.QPixmap(img))
 
     def setDisabled(self, disabled):
