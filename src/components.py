@@ -538,6 +538,7 @@ class GenerateButton(QtWidgets.QPushButton):
 
 
 
+#button for removing a track list element
 class DeleteButton(QtWidgets.QPushButton):
     def sizeHint(self):
         return QSize(25, 25)
@@ -553,9 +554,17 @@ class DeleteButton(QtWidgets.QPushButton):
 class ArrowButton(QtWidgets.QPushButton):
 
     pressed = pyqtSignal(int)
-    
+
+    #use dictionary to choose appropriate icon, based on button type and disabled status
+    ButtonTypeImageDict = {
+        (ButtonType.ARROW_UP, True):    Assets.ICON_ARROW_UP_DIS,
+        (ButtonType.ARROW_UP, False):   Assets.ICON_ARROW_UP,
+        (ButtonType.ARROW_DOWN, True):  Assets.ICON_ARROW_DOWN_DIS,
+        (ButtonType.ARROW_DOWN, False): Assets.ICON_ARROW_DOWN
+    }
+
     def __init__(self, btnType = ButtonType.ARROW_UP, parent = None):
-        super(ArrowButton, self).__init__()
+        super().__init__()
 
         self._parent = parent
 
@@ -582,21 +591,12 @@ class ArrowButton(QtWidgets.QPushButton):
         index = self._parent.getIndex()
         self.pressed.emit(index)
 
-    #TODO: use a dictionary to associate images with button type
     def setImage(self, btnType, disabled):
-        if(btnType == ButtonType.ARROW_UP):
-            if disabled:
-                self._img.setPixmap(QtGui.QPixmap(Assets.ICON_ARROW_UP_DIS))
-            else:
-                self._img.setPixmap(QtGui.QPixmap(Assets.ICON_ARROW_UP))
-        else:
-            if disabled:
-                self._img.setPixmap(QtGui.QPixmap(Assets.ICON_ARROW_DOWN_DIS))
-            else:
-                self._img.setPixmap(QtGui.QPixmap(Assets.ICON_ARROW_DOWN))
+        img = self.ButtonTypeImageDict[ (btnType, disabled) ]
+        self._img.setPixmap(QtGui.QPixmap(img))
 
     def setDisabled(self, disabled):
-        super(ArrowButton, self).setDisabled(disabled)
+        super().setDisabled(disabled)
         self.setImage(self._type, disabled)
 
         #button may have moved away from mouse, force clear hover state
