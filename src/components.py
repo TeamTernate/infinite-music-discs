@@ -19,8 +19,15 @@ from src.definitions import StatusMessageDict, StatusStickyDict, DigitNameDict, 
 
 
 
+class QSetsNameFromType(QtCore.QObject):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.setObjectName(type(self).__name__)
+
+
+
 #child of QLineEdit with drag-drop text
-class QDragDropLineEdit(QtWidgets.QLineEdit):
+class QDragDropLineEdit(QtWidgets.QLineEdit, QSetsNameFromType):
     def __init__(self, text, parent = None):
         super().__init__(text=text, parent=parent)
         self._parent = parent
@@ -253,7 +260,7 @@ class QSubtitleLabel(QtWidgets.QLabel):
 #TODO: optimize a lot
 #TODO: don't use properties? what's the point if you're just overriding them with stylesheets anyway
 #TODO: use something other than stylesheet for optimization? or are there built in methods to parse stylesheet?
-class GenerateButton(QtWidgets.QPushButton):
+class GenerateButton(QtWidgets.QPushButton, QSetsNameFromType):
 
     BD_OUTER_WIDTH = 2
     BD_TOP_WIDTH = 4
@@ -323,7 +330,6 @@ class GenerateButton(QtWidgets.QPushButton):
 
         self.setCurrentIndex.connect(layout.setCurrentIndex)
 
-        self.setObjectName('GenerateButton')
         self._label.setObjectName('GenLabel')
         self._progress.setObjectName('GenProgress')
 
@@ -539,7 +545,10 @@ class GenerateButton(QtWidgets.QPushButton):
 
 
 #button for removing a track list element
-class DeleteButton(QtWidgets.QPushButton):
+class DeleteButton(QtWidgets.QPushButton, QSetsNameFromType):
+    def __init__(self, parent = None):
+        super().__init__(parent=parent)
+
     def sizeHint(self):
         return QSize(25, 25)
 
@@ -551,7 +560,7 @@ class DeleteButton(QtWidgets.QPushButton):
 
 
 #button for reordering track list elements
-class ArrowButton(QtWidgets.QPushButton):
+class ArrowButton(QtWidgets.QPushButton, QSetsNameFromType):
 
     pressed = pyqtSignal(int)
 
@@ -605,7 +614,7 @@ class ArrowButton(QtWidgets.QPushButton):
 
 
 #file selection button supporting file drag/drop
-class DragDropButton(QtWidgets.QPushButton):
+class DragDropButton(QtWidgets.QPushButton, QSetsNameFromType):
 
     fileChanged = pyqtSignal(list)
 
@@ -859,7 +868,7 @@ class FileButton(DragDropButton):
 
 
 
-class NewDiscButton(DragDropButton):
+class NewDiscButton(DragDropButton, QSetsNameFromType):
     def __init__(self, parent = None):
         super().__init__(btnType=ButtonType.NEW_TRACK, parent=parent)
 
@@ -875,8 +884,6 @@ class NewDiscButton(DragDropButton):
         layout.addStretch(1)
 
         self.setLayout(layout)
-
-        self.setObjectName('NewDiscButton')
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
@@ -921,7 +928,7 @@ class NewDiscButton(DragDropButton):
 
 #abstract class containing common code between DiscList entries
 #inherited by DiscListEntry and NewDiscEntry
-class AbstractDiscListEntry(QtWidgets.QFrame):
+class AbstractDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
@@ -931,9 +938,6 @@ class AbstractDiscListEntry(QtWidgets.QFrame):
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHeightForWidth(True)
         self.setSizePolicy(sizePolicy)
-
-        #TODO: start setting object names this way? object names just for QSS anyway, no need for uniqueness
-        #self.setObjectName(type(self).__name__)
 
     def sizeHint(self):
         return QSize(350, 87)
@@ -1037,7 +1041,6 @@ class DiscListEntry(AbstractDiscListEntry):
         self._btnTrack.fileChanged.connect(self.setTitle)
         self._leTitle.textChanged.connect(self.setSubtitle)
 
-        self.setObjectName('DiscListEntry')
         self._btnIcon.setObjectName('ImageButton')
         self._btnTrack.setObjectName('TrackButton')
         self._leTitle.setObjectName('TitleLineEdit')
@@ -1096,13 +1099,11 @@ class NewDiscEntry(AbstractDiscListEntry):
 
         self.setLayout(layout)
 
-        self.setObjectName('NewDiscEntry')
-
 
 
 #TODO: create AbstractList with standard setup for DiscList and SettingsList?
 #list of tracks
-class DiscList(QtWidgets.QWidget):
+class DiscList(QtWidgets.QWidget, QSetsNameFromType):
 
     reordered = pyqtSignal(int)
 
@@ -1157,7 +1158,6 @@ class DiscList(QtWidgets.QWidget):
         self.track_multiDrop.connect(self.addExcessEntries)
         self.title_multiDrop.connect(self.addExcessEntries)
 
-        self.setObjectName('DiscList')
         widget.setObjectName('DiscListChildWidget')
         scrollArea.setObjectName('DiscListScrollArea')
 
@@ -1248,7 +1248,7 @@ class DiscList(QtWidgets.QWidget):
 
 
 #overloaded QTabBar, with an animated underline like the Minecraft launcher
-class AnimatedTabBar(QtWidgets.QTabBar):
+class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
     UL_COLOR = QtGui.QColor(57, 130, 73)
     UL_HEIGHT = 3
@@ -1261,8 +1261,6 @@ class AnimatedTabBar(QtWidgets.QTabBar):
         self._first = True
 
         self.currentChanged.connect(self.tabChanged)
-
-        self.setObjectName('AnimatedTabBar')
 
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -1365,7 +1363,7 @@ class SettingsSelector(QtWidgets.QWidget):
             self._parent.setObjectName("DROPDOWN")
             self._widget = QtWidgets.QComboBox(self)
             self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
-            
+
             #on Linux, the QComboBox QAbstractItemView popup does not automatically hide on window movement.
             #  manually trigger the popup hide if a "window moved" signal is received
             self._parent.windowMoved.connect(self._widget.hidePopup)
@@ -1429,7 +1427,7 @@ class SettingsListEntry(QtWidgets.QFrame):
         layout.addStretch(1)
 
         self.setLayout(layout)
-        
+
         #provide child SettingsSelector with a "window moved" signal
         if self._parent is not None:
             self._parent.windowMoved.connect(self.windowMoved)
@@ -1444,7 +1442,7 @@ class SettingsListEntry(QtWidgets.QFrame):
 
 
 
-class SettingsList(QtWidgets.QWidget):
+class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
     windowMoved = QtCore.pyqtSignal()
 
     def __init__(self, parent = None):
@@ -1488,7 +1486,6 @@ class SettingsList(QtWidgets.QWidget):
         #provide settings entries (especially those with QComboBox selectors) with a "window moved" signal
         self._parent.windowMoved.connect(self.windowMoved)
 
-        self.setObjectName('SettingsList')
         widget.setObjectName('SettingsChildWidget')
         scrollArea.setObjectName('SettingsScrollArea')
 
@@ -1505,7 +1502,7 @@ class SettingsList(QtWidgets.QWidget):
 
 
 #semi-transparent popup to display errors during pack generation
-class StatusDisplayWidget(QtWidgets.QLabel):
+class StatusDisplayWidget(QtWidgets.QLabel, QSetsNameFromType):
     def __init__(self, text, relativeWidget, parent = None):
         super().__init__(text=text, parent=parent)
 
@@ -1530,8 +1527,6 @@ class StatusDisplayWidget(QtWidgets.QLabel):
         self.timer.setInterval(Constants.STATUS_MESSAGE_SHOW_TIME_MS)
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
-
-        self.setObjectName('StatusDisplay')
 
     def mousePressEvent(self, event):
         event.accept()
@@ -1604,7 +1599,7 @@ class StatusDisplayWidget(QtWidgets.QLabel):
 #   generally, separate files for different tabs
 #TODO: standardize where size policies are set - probably inside widget's own init makes more sense
 #primary container widget
-class CentralWidget(QtWidgets.QWidget):
+class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
     windowMoved = QtCore.pyqtSignal()
 
     def __init__(self, parent = None):
@@ -1658,7 +1653,6 @@ class CentralWidget(QtWidgets.QWidget):
         layout.addWidget(btnFrame)
         self.setLayout(layout)
 
-        self.setObjectName('CentralWidget')
         tabs.setObjectName('AnimatedTabs')
         btnFrame.setObjectName('GenFrame')
 
