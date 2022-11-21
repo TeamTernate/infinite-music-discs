@@ -22,7 +22,7 @@ from src.definitions import StatusMessageDict, StatusStickyDict, DigitNameDict, 
 #child of QLineEdit with drag-drop text
 class QDragDropLineEdit(QtWidgets.QLineEdit):
     def __init__(self, text, parent = None):
-        super(QDragDropLineEdit, self).__init__(text, parent)
+        super().__init__(text=text, parent=parent)
         self._parent = parent
 
         self.setProperty(StyleProperties.DRAG_HELD, False)
@@ -88,7 +88,7 @@ class QMultiDragDropLineEdit(QDragDropLineEdit):
     multiDrop = pyqtSignal(int, list)
 
     def dragEnterEvent(self, event):
-        super(QMultiDragDropLineEdit, self).dragEnterEvent(event)
+        super().dragEnterEvent(event)
         if not event.isAccepted():
             return
 
@@ -96,12 +96,12 @@ class QMultiDragDropLineEdit(QDragDropLineEdit):
         self.multiDragEnter.emit(self._parent.getIndex(), len(f))
 
     def dragLeaveEvent(self, event):
-        super(QMultiDragDropLineEdit, self).dragLeaveEvent(event)
+        super().dragLeaveEvent(event)
 
         self.multiDragLeave.emit(self._parent.getIndex(), Constants.MAX_DRAW_MULTI_DRAGDROP)
 
     def dropEvent(self, event):
-        super(QMultiDragDropLineEdit, self).dropEvent(event)
+        super().dropEvent(event)
         if not event.isAccepted():
             return
 
@@ -161,7 +161,7 @@ class QFocusLineEdit(QMultiDragDropLineEdit):
         self._wasFocused = False
 
     def mousePressEvent(self, event):
-        super(QFocusLineEdit, self).mousePressEvent(event)
+        super().mousePressEvent(event)
 
         if not self._wasFocused:
             self.selectAll()
@@ -181,7 +181,7 @@ class QSettingLineEdit(QFocusLineEdit):
 # currently positive integers only
 class QPosIntLineEdit(QSettingLineEdit):
     def __init__(self, minInt = 0, maxInt = float('inf'), parent = None):
-        super(QPosIntLineEdit, self).__init__(str(minInt), parent)
+        super().__init__(text=str(minInt), parent=parent)
 
         self._min = minInt
         self._max = maxInt
@@ -224,7 +224,7 @@ class QPosIntLineEdit(QSettingLineEdit):
 #child of QSettingLineEdit with input filtering
 class QAlphaLineEdit(QSettingLineEdit):
     def __init__(self, text, parent = None):
-        super(QAlphaLineEdit, self).__init__(text, parent)
+        super().__init__(text=text, parent=parent)
 
         self._defaultText = text
 
@@ -271,7 +271,7 @@ class GenerateButton(QtWidgets.QPushButton):
     setCurrentIndex = pyqtSignal(int)
 
     def __init__(self, parent = None):
-        super(GenerateButton, self).__init__()
+        super().__init__(parent=parent)
 
         self._parent = parent
 
@@ -366,7 +366,7 @@ class GenerateButton(QtWidgets.QPushButton):
                 pass
 
     def paintEvent(self, event):
-        super(GenerateButton, self).paintEvent(event)
+        super().paintEvent(event)
 
         #setup painter
         qp = QtGui.QPainter(self)
@@ -564,7 +564,7 @@ class ArrowButton(QtWidgets.QPushButton):
     }
 
     def __init__(self, btnType = ButtonType.ARROW_UP, parent = None):
-        super().__init__()
+        super().__init__(parent=parent)
 
         self._parent = parent
 
@@ -610,7 +610,7 @@ class DragDropButton(QtWidgets.QPushButton):
     fileChanged = pyqtSignal(list)
 
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
-        super(DragDropButton, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self._parent = parent
 
@@ -741,7 +741,7 @@ class FileButton(DragDropButton):
     multiDrop = pyqtSignal(int, list)
 
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
-        super(FileButton, self).__init__(btnType, parent)
+        super().__init__(btnType=btnType, parent=parent)
 
         #child QFrame, for CSS styling purposes
         self._childFrame = QtWidgets.QFrame()
@@ -766,7 +766,7 @@ class FileButton(DragDropButton):
         self._childFrame.setObjectName('FileButtonFrame')
 
     def mousePressEvent(self, event):
-        super(FileButton, self).mousePressEvent(event)
+        super().mousePressEvent(event)
 
         #set accepted file types based on button function
         if(self._type == ButtonType.IMAGE or self._type == ButtonType.PACKPNG):
@@ -785,7 +785,7 @@ class FileButton(DragDropButton):
         self.fileChanged.emit([ f[0] ])
 
     def dragEnterEvent(self, event):
-        super(FileButton, self).dragEnterEvent(event)
+        super().dragEnterEvent(event)
         if not event.isAccepted():
             return
 
@@ -793,12 +793,12 @@ class FileButton(DragDropButton):
         self.multiDragEnter.emit(self._parent.getIndex(), len(f))
 
     def dragLeaveEvent(self, event):
-        super(FileButton, self).dragLeaveEvent(event)
+        super().dragLeaveEvent(event)
 
         self.multiDragLeave.emit(self._parent.getIndex(), Constants.MAX_DRAW_MULTI_DRAGDROP)
 
     def dropEvent(self, event):
-        super(FileButton, self).dropEvent(event)
+        super().dropEvent(event)
         if not event.isAccepted():
             return
 
@@ -861,7 +861,7 @@ class FileButton(DragDropButton):
 
 class NewDiscButton(DragDropButton):
     def __init__(self, parent = None):
-        super(NewDiscButton, self).__init__(ButtonType.NEW_TRACK, parent)
+        super().__init__(btnType=ButtonType.NEW_TRACK, parent=parent)
 
         self._img.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
@@ -879,7 +879,7 @@ class NewDiscButton(DragDropButton):
         self.setObjectName('NewDiscButton')
 
     def mousePressEvent(self, event):
-        super(NewDiscButton, self).mousePressEvent(event)
+        super().mousePressEvent(event)
 
         #new disc button only accepts music files on click
         fileTypeStr = Constants.FILTER_MUSIC
@@ -893,7 +893,7 @@ class NewDiscButton(DragDropButton):
         self.fileChanged.emit( f[0] )
 
     def dragEnterEvent(self, event):
-        super(NewDiscButton, self).dragEnterEvent(event)
+        super().dragEnterEvent(event)
         if not event.isAccepted():
             return
 
@@ -901,13 +901,13 @@ class NewDiscButton(DragDropButton):
         self.repolish(self)
 
     def dragLeaveEvent(self, event):
-        super(NewDiscButton, self).dragLeaveEvent(event)
+        super().dragLeaveEvent(event)
 
         self.setProperty(StyleProperties.DRAG_HELD, False)
         self.repolish(self)
 
     def dropEvent(self, event):
-        super(NewDiscButton, self).dropEvent(event)
+        super().dropEvent(event)
         if not event.isAccepted():
             return
         
@@ -923,7 +923,7 @@ class NewDiscButton(DragDropButton):
 #inherited by DiscListEntry and NewDiscEntry
 class AbstractDiscListEntry(QtWidgets.QFrame):
     def __init__(self, parent = None):
-        super().__init__()
+        super().__init__(parent=parent)
 
         self._parent = parent
 
@@ -946,7 +946,7 @@ class AbstractDiscListEntry(QtWidgets.QFrame):
 #entry in list of tracks
 class DiscListEntry(AbstractDiscListEntry):
     def __init__(self, parent = None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         layout = QtWidgets.QHBoxLayout()
 
@@ -1085,7 +1085,7 @@ class DiscListEntry(AbstractDiscListEntry):
 #blank entry in list of tracks
 class NewDiscEntry(AbstractDiscListEntry):
     def __init__(self, parent = None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self._btnAdd = NewDiscButton(self)
 
@@ -1119,7 +1119,7 @@ class DiscList(QtWidgets.QWidget):
     title_multiDrop = pyqtSignal(int, list)
 
     def __init__(self, parent = None):
-        super(DiscList, self).__init__()
+        super().__init__(parent=parent)
 
         self._parent = parent
 
@@ -1255,7 +1255,7 @@ class AnimatedTabBar(QtWidgets.QTabBar):
     UL_WIDTH_2 = 12
 
     def __init__(self, parent = None):
-        super(AnimatedTabBar, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self.animations = []
         self._first = True
@@ -1265,7 +1265,7 @@ class AnimatedTabBar(QtWidgets.QTabBar):
         self.setObjectName('AnimatedTabBar')
 
     def paintEvent(self, event):
-        super(AnimatedTabBar, self).paintEvent(event)
+        super().paintEvent(event)
 
         selected = self.currentIndex()
         if selected < 0:
@@ -1295,7 +1295,7 @@ class AnimatedTabBar(QtWidgets.QTabBar):
             self.animations[index].start()
 
     def tabInserted(self, index):
-        super(AnimatedTabBar, self).tabInserted(index)
+        super().tabInserted(index)
 
         baseRect = self.tabRect(index)
 
@@ -1313,7 +1313,7 @@ class AnimatedTabBar(QtWidgets.QTabBar):
             anim.start()
 
     def tabRemoved(self, index):
-        super(AnimatedTabBar, self).tabRemoved(index)
+        super().tabRemoved(index)
 
         anim = self.animations.pop(index)
         anim.stop()
@@ -1341,7 +1341,7 @@ class AnimatedTabBar(QtWidgets.QTabBar):
 #TODO: separate settingsselectors into different classes by function?
 class SettingsSelector(QtWidgets.QWidget):
     def __init__(self, settingType = SettingType.PACKPNG, params = None, parent = None):
-        super(SettingsSelector, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self._parent = parent
         self._type = settingType
@@ -1405,7 +1405,7 @@ class SettingsListEntry(QtWidgets.QFrame):
     windowMoved = QtCore.pyqtSignal()
     
     def __init__(self, key, label, settingType = SettingType.PACKPNG, tooltip = None, params = None, parent = None):
-        super(SettingsListEntry, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self._parent = parent
         self._key = key
@@ -1448,7 +1448,7 @@ class SettingsList(QtWidgets.QWidget):
     windowMoved = QtCore.pyqtSignal()
 
     def __init__(self, parent = None):
-        super(SettingsList, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self._parent = parent
 
@@ -1507,7 +1507,7 @@ class SettingsList(QtWidgets.QWidget):
 #semi-transparent popup to display errors during pack generation
 class StatusDisplayWidget(QtWidgets.QLabel):
     def __init__(self, text, relativeWidget, parent = None):
-        super(StatusDisplayWidget, self).__init__(text, parent)
+        super().__init__(text=text, parent=parent)
 
         self._parent = parent
         self._widget = relativeWidget
@@ -1608,7 +1608,7 @@ class CentralWidget(QtWidgets.QWidget):
     windowMoved = QtCore.pyqtSignal()
 
     def __init__(self, parent = None):
-        super(CentralWidget, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self._parent = parent
 
@@ -1677,7 +1677,7 @@ class CentralWidget(QtWidgets.QWidget):
         self._status.raise_()
 
     def showEvent(self, event):
-        super(CentralWidget, self).showEvent(event)
+        super().showEvent(event)
 
         #setup status display bar, now that widget coordinates are determined
         self._status.adjustSize()
@@ -1737,7 +1737,7 @@ class GeneratePackWorker(QtCore.QObject):
     max_prog = pyqtSignal(int)
 
     def __init__(self, settings, texture_files, track_files, titles, internal_names):
-        super(GeneratePackWorker, self).__init__()
+        super().__init__()
 
         self._settings = settings
         self._texture_files = texture_files
