@@ -26,15 +26,16 @@ class QSetsNameFromType(QtCore.QObject):
 
 
 
-#child of QLineEdit with drag-drop text
-class QDragDropLineEdit(QtWidgets.QLineEdit, QSetsNameFromType):
-    def __init__(self, text, parent = None):
-        super().__init__(text=text, parent=parent)
-        self._parent = parent
+#mixin class that implements a "repolish" method to refresh object styles
+class QRepolishMixin():
+    def repolish(self, obj):
+        obj.style().unpolish(obj)
+        obj.style().polish(obj)
 
-        self.setProperty(StyleProperties.DRAG_HELD, False)
-        self.setProperty(StyleProperties.ALPHA, 10)
 
+
+#mixin class that implements most common drag-drop functionality
+class QDragDropMixin():
     def dragEnterEvent(self, event):
         if not event.mimeData().hasUrls():
             event.ignore()
@@ -59,37 +60,17 @@ class QDragDropLineEdit(QtWidgets.QLineEdit, QSetsNameFromType):
         else:
             event.ignore()
 
-        #line edit may have moved away from mouse, force clear hover state
+        #widget may have moved away from mouse, force clear hover state
         self.setAttribute(Qt.WA_UnderMouse, False)
 
     def getFilesFromEvent(self, event):
-        urls = event.mimeData().urls()
-
-        for u in urls:
-            uf = u.toLocalFile()
-            uext = QtCore.QFileInfo(uf).suffix()
-
-            if self.supportsFileType(uext):
-                #parse lines from first available text file as titles
-                return self.getLinesFromFile(uf)
-
-        return []
-
-    def getLinesFromFile(self, file):
-        with open(file, 'r', encoding='utf-8') as uf:
-            return list(line.replace('\n', '') for line in uf)
+        raise NotImplementedError
 
     def supportsFileType(self, ext):
-        return ( ext in [ FileExt.TXT ] )
+        raise NotImplementedError
 
-    def repolish(self, obj):
-        obj.style().unpolish(obj)
-        obj.style().polish(obj)
-
-
-#TODO: this chain is pretty good, try to mimic in others
-#child of QDragDropLineEdit with multi-drag-drop support
-class QMultiDragDropLineEdit(QDragDropLineEdit):
+#mixin class that implements most multi-drag-drop functionality
+class QMultiDragDropMixin(QDragDropMixin):
     multiDragEnter = pyqtSignal(int, int)
     multiDragLeave = pyqtSignal(int, int)
     multiDrop = pyqtSignal(int, list)
@@ -123,39 +104,95 @@ class QMultiDragDropLineEdit(QDragDropLineEdit):
         if(selfIndex >= initIndex + min(Constants.MAX_DRAW_MULTI_DRAGDROP, count)):
             return
 
-        #update styling
-        self.setProperty(StyleProperties.DRAG_HELD, True)
-        self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - (selfIndex - initIndex))
-        self.repolish(self)
+        #if so, highlight with gradient
+        self.highlightStyling(initIndex, selfIndex)
 
     def multiDragLeaveEvent(self, initIndex, count):
-        #check if this element should be highlighted
+        #check if this element is currently highlighted
         selfIndex = self._parent.getIndex()
         if(selfIndex < initIndex):
             return
         if(selfIndex >= initIndex + min(Constants.MAX_DRAW_MULTI_DRAGDROP, count)):
             return
 
-        #reset styling
-        self.setProperty(StyleProperties.DRAG_HELD, False)
-        self.setProperty(StyleProperties.ALPHA, 10)
-        self.repolish(self)
+        #if so, remove its highlight
+        self.resetStyling()
 
     def multiDropEvent(self, initIndex, files):
-        #check if this element should be highlighted
-        #   allow all text lines to drop, instead of restricting like outline render
+        #check if this element is currently highlighted
+        #allow all files to drop, instead of restricting like outline render
+        #return index of file dropped into this object, or -1 if N/A
         selfIndex = self._parent.getIndex()
         if(selfIndex < initIndex):
-            return
+            return -1
         if(selfIndex >= initIndex + len(files)):
+            return -1
+
+        #remove highlight since files were dropped
+        self.resetStyling()
+
+        return (selfIndex - initIndex)
+
+    def highlightStyling(self, initIndex, selfIndex):
+        raise NotImplementedError
+
+    def resetStyling(self):
+        raise NotImplementedError
+
+
+
+#child of QLineEdit with drag-drop text
+class QDragDropLineEdit(QDragDropMixin, QRepolishMixin, QtWidgets.QLineEdit, QSetsNameFromType):
+    def __init__(self, text, parent = None):
+        super().__init__(text=text, parent=parent)
+        self._parent = parent
+
+        self.setProperty(StyleProperties.DRAG_HELD, False)
+        self.setProperty(StyleProperties.ALPHA, 10)
+
+    def getFilesFromEvent(self, event):
+        urls = event.mimeData().urls()
+
+        for u in urls:
+            uf = u.toLocalFile()
+            uext = QtCore.QFileInfo(uf).suffix()
+
+            if self.supportsFileType(uext):
+                #parse lines from first available text file as titles
+                return self.getLinesFromFile(uf)
+
+        return []
+
+    def getLinesFromFile(self, file):
+        with open(file, 'r', encoding='utf-8') as uf:
+            return list(line.replace('\n', '') for line in uf)
+
+    def supportsFileType(self, ext):
+        return ( ext in [ FileExt.TXT ] )
+
+
+
+#child of QDragDropLineEdit with multi-drag-drop support
+class QMultiDragDropLineEdit(QMultiDragDropMixin, QDragDropLineEdit):
+    def multiDropEvent(self, initIndex, files):
+        #TODO: maybe bad practice to have super return value but child doesn't?
+        #   maybe better to have helper function defined elsewhere that parent uses
+
+        #TODO: actually pass an event into these functions?
+        #  check if event.isAccepted instead of returning value
+        dropIndex = super().multiDropEvent(initIndex, files)
+        if dropIndex < 0:
             return
 
-        #save text line
-        deltaIndex = selfIndex - initIndex
+        #set text from line in file
+        self.setText(files[dropIndex])
 
-        self.setText(files[deltaIndex])
+    def highlightStyling(self, initIndex, selfIndex):
+        self.setProperty(StyleProperties.DRAG_HELD, True)
+        self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - (selfIndex - initIndex))
+        self.repolish(self)
 
-        #reset styling
+    def resetStyling(self):
         self.setProperty(StyleProperties.DRAG_HELD, False)
         self.setProperty(StyleProperties.ALPHA, 10)
         self.repolish(self)
@@ -177,7 +214,7 @@ class QFocusLineEdit(QMultiDragDropLineEdit):
 
 
 
-#dummy child of QFocusLineEdit, mostly for CSS purposes
+#child of QFocusLineEdit, base class for settings LineEdits with drag-drop disabled
 class QSettingLineEdit(QFocusLineEdit):
     def supportsFileType(self, ext):
         return False
@@ -249,7 +286,7 @@ class QAlphaLineEdit(QSettingLineEdit):
 
 
 #child of QLabel with size hint specified
-#prevents tracks with long titles from exceeding window width
+#prevents tracks with long subtitles from exceeding window width
 class QSubtitleLabel(QtWidgets.QLabel):
     def sizeHint(self):
         return QSize(10, 10)
@@ -260,7 +297,7 @@ class QSubtitleLabel(QtWidgets.QLabel):
 #TODO: optimize a lot
 #TODO: don't use properties? what's the point if you're just overriding them with stylesheets anyway
 #TODO: use something other than stylesheet for optimization? or are there built in methods to parse stylesheet?
-class GenerateButton(QtWidgets.QPushButton, QSetsNameFromType):
+class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
     BD_OUTER_WIDTH = 2
     BD_TOP_WIDTH = 4
@@ -525,6 +562,7 @@ class GenerateButton(QtWidgets.QPushButton, QSetsNameFromType):
         self.repolish(self)
         self.repolish(self._label)
         self.repolish(self._progress)
+        self._styleDict = self.getStyleSheetDict()
 
     def qColorFromRgb(self, rgb_str):
         #get contents of rgb(...) and remove whitespace
@@ -536,11 +574,6 @@ class GenerateButton(QtWidgets.QPushButton, QSetsNameFromType):
         rgb = list(map(int, rgb))
 
         return QtGui.QColor(rgb[0], rgb[1], rgb[2])
-
-    def repolish(self, obj):
-        obj.style().unpolish(obj)
-        obj.style().polish(obj)
-        self._styleDict = self.getStyleSheetDict()
 
 
 
@@ -614,7 +647,7 @@ class ArrowButton(QtWidgets.QPushButton, QSetsNameFromType):
 
 
 #file selection button supporting file drag/drop
-class DragDropButton(QtWidgets.QPushButton, QSetsNameFromType):
+class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
     fileChanged = pyqtSignal(list)
 
@@ -643,37 +676,6 @@ class DragDropButton(QtWidgets.QPushButton, QSetsNameFromType):
 
     def mousePressEvent(self, event):
         event.accept()
-
-    def dragEnterEvent(self, event):
-        if not event.mimeData().hasUrls():
-            event.ignore()
-            return
-
-        for u in event.mimeData().urls():
-            u = u.toLocalFile()
-            u = QtCore.QFileInfo(u).suffix()
-
-            if(self.supportsFileType(u)):
-                event.accept()
-                return
-
-        event.ignore()
-
-    def dragLeaveEvent(self, event):
-        event.accept()
-
-    def dropEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
-        else:
-            event.ignore()
-
-        #button may have moved away from mouse, force clear hover state
-        self.setAttribute(Qt.WA_UnderMouse, False)
-
-    def repolish(self, obj):
-        obj.style().unpolish(obj)
-        obj.style().polish(obj)
 
     def hasFile(self):
         return (self._file != None)
@@ -741,14 +743,8 @@ class DragDropButton(QtWidgets.QPushButton, QSetsNameFromType):
 
 
 
-#TODO: abstract some of the multi-drag-drop stuff here and in the line edit above
-#TODO: both inherit a common multi-drag-drop interface class? multiple inheritance?
-class FileButton(DragDropButton):
-
-    multiDragEnter = pyqtSignal(int, int)
-    multiDragLeave = pyqtSignal(int, int)
-    multiDrop = pyqtSignal(int, list)
-
+#child of DragDropButton supporting multi-file drag-drop
+class FileButton(QMultiDragDropMixin, DragDropButton):
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
         super().__init__(btnType=btnType, parent=parent)
 
@@ -793,73 +789,29 @@ class FileButton(DragDropButton):
         #wrap file string in a list to match signal type
         self.fileChanged.emit([ f[0] ])
 
-    def dragEnterEvent(self, event):
-        super().dragEnterEvent(event)
-        if not event.isAccepted():
-            return
-
-        f = self.getFilesFromEvent(event)
-        self.multiDragEnter.emit(self._parent.getIndex(), len(f))
-
-    def dragLeaveEvent(self, event):
-        super().dragLeaveEvent(event)
-
-        self.multiDragLeave.emit(self._parent.getIndex(), Constants.MAX_DRAW_MULTI_DRAGDROP)
-
-    def dropEvent(self, event):
-        super().dropEvent(event)
-        if not event.isAccepted():
-            return
-
-        f = self.getFilesFromEvent(event)
-        self.multiDrop.emit(self._parent.getIndex(), f)
-
     def multiDragEnterEvent(self, initIndex, count):
-        #check if this element should be highlighted
-        selfIndex = self._parent.getIndex()
-        if(selfIndex < initIndex):
-            return
-        if(selfIndex >= initIndex + min(Constants.MAX_DRAW_MULTI_DRAGDROP, count)):
+        super().multiDragEnterEvent(initIndex, count)
+
+    def multiDragLeaveEvent(self, initIndex, count):
+        super().multiDragLeaveEvent(initIndex, count)
+
+    def multiDropEvent(self, initIndex, files):
+        dropIndex = super().multiDropEvent(initIndex, files)
+        if dropIndex < 0:
             return
 
-        #update styling
+        #save file
+        self.setFile(files[dropIndex])
+        self.fileChanged.emit([ files[dropIndex] ])
+
+    def highlightStyling(self, initIndex, selfIndex):
         self.setProperty(StyleProperties.DRAG_HELD, True)
         self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - (selfIndex - initIndex))
         self._childFrame.setProperty(StyleProperties.DRAG_HELD, True)
         self.repolish(self)
         self.repolish(self._childFrame)
 
-    def multiDragLeaveEvent(self, initIndex, count):
-        #check if this element should be highlighted
-        selfIndex = self._parent.getIndex()
-        if(selfIndex < initIndex):
-            return
-        if(selfIndex >= initIndex + min(Constants.MAX_DRAW_MULTI_DRAGDROP, count)):
-            return
-
-        #reset styling
-        self.setProperty(StyleProperties.DRAG_HELD, False)
-        self.setProperty(StyleProperties.ALPHA, 10)
-        self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
-        self.repolish(self)
-        self.repolish(self._childFrame)
-
-    def multiDropEvent(self, initIndex, files):
-        #check if this element should be highlighted
-        #   allow all files to drop, instead of restricting like outline render
-        selfIndex = self._parent.getIndex()
-        if(selfIndex < initIndex):
-            return
-        if(selfIndex >= initIndex + len(files)):
-            return
-
-        #save file
-        deltaIndex = selfIndex - initIndex
-
-        self.setFile(files[deltaIndex])
-        self.fileChanged.emit([ files[deltaIndex] ])
-
-        #reset styling
+    def resetStyling(self):
         self.setProperty(StyleProperties.DRAG_HELD, False)
         self.setProperty(StyleProperties.ALPHA, 10)
         self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
@@ -1502,7 +1454,7 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
 
 
 #semi-transparent popup to display errors during pack generation
-class StatusDisplayWidget(QtWidgets.QLabel, QSetsNameFromType):
+class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
     def __init__(self, text, relativeWidget, parent = None):
         super().__init__(text=text, parent=parent)
 
@@ -1531,10 +1483,6 @@ class StatusDisplayWidget(QtWidgets.QLabel, QSetsNameFromType):
     def mousePressEvent(self, event):
         event.accept()
         self.hide()
-
-    def repolish(self, obj):
-        obj.style().unpolish(obj)
-        obj.style().polish(obj)
 
     #widget is not part of a layout, so position has to be updated manually
     def setBasePos(self):
