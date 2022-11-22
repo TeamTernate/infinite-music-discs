@@ -69,6 +69,12 @@ class QDragDropMixin():
     def supportsFileType(self, ext):
         raise NotImplementedError
 
+    def highlightStyling(self):
+        raise NotImplementedError
+
+    def resetStyling(self):
+        raise NotImplementedError
+
 #mixin class that implements most multi-drag-drop functionality
 class QMultiDragDropMixin(QDragDropMixin):
     multiDragEnter = pyqtSignal(int, int)
@@ -779,6 +785,7 @@ class FileButton(QMultiDragDropMixin, DragDropButton):
         else:
             fileTypeStr = Constants.FILTER_MUSIC
 
+        #allow user to pick one file for this button
         f = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '.', fileTypeStr)
 
         if(f[0] == ''):
@@ -788,12 +795,6 @@ class FileButton(QMultiDragDropMixin, DragDropButton):
 
         #wrap file string in a list to match signal type
         self.fileChanged.emit([ f[0] ])
-
-    def multiDragEnterEvent(self, initIndex, count):
-        super().multiDragEnterEvent(initIndex, count)
-
-    def multiDragLeaveEvent(self, initIndex, count):
-        super().multiDragLeaveEvent(initIndex, count)
 
     def multiDropEvent(self, initIndex, files):
         dropIndex = super().multiDropEvent(initIndex, files)
@@ -843,12 +844,13 @@ class NewDiscButton(DragDropButton, QSetsNameFromType):
         #new disc button only accepts music files on click
         fileTypeStr = Constants.FILTER_MUSIC
 
-        #allow multiple files
+        #allow user to pick multiple files using dialog
         f = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open file', '.', fileTypeStr)
 
         if(f[0] == []):
             return
 
+        #return file list directly, signal is of type list
         self.fileChanged.emit( f[0] )
 
     def dragEnterEvent(self, event):
@@ -856,23 +858,26 @@ class NewDiscButton(DragDropButton, QSetsNameFromType):
         if not event.isAccepted():
             return
 
-        self.setProperty(StyleProperties.DRAG_HELD, True)
-        self.repolish(self)
+        self.highlightStyling()
 
     def dragLeaveEvent(self, event):
         super().dragLeaveEvent(event)
-
-        self.setProperty(StyleProperties.DRAG_HELD, False)
-        self.repolish(self)
+        self.resetStyling()
 
     def dropEvent(self, event):
         super().dropEvent(event)
         if not event.isAccepted():
             return
-        
+
         f = self.getFilesFromEvent(event)
         self.fileChanged.emit(f)
+        self.resetStyling()
 
+    def highlightStyling(self):
+        self.setProperty(StyleProperties.DRAG_HELD, True)
+        self.repolish(self)
+
+    def resetStyling(self):
         self.setProperty(StyleProperties.DRAG_HELD, False)
         self.repolish(self)
 
