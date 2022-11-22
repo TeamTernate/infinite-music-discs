@@ -15,10 +15,11 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 from src import generator
 from src.generator import Status
 from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties, DisplayStrings
-from src.definitions import StatusMessageDict, StatusStickyDict, DigitNameDict, PackFormatsDict, GB_CSS_STYLESHEET, CSS_STYLESHEET
+from src.definitions import StatusMessageDict, StatusStickyDict, PackFormatsDict, GB_CSS_STYLESHEET, CSS_STYLESHEET
 
 
 
+#mixin class requiring inheriting classes to use their class name as their object name
 class QSetsNameFromType(QtCore.QObject):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -600,7 +601,6 @@ class DeleteButton(QtWidgets.QPushButton, QSetsNameFromType):
 
 #button for reordering track list elements
 class ArrowButton(QtWidgets.QPushButton, QSetsNameFromType):
-
     pressed = pyqtSignal(int)
 
     #use dictionary to choose appropriate icon, based on button type and disabled status
