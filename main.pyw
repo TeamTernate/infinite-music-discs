@@ -15,7 +15,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from src.definitions import Assets, Constants
-from src.components import CentralWidget
+from src.components.common import CentralWidget
 
 class UI(QtWidgets.QMainWindow):
     resized = QtCore.pyqtSignal()
