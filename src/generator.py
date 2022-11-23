@@ -10,12 +10,12 @@ import os
 import json
 import shutil
 import sys
-import enum
 import zipfile
 import pyffmpeg
 import tempfile
 
 from mutagen.mp3 import MP3, HeaderNotFoundError
+from src.definitions import Status
 from src.commands import ReplaceItemCommand, ItemSlot
 
 default_pack_name = 'infinite_music_discs'
@@ -31,27 +31,8 @@ default_pack_format = 8
 tmp_path = None
 
 #TODO: design this to be split into multiple variants for v1.x and v2.x
-
-#TODO: integrate fully with GUI, move to definitions.py
-class Status(enum.Enum):
-    SUCCESS = 0
-    LIST_EMPTY = 1
-    LIST_UNEVEN_LENGTH = 2
-    IMAGE_FILE_MISSING = 3
-    BAD_IMAGE_TYPE = 4
-    TRACK_FILE_MISSING = 5
-    BAD_TRACK_TYPE = 6
-    BAD_INTERNAL_NAME = 7
-    PACK_IMAGE_MISSING = 8
-    BAD_PACK_IMAGE_TYPE = 9
-    BAD_OGG_CONVERT = 10
-    BAD_ZIP = 11
-    IMAGE_FILE_NOT_GIVEN = 12
-    TRACK_FILE_NOT_GIVEN = 13
-    BAD_MP3_META = 14
-    BAD_UNICODE_CHAR = 15
-    FFMPEG_CONVERT_FAIL = 16
-    DUP_INTERNAL_NAME = 17
+#TODO: create generator_wrapper.py that handles all the status and validation stuff, and have
+#   generator_v1.py and generator_v2.py to handle datapack creation?
 
 
 

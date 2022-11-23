@@ -13,8 +13,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QRect, QPoint, QSize
 
 from src import generator
-from src.generator import Status
-from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, FileExt, StyleProperties, DisplayStrings
+from src.definitions import Assets, Constants, ButtonType, Helpers, SettingType, Status, FileExt, StyleProperties, DisplayStrings
 from src.definitions import StatusMessageDict, StatusStickyDict, PackFormatsDict, GB_CSS_STYLESHEET, CSS_STYLESHEET
 
 

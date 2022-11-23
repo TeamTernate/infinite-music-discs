@@ -9,7 +9,6 @@ import sys
 import unidecode
 from enum import Enum
 from datetime import datetime
-from src.generator import Status
 
 #constants
 #TODO: use dataclass to store values
@@ -46,6 +45,26 @@ class SettingType(Enum):
     DROPDOWN = 4
     NUM_ENTRY = 5
     TXT_ENTRY = 6
+
+class Status(Enum):
+    SUCCESS = 0
+    LIST_EMPTY = 1
+    LIST_UNEVEN_LENGTH = 2
+    IMAGE_FILE_MISSING = 3
+    BAD_IMAGE_TYPE = 4
+    TRACK_FILE_MISSING = 5
+    BAD_TRACK_TYPE = 6
+    BAD_INTERNAL_NAME = 7
+    PACK_IMAGE_MISSING = 8
+    BAD_PACK_IMAGE_TYPE = 9
+    BAD_OGG_CONVERT = 10
+    BAD_ZIP = 11
+    IMAGE_FILE_NOT_GIVEN = 12
+    TRACK_FILE_NOT_GIVEN = 13
+    BAD_MP3_META = 14
+    BAD_UNICODE_CHAR = 15
+    FFMPEG_CONVERT_FAIL = 16
+    DUP_INTERNAL_NAME = 17
 
 class FileExt():
     PNG = 'png'
