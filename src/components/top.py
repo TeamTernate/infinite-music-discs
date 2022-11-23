@@ -483,9 +483,6 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
 
 
 
-#TODO: move primary widget into its own separate file
-#   separate files for DiscList and SettingsList
-#   generally, separate files for different tabs
 #TODO: standardize where size policies are set - probably inside widget's own init makes more sense
 #primary container widget
 class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):

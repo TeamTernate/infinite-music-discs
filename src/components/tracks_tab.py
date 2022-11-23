@@ -171,6 +171,8 @@ class AbstractDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):
     def heightForWidth(self, width):
         return width * 0.375
 
+
+
 #TODO: move some parsing / helper functions to Helpers() class
 #TODO: create data subclass to store magic numbers by name? reduce confusing magic numbers?
 #entry in list of tracks

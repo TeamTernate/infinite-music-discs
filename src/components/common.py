@@ -72,6 +72,8 @@ class QDragDropMixin():
     def resetStyling(self):
         raise NotImplementedError
 
+
+
 #mixin class that implements most multi-drag-drop functionality
 class QMultiDragDropMixin(QDragDropMixin):
     multiDragEnter = pyqtSignal(int, int)
@@ -243,7 +245,7 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
         self.setImage(self._file)
 
     def sizeHint(self):
-        return(QSize(80, 80))
+        return QSize(80, 80)
 
     def mousePressEvent(self, event):
         event.accept()
