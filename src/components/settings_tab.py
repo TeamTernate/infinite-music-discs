@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#Infinite Music Discs datapack + resourcepack GUI components module
+#Infinite Music Discs settings-tab-specific GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
 from PyQt5 import QtCore

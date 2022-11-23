@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#Infinite Music Discs datapack + resourcepack GUI components module
+#Infinite Music Discs tracks-tab-specific GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
 from PyQt5 import QtCore
@@ -10,7 +10,6 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 
 from src.definitions import Assets, Constants, ButtonType, Helpers, StyleProperties
-
 from src.components.common import QSetsNameFromType, QFocusLineEdit, DragDropButton, FileButton
 
 
