@@ -4,6 +4,12 @@
 #Infinite Music Discs datapack + resourcepack GUI execution module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+#TODO: tint DiscListEntries during pack generation, display pass/fail indicators showing which ones finished
+#  successfully and which ones caused an error (if any)
+#TODO: display "converting track x/y" to indicate progress? necessary?
+
+#TODO: add ffmpeg speed <-> quality double-sided slider?
+
 #TODO: drag-dropping a track title with "." in the name causes it to truncate
 import sys
 import ctypes
@@ -20,7 +26,7 @@ from src.components.top import CentralWidget
 class UI(QtWidgets.QMainWindow):
     resized = QtCore.pyqtSignal()
     moved = QtCore.pyqtSignal()
-    
+
     def __init__(self):
         super().__init__()
 
@@ -31,7 +37,7 @@ class UI(QtWidgets.QMainWindow):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.resized.emit()
-    
+
     def moveEvent(self, event):
         super().moveEvent(event)
         self.moved.emit()
@@ -71,7 +77,7 @@ if __name__ == "__main__":
     #init app and begin
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
-    
+
     ui = UI()
     ui.resize(500, 650)
     ui.setMinimumSize(400, 500)
