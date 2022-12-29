@@ -565,24 +565,12 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
 
     def generatePacks(self):
         settings = self._settingsList.getUserSettings()
-        discEntries = self._discList.getDiscEntries()
-
-        texture_files =     []
-        track_files =       []
-        titles =            []
-        internal_names =    []
-
-        #TODO: try to use 1 dictionary instead of parallel lists
-        for e in discEntries:
-            texture_files.append(e[0])
-            track_files.append(e[1])
-            titles.append(e[2])
-            internal_names.append(e[3])
+        disc_entries = self._discList.getDiscEntries()
 
         #launch worker thread to generate packs
         #   FFmpeg conversion is slow, don't want to lock up UI
         self._thread = QtCore.QThread(self)
-        self._worker = GeneratePackWorker(settings, texture_files, track_files, titles, internal_names)
+        self._worker = GeneratePackWorker(settings, disc_entries)
         self._worker.moveToThread(self._thread)
 
         self._worker.started.connect(lambda: self._btnGen.setCurrentIndex.emit(1))
@@ -616,14 +604,14 @@ class GeneratePackWorker(QtCore.QObject):
     progress = pyqtSignal(int)
     max_prog = pyqtSignal(int)
 
-    def __init__(self, settings, texture_files, track_files, titles, internal_names):
+    def __init__(self, settings, disc_entries):
         super().__init__()
 
         self._settings = settings
-        self._texture_files = texture_files
-        self._track_files = track_files
-        self._titles = titles
-        self._internal_names = internal_names
+        self._texture_files = disc_entries.texture_files
+        self._track_files = disc_entries.track_files
+        self._titles = disc_entries.titles
+        self._internal_names = disc_entries.internal_names
 
     #TODO: make the status returning system more elegant - function to capture status and check that it's not success?
     def generate(self):

@@ -9,6 +9,8 @@ import sys
 import unidecode
 from enum import Enum
 from datetime import datetime
+from typing import List
+from dataclasses import dataclass, field
 
 #constants
 #TODO: use dataclass to store values
@@ -211,6 +213,23 @@ PackFormatsDict = {
     '1.15':             {'dp':5,  'rp':5},
     '1.14':             {'dp':4,  'rp':4}
 }
+
+
+
+#dataclasses to collect DiscList contents for pack generation
+@dataclass
+class DiscListEntryContents:
+    texture_file:   str = ""
+    track_file:     str = ""
+    title:          str = ""
+    internal_name:  str = ""
+
+@dataclass
+class DiscListContents:
+    texture_files:  List[str] = field(default_factory=list)
+    track_files:    List[str] = field(default_factory=list)
+    titles:         List[str] = field(default_factory=list)
+    internal_names: List[str] = field(default_factory=list)
 
 
 

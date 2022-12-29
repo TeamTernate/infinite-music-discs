@@ -9,7 +9,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 
-from src.definitions import Assets, Constants, ButtonType, Helpers, StyleProperties
+from src.definitions import Assets, Constants, ButtonType, FileExt, Helpers, StyleProperties, DiscListEntryContents, DiscListContents
 from src.components.common import QSetsNameFromType, QFocusLineEdit, DragDropButton, FileButton
 
 
@@ -291,16 +291,17 @@ class DiscListEntry(AbstractDiscListEntry):
     def getIndex(self):
         return self._parent._childLayout.indexOf(self)
 
-    #TODO: return dictionary / dataclass so entries are named?
-    #TODO: inner class factory for generating "entry" object?
     def getEntry(self):
-        return [self._btnIcon.getFile(), self._btnTrack.getFile(), self._leTitle.text(), self._lblIName.text()]
+        return DiscListEntryContents(texture_file   = self._btnIcon.getFile(),
+                                     track_file     = self._btnTrack.getFile(),
+                                     title          = self._leTitle.text(),
+                                     internal_name  = self._lblIName.text())
 
-    def setEntry(self, fIcon, fTrack, title):
-        self._btnIcon.setFile(fIcon)
-        self._btnTrack.setFile(fTrack)
+    def setEntry(self, entry_contents):
+        self._btnIcon.setFile(entry_contents.texture_file)
+        self._btnTrack.setFile(entry_contents.track_file)
 
-        self.setTitle([ fTrack ])
+        self.setTitle([ entry_contents.track_file ])
 
     def setTitle(self, fFileList):
         #TODO: using completeBaseName here breaks if there are "." in the track name
@@ -414,13 +415,17 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
 
     #get all stored track data
     def getDiscEntries(self):
-        entries = []
-        
-        for i in range(self._childLayout.count()):
-            e = self._childLayout.itemAt(i).widget()
+        entries = DiscListContents()
 
-            if(type(e) == DiscListEntry):
-                entries.append(e.getEntry())
+        for i in range(self._childLayout.count()):
+            widget = self._childLayout.itemAt(i).widget()
+
+            if(type(widget) == DiscListEntry):
+                entry = widget.getEntry()
+                entries.texture_files.append(entry.texture_file)
+                entries.track_files.append(entry.track_file)
+                entries.titles.append(entry.title)
+                entries.internal_names.append(entry.internal_name)
 
         return entries
 
@@ -428,10 +433,10 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
         return self._childLayout.count()-2
 
     #insert a new track object into the list of tracks
-    def addDiscEntry(self, fIcon, fTrack, title):
+    def addDiscEntry(self, entry_contents):
         #add new entry
         tmpEntry = DiscListEntry(self)
-        tmpEntry.setEntry(fIcon, fTrack, title)
+        tmpEntry.setEntry(entry_contents)
 
         #insert into list
         self._childLayout.insertWidget(self.getNumDiscEntries(), tmpEntry, 0, Qt.AlignTop)
@@ -446,11 +451,15 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
 
     #add multiple track objects to the list of tracks
     def addDiscEntries(self, fTrackList):
-        for f in fTrackList:
-            if '.png' in f:
-                self.addDiscEntry(f, '', "New Track")
+        for file in fTrackList:
+            f = QtCore.QFileInfo(file).suffix()
+
+            if f == FileExt.PNG:
+                entry_contents = DiscListEntryContents(texture_file=file)
             else:
-                self.addDiscEntry('', f, "New Track")
+                entry_contents = DiscListEntryContents(track_file=file)
+
+            self.addDiscEntry(entry_contents)
 
     #add remaining track objects after a multi drag-drop 
     def addExcessEntries(self, initIndex, fTrackList):
