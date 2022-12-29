@@ -275,9 +275,15 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
     def sizeHint(self):
         return QSize(80, 80)
 
+    #TODO: how to reduce the number of on resize / on show handler calls?
     #widget geometry is wrong at creation, so icon pixmap gets scaled to the wrong dimensions
     #redraw icon on resize events to ensure icon is correctly scaled
     def resizeEvent(self, event):
+        event.accept()
+        self.setImage(self._file)
+
+    #also redraw icon on show event to handle cases where buttons are created without being resized after
+    def showEvent(self, event):
         event.accept()
         self.setImage(self._file)
 
