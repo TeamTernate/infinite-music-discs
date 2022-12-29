@@ -11,6 +11,8 @@
 #TODO: add ffmpeg speed <-> quality double-sided slider?
 
 #TODO: drag-dropping a track title with "." in the name causes it to truncate
+
+#TODO: unify colors of empty icon, empty track, new disc track
 import sys
 import ctypes
 import platform

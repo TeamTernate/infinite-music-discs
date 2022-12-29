@@ -219,10 +219,38 @@ class QFocusLineEdit(QMultiDragDropLineEdit):
 
 
 
+#child of QLabel with size hint specified
+#prevents NewDiscButton icon from shrinking too much on resize event
+class QImgLabel(QtWidgets.QLabel):
+    def sizeHint(self):
+        return QSize(52, 52)
+
+
+
 #file selection button supporting file drag/drop
 class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
     fileChanged = pyqtSignal(list)
+
+    IconDict = {
+        FileExt.OGG: Assets.ICON_OGG,
+        FileExt.MP3: Assets.ICON_MP3,
+        FileExt.WAV: Assets.ICON_WAV
+    }
+
+    DefaultIconDict = {
+        ButtonType.IMAGE:       Assets.ICON_ICON_EMPTY,
+        ButtonType.PACKPNG:     Assets.ICON_PACK_EMPTY,
+        ButtonType.TRACK:       Assets.ICON_TRACK_EMPTY,
+        ButtonType.NEW_TRACK:   Assets.ICON_NEW_DISC
+    }
+
+    SupportedFiletypesDict = {
+        ButtonType.IMAGE:       [ FileExt.PNG ],
+        ButtonType.PACKPNG:     [ FileExt.PNG ],
+        ButtonType.TRACK:       [ FileExt.MP3, FileExt.WAV, FileExt.OGG ],
+        ButtonType.NEW_TRACK:   [ FileExt.MP3, FileExt.WAV, FileExt.OGG ]
+    }
 
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
         super().__init__(parent=parent)
@@ -240,12 +268,18 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
         self.setAcceptDrops(True)
 
         #icon object
-        self._img = QtWidgets.QLabel()
+        self._img = QImgLabel(self)
         self._img.setScaledContents(True)
         self.setImage(self._file)
 
     def sizeHint(self):
         return QSize(80, 80)
+
+    #widget geometry is wrong at creation, so icon pixmap gets scaled to the wrong dimensions
+    #redraw icon on resize events to ensure icon is correctly scaled
+    def resizeEvent(self, event):
+        event.accept()
+        self.setImage(self._file)
 
     def mousePressEvent(self, event):
         event.accept()
@@ -263,30 +297,14 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
     def setImage(self, file):
         f = QtCore.QFileInfo(file).suffix()
 
-        #TODO: move this somewhere more global ^ top of class maybe
-        assetDict = {
-            FileExt.PNG: self._file,
-            FileExt.OGG: Assets.ICON_OGG,
-            FileExt.MP3: Assets.ICON_MP3,
-            FileExt.WAV: Assets.ICON_WAV
-        }
-
-        #TODO: use another dictionary to nest this decision logic
-        imgPath = ''
-        if(self._type == ButtonType.IMAGE):
-            imgPath = assetDict.get(f, Assets.ICON_ICON_EMPTY)
-        elif(self._type == ButtonType.TRACK):
-            imgPath = assetDict.get(f, Assets.ICON_TRACK_EMPTY)
-        elif(self._type == ButtonType.PACKPNG):
-            imgPath = assetDict.get(f, Assets.ICON_PACK_EMPTY)
-        elif(self._type == ButtonType.NEW_TRACK):
-            self.setText('+')
-            #imgPath = Assets.ICON_NEW_DISC
+        if(f == FileExt.PNG):
+            imgPath = self._file
         else:
-            pass
+            defaultIcon = self.DefaultIconDict.get(self._type, '')
+            imgPath = self.IconDict.get(f, defaultIcon)
 
         if not imgPath == '':
-          self._img.setPixmap(self.getScaledImage(QtGui.QPixmap(imgPath)))
+            self._img.setPixmap(self.getScaledImage(QtGui.QPixmap(imgPath)))
 
     def getScaledImage(self, pixmap):
         return pixmap.scaled(self._img.frameGeometry().width(), self._img.frameGeometry().height(), Qt.KeepAspectRatio)
@@ -305,14 +323,7 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
         return sorted(f, key=Helpers.natural_keys)
 
     def supportsFileType(self, ext):
-        if(self._type == ButtonType.IMAGE):
-            return ( ext in [ FileExt.PNG ] )
-        if(self._type == ButtonType.PACKPNG):
-            return ( ext in [ FileExt.PNG ] )
-        if(self._type == ButtonType.TRACK):
-            return ( ext in [ FileExt.MP3, FileExt.WAV, FileExt.OGG ] )
-        if(self._type == ButtonType.NEW_TRACK):
-            return ( ext in [ FileExt.MP3, FileExt.WAV, FileExt.OGG ] )
+        return ( ext in self.SupportedFiletypesDict.get(self._type, []) )
 
 
 

@@ -94,16 +94,14 @@ class NewDiscButton(DragDropButton, QSetsNameFromType):
     def __init__(self, parent = None):
         super().__init__(btnType=ButtonType.NEW_TRACK, parent=parent)
 
-        self._img.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-
         self.setProperty(StyleProperties.DRAG_HELD, False)
 
         layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
-        layout.setContentsMargins(5, 5, 5, 5)
-        layout.addStretch(1)
+        layout.setContentsMargins(0, 14, 0, 14)
+        layout.addStretch()
         layout.addWidget(self._img)
-        layout.addStretch(1)
+        layout.addStretch()
 
         self.setLayout(layout)
 
@@ -278,6 +276,7 @@ class DiscListEntry(AbstractDiscListEntry):
         self._btnDownArrow.setObjectName('ArrowDown')
 
     def leaveEvent(self, event):
+        super().leaveEvent(event)
         self._btnDelete.clearHoverState()
 
     def listReorderEvent(self, count):

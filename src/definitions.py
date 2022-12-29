@@ -104,7 +104,7 @@ class Assets():
     ICON_ICON_EMPTY =       Helpers.data_path() + 'data/image-empty.png'
     ICON_TRACK_EMPTY =      Helpers.data_path() + 'data/track-empty.png'
     ICON_PACK_EMPTY =       Helpers.data_path() + 'data/pack-empty.png'
-    ICON_NEW_DISC =         Helpers.data_path() + 'data/new-disc.png'
+    ICON_NEW_DISC =         Helpers.data_path() + 'data/track-new.png'
     ICON_MP3 =              Helpers.data_path() + 'data/track-mp3.png'
     ICON_WAV =              Helpers.data_path() + 'data/track-wav.png'
     ICON_OGG =              Helpers.data_path() + 'data/track-ogg.png'
