@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt
 
 from src.definitions import Constants, ButtonType, SettingType, DisplayStrings
 from src.definitions import PackFormatsDict
-from src.components.common import QSetsNameFromType, QFocusLineEdit, FileButton
+from src.components.common import QSetsNameFromType, QFocusLineEdit, MultiDragDropButton
 
 
 
@@ -97,7 +97,7 @@ class SettingsSelector(QtWidgets.QWidget):
 
         if(self._type == SettingType.PACKPNG):
             self._parent.setObjectName("PACKPNG")
-            self._widget = FileButton(ButtonType.PACKPNG, parent)
+            self._widget = MultiDragDropButton(ButtonType.PACKPNG, parent)
             self._widget.multiDragEnter.connect(self._widget.multiDragEnterEvent)
             self._widget.multiDragLeave.connect(self._widget.multiDragLeaveEvent)
             self._widget.multiDrop.connect(self._widget.multiDropEvent)

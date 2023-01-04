@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 
 from src.definitions import Assets, Constants, ButtonType, FileExt, Helpers, StyleProperties, DiscListEntryContents, DiscListContents
-from src.components.common import QSetsNameFromType, QFocusLineEdit, DragDropButton, FileButton
+from src.components.common import QSetsNameFromType, QFocusLineEdit, DragDropButton, MultiDragDropButton
 
 
 
@@ -181,8 +181,8 @@ class DiscListEntry(AbstractDiscListEntry):
         layout = QtWidgets.QHBoxLayout()
 
         #child widgets
-        self._btnIcon = FileButton(ButtonType.IMAGE, self)
-        self._btnTrack = FileButton(ButtonType.TRACK, self)
+        self._btnIcon = MultiDragDropButton(ButtonType.IMAGE, self)
+        self._btnTrack = MultiDragDropButton(ButtonType.TRACK, self)
         self._leTitle = QFocusLineEdit("Track Title", self)
         self._lblIName = QSubtitleLabel("internal name", self)
         self._btnDelete = DeleteButton(self)

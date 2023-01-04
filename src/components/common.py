@@ -336,7 +336,7 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
 
 
 #child of DragDropButton supporting multi-file drag-drop
-class FileButton(QMultiDragDropMixin, DragDropButton):
+class MultiDragDropButton(QMultiDragDropMixin, DragDropButton):
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
         super().__init__(btnType=btnType, parent=parent)
 
@@ -360,7 +360,7 @@ class FileButton(QMultiDragDropMixin, DragDropButton):
         self.setProperty(StyleProperties.DRAG_HELD, False)
         self._childFrame.setProperty(StyleProperties.DRAG_HELD, False)
 
-        self._childFrame.setObjectName('FileButtonFrame')
+        self._childFrame.setObjectName('MultiDragDropButtonFrame')
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)

@@ -515,52 +515,52 @@ DiscListEntry {
     background-color: rgb(48, 48, 48);
 }
 
-FileButton {
+MultiDragDropButton {
     background-color: rgb(48, 48, 48);
     border: 5px solid rgb(48, 48, 48);
 }
 
-FileButton[drag_held="true"] {
+MultiDragDropButton[drag_held="true"] {
     border: 5px solid rgb(51, 178, 45);
 }
 
-FileButton[alpha="9"] {
+MultiDragDropButton[alpha="9"] {
     border: 5px solid rgba(51, 178, 45, 0.9);
 }
 
-FileButton[alpha="8"] {
+MultiDragDropButton[alpha="8"] {
     border: 5px solid rgba(51, 178, 45, 0.8);
 }
 
-FileButton[alpha="7"] {
+MultiDragDropButton[alpha="7"] {
     border: 5px solid rgba(51, 178, 45, 0.7);
 }
 
-FileButton[alpha="6"] {
+MultiDragDropButton[alpha="6"] {
     border: 5px solid rgba(51, 178, 45, 0.6);
 }
 
-FileButton[alpha="5"] {
+MultiDragDropButton[alpha="5"] {
     border: 5px solid rgba(51, 178, 45, 0.5);
 }
 
-FileButton[alpha="4"] {
+MultiDragDropButton[alpha="4"] {
     border: 5px solid rgba(51, 178, 45, 0.4);
 }
 
-FileButton[alpha="3"] {
+MultiDragDropButton[alpha="3"] {
     border: 5px solid rgba(51, 178, 45, 0.3);
 }
 
-FileButton[alpha="2"] {
+MultiDragDropButton[alpha="2"] {
     border: 5px solid rgba(51, 178, 45, 0.2);
 }
 
-FileButton[alpha="1"] {
+MultiDragDropButton[alpha="1"] {
     border: 5px solid rgba(51, 178, 45, 0.1);
 }
 
-QFrame#FileButtonFrame {
+QFrame#MultiDragDropButtonFrame {
     border-top: 4px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 black, stop:1 rgba(0,0,0,0));
     border-bottom: 3px solid qlineargradient(x1:0, y1:1, x2:0, y2:0, stop:0 rgb(32,32,32), stop:1 rgba(0,0,0,0));
     border-left: 4px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 black, stop:1 rgba(0,0,0,0));
@@ -569,11 +569,11 @@ QFrame#FileButtonFrame {
     background-color: rgb(32, 32, 32);
 }
 
-QFrame#FileButtonFrame:hover[drag_held="true"] {
+QFrame#MultiDragDropButtonFrame:hover[drag_held="true"] {
     background-color: rgb(72, 72, 72);
 }
 
-QFrame#FileButtonFrame:hover {
+QFrame#MultiDragDropButtonFrame:hover {
     background-color: rgb(72, 72, 72);
 }
 
