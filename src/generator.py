@@ -26,7 +26,7 @@ zip_suffix = '.zip'
 
 datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
-default_pack_format = 8
+default_pack_format = 8     #TODO: can this come from definitions?
 
 tmp_path = None
 

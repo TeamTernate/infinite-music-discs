@@ -12,6 +12,8 @@
 
 #TODO: drag-dropping a track title with "." in the name causes it to truncate
 
+#TODO: consider type-annotating all functions, to clarify in/out types
+
 import sys
 import ctypes
 import platform

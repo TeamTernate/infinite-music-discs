@@ -109,8 +109,10 @@ class QMultiDragDropMixin(QDragDropMixin):
         if(selfIndex >= initIndex + min(Constants.MAX_DRAW_MULTI_DRAGDROP, count)):
             return
 
+        dropIndex = selfIndex - initIndex
+
         #if so, highlight with gradient
-        self.highlightStyling(initIndex, selfIndex)
+        self.highlightStyling(dropIndex)
 
     def multiDragLeaveEvent(self, initIndex, count):
         #check if this element is currently highlighted
@@ -133,12 +135,18 @@ class QMultiDragDropMixin(QDragDropMixin):
         if(selfIndex >= initIndex + len(files)):
             return -1
 
+        dropIndex = selfIndex - initIndex
+
         #remove highlight since files were dropped
         self.resetStyling()
 
-        return (selfIndex - initIndex)
+        #run implementation-specific code from inheriting classes
+        self.postMultiDropEvent(dropIndex, files)
 
-    def highlightStyling(self, initIndex, selfIndex):
+    def postMultiDropEvent(self, dropIndex, files):
+        raise NotImplementedError
+
+    def highlightStyling(self, dropIndex):
         raise NotImplementedError
 
     def resetStyling(self):
@@ -179,22 +187,16 @@ class QDragDropLineEdit(QDragDropMixin, QRepolishMixin, QtWidgets.QLineEdit, QSe
 
 #child of QDragDropLineEdit with multi-drag-drop support
 class QMultiDragDropLineEdit(QMultiDragDropMixin, QDragDropLineEdit):
-    def multiDropEvent(self, initIndex, files):
-        #TODO: maybe bad practice to have super return value but child doesn't?
-        #   maybe better to have helper function defined elsewhere that parent uses
-
-        #TODO: actually pass an event into these functions?
-        #  check if event.isAccepted instead of returning value
-        dropIndex = super().multiDropEvent(initIndex, files)
+    def postMultiDropEvent(self, dropIndex, files):
         if dropIndex < 0:
             return
 
         #set text from line in file
         self.setText(files[dropIndex])
 
-    def highlightStyling(self, initIndex, selfIndex):
+    def highlightStyling(self, dropIndex):
         self.setProperty(StyleProperties.DRAG_HELD, True)
-        self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - (selfIndex - initIndex))
+        self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - dropIndex)
         self.repolish(self)
 
     def resetStyling(self):
@@ -380,8 +382,7 @@ class FileButton(QMultiDragDropMixin, DragDropButton):
         #wrap file string in a list to match signal type
         self.fileChanged.emit([ f[0] ])
 
-    def multiDropEvent(self, initIndex, files):
-        dropIndex = super().multiDropEvent(initIndex, files)
+    def postMultiDropEvent(self, dropIndex, files):
         if dropIndex < 0:
             return
 
@@ -389,9 +390,9 @@ class FileButton(QMultiDragDropMixin, DragDropButton):
         self.setFile(files[dropIndex])
         self.fileChanged.emit([ files[dropIndex] ])
 
-    def highlightStyling(self, initIndex, selfIndex):
+    def highlightStyling(self, dropIndex):
         self.setProperty(StyleProperties.DRAG_HELD, True)
-        self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - (selfIndex - initIndex))
+        self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - dropIndex)
         self._childFrame.setProperty(StyleProperties.DRAG_HELD, True)
         self.repolish(self)
         self.repolish(self._childFrame)
