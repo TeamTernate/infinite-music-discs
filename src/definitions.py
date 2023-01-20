@@ -20,7 +20,7 @@ class Constants():
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
     
-    APP_TITLE = "IMD Datapack Generator - v1.3"
+    APP_TITLE = "IMD Datapack Generator - v1.4"
 
     TIMESTAMP = datetime.now().strftime("%m-%d-%Y_%H%M%S")
     LOG_EXC_MSG = ""
@@ -171,6 +171,7 @@ DigitNameDict = {
 
 #dictionary to associate game version : pack format version
 PackFormatsDict = {
+    '1.19.4':           {'dp':11, 'rp':12},
     '1.19.3':           {'dp':10, 'rp':12},
     '1.19 - 1.19.2':    {'dp':10, 'rp':9},
     '1.18.2':           {'dp':9,  'rp':8},
