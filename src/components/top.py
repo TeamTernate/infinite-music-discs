@@ -11,7 +11,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
 
-from src import generator
+from src.generator import top as generator
 from src.definitions import Status
 from src.definitions import CSS_STYLESHEET, GB_CSS_STYLESHEET
 
