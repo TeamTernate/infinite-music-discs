@@ -15,6 +15,7 @@ import pyffmpeg
 import tempfile
 
 from mutagen.mp3 import MP3, HeaderNotFoundError
+from mutagen.oggvorbis import OggVorbis
 from src.definitions import Status, GeneratorContents, DiscListContents, DiscListEntryContents
 from src.commands import ReplaceItemCommand, ItemSlot
 
@@ -154,6 +155,7 @@ def convert_to_ogg(track_entry: DiscListEntryContents, mix_mono, create_tmp=True
     #convert file
     try:
         ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
+
     except Exception as e:
         #TODO: how to reraise exception and also return?
         print(e)
@@ -172,6 +174,24 @@ def convert_to_ogg(track_entry: DiscListEntryContents, mix_mono, create_tmp=True
         tmp_path = None
 
     return Status.SUCCESS, out_track
+
+
+
+def get_track_length(track_entry: DiscListEntryContents):
+    try:
+        #capture track length in seconds
+        meta_ogg = OggVorbis(track_entry.track_file)
+        length_s = meta_ogg.info.length
+
+        #convert from seconds to Minecraft ticks (20 t/s)
+        length_t = int(length_s) * 20
+
+    except Exception as e:
+        #TODO: how to reraise exception and also return?
+        print(e)
+        return Status.BAD_OGG_META, 0
+
+    return Status.SUCCESS, length_t
 
 
 

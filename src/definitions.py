@@ -67,6 +67,7 @@ class Status(Enum):
     BAD_UNICODE_CHAR = 15
     FFMPEG_CONVERT_FAIL = 16
     DUP_INTERNAL_NAME = 17
+    BAD_OGG_META = 18
 
 class FileExt():
     PNG = 'png'
@@ -159,7 +160,8 @@ StatusMessageDict = {
     Status.BAD_MP3_META:            "Failed to remove mp3 metadata while converting.",
     Status.BAD_UNICODE_CHAR:        "Couldn't use track name. Try removing uncommon characters.",
     Status.FFMPEG_CONVERT_FAIL:     "FFmpeg failed while converting a track to '.ogg' format.",
-    Status.DUP_INTERNAL_NAME:       "Some tracks have the same name. Try removing duplicate tracks."
+    Status.DUP_INTERNAL_NAME:       "Some tracks have the same name. Try removing duplicate tracks.",
+    Status.BAD_OGG_META:            "Failed to detect ogg file length while converting."
 }
 
 #dictionary to associate Status : sticky state
@@ -181,7 +183,8 @@ StatusStickyDict = {
     Status.BAD_MP3_META:            True,
     Status.BAD_UNICODE_CHAR:        True,
     Status.FFMPEG_CONVERT_FAIL:     True,
-    Status.DUP_INTERNAL_NAME:       True
+    Status.DUP_INTERNAL_NAME:       True,
+    Status.BAD_OGG_META:            True
 }
 
 #dictionary to associate digit : digit name
@@ -220,12 +223,12 @@ class DiscListEntryContents:
     track_file:     str = ""
     title:          str = ""
     internal_name:  str = ""
+    length:         int = 0
 
 #TODO: use iter and next so you don't have to iterate over entries?
 @dataclass
 class DiscListContents:
     entries: List[DiscListEntryContents] = field(default_factory=list)
-    lengths: List[int] = field(default_factory=int)
 
     def __len__(self):
         return len(self.entries)

@@ -647,8 +647,15 @@ class GeneratePackWorker(QtCore.QObject):
         #convert track files to ogg
         for i,e in enumerate(self._data.entry_list.entries):
             self._data.status, ogg_track = generator.convert_to_ogg(e, self._data.settings, (i == 0))
-
             self._data.entry_list.entries[i].track_file = ogg_track
+
+            if self.emit_status_bad(): return
+            self.emit_update_progress()
+
+            #detect track length
+            self._data.status, length = generator.get_track_length(e)
+            self._data.entry_list.entries[i].length = length
+            print(length)
 
             if self.emit_status_bad(): return
             self.emit_update_progress()
