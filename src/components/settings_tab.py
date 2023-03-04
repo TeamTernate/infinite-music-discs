@@ -206,6 +206,7 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
         self._childLayout.setSpacing(0)
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
+        #TODO: define all of this in definitions.py, parse dict to build settings tab
         self._childLayout.addWidget(SettingsListEntry('pack',       DisplayStrings.STR_PACKPNG_TITLE,   SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TOOLTIP))
         self._childLayout.addWidget(SettingsListEntry('version',    DisplayStrings.STR_VERSION_TITLE,   SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TOOLTIP, PackFormatsDict, self))
         #self._childLayout.addWidget(SettingsListEntry('offset',     DisplayStrings.STR_OFFSET_TITLE,    SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TOOLTIP, Constants.CUSTOM_MODEL_DATA_MAX))

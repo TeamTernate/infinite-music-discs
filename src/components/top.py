@@ -12,7 +12,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
 
 from src.generator import top as generator
-from src.definitions import Status
+from src.definitions import Status, GeneratorContents
 from src.definitions import CSS_STYLESHEET, GB_CSS_STYLESHEET
 
 from src.definitions import Assets, Constants, StyleProperties, StatusMessageDict, StatusStickyDict
@@ -564,13 +564,14 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
         self._status.setBasePos()
 
     def generatePacks(self):
-        settings = self._settingsList.getUserSettings()
-        disc_entries = self._discList.getDiscEntries()
+        generator_data = GeneratorContents()
+        generator_data.settings = self._settingsList.getUserSettings()
+        generator_data.entry_list = self._discList.getDiscEntries()
 
         #launch worker thread to generate packs
         #   FFmpeg conversion is slow, don't want to lock up UI
         self._thread = QtCore.QThread(self)
-        self._worker = GeneratePackWorker(settings, disc_entries)
+        self._worker = GeneratePackWorker(generator_data)
         self._worker.moveToThread(self._thread)
 
         self._worker.started.connect(lambda: self._btnGen.setCurrentIndex.emit(1))
@@ -604,14 +605,10 @@ class GeneratePackWorker(QtCore.QObject):
     progress = pyqtSignal(int)
     max_prog = pyqtSignal(int)
 
-    def __init__(self, settings, disc_entries):
+    def __init__(self, generator_data: GeneratorContents):
         super().__init__()
 
-        self._settings = settings
-        self._texture_files = disc_entries.texture_files
-        self._track_files = disc_entries.track_files
-        self._titles = disc_entries.titles
-        self._internal_names = disc_entries.internal_names
+        self._data = generator_data
 
     #TODO: make the status returning system more elegant - function to capture status and check that it's not success?
     def generate(self):
@@ -620,16 +617,13 @@ class GeneratePackWorker(QtCore.QObject):
         #total steps = validate + num track conversions + generate dp + generate rp
         self.min_prog.emit(0)
         self.progress.emit(0)
-        self.max_prog.emit(len(self._track_files) + 3)
+        self.max_prog.emit(1 + len(self._data.entry_list) + 1 + 1)
 
-        status = 0
+        status = Status.SUCCESS
         progress = 0
 
-        status = generator.validate(self._texture_files,
-                                    self._track_files,
-                                    self._titles,
-                                    self._internal_names,
-                                    self._settings['pack'])
+        #validate data before continuing
+        status = generator.validate(self._data)
         if not status == Status.SUCCESS:
             self.status.emit(status)
             self.finished.emit()
@@ -639,28 +633,23 @@ class GeneratePackWorker(QtCore.QObject):
         self.progress.emit(progress)
         self.valid.emit()
 
-        for i in range(len(self._track_files)):
-            #wrap string in list to allow C-style passing by reference
-            wrapper = [ self._track_files[i] ]
-            status = generator.convert_to_ogg(wrapper,
-                                              self._internal_names[i],
-                                              self._settings['mix_mono'],
-                                              (i == 0))
+        #convert track files to ogg
+        for i,e in enumerate(self._data.entry_list.entries):
+            status, ogg_track = generator.convert_to_ogg(e, self._data.settings, (i == 0))
+
+            self._data.entry_list.entries[i].track_file = ogg_track
+
             if not status == Status.SUCCESS:
                 self.status.emit(status)
                 self.finished.emit()
                 return
 
-            #extract modified string from wrapper list
-            self._track_files[i] = wrapper[0]
             progress += 1
             self.progress.emit(progress)
 
-        status = generator.generate_datapack(self._texture_files,
-                                             self._track_files,
-                                             self._titles,
-                                             self._internal_names,
-                                             self._settings)
+        #generate datapack
+        status = generator.generate_datapack(self._data.entry_list, self._data.settings)
+
         if not status == Status.SUCCESS:
             self.status.emit(status)
 
@@ -671,11 +660,9 @@ class GeneratePackWorker(QtCore.QObject):
         progress += 1
         self.progress.emit(progress)
 
-        status = generator.generate_resourcepack(self._texture_files,
-                                                 self._track_files,
-                                                 self._titles,
-                                                 self._internal_names,
-                                                 self._settings)
+        #generate resourcepack
+        status = generator.generate_resourcepack(self._data.entry_list,
+                                                 self._data.settings)
         if not status == Status.SUCCESS:
             self.status.emit(status)
 

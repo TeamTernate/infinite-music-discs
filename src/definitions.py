@@ -221,12 +221,44 @@ class DiscListEntryContents:
     title:          str = ""
     internal_name:  str = ""
 
+#TODO: use iter and next so you don't have to iterate over entries?
 @dataclass
 class DiscListContents:
-    texture_files:  List[str] = field(default_factory=list)
-    track_files:    List[str] = field(default_factory=list)
-    titles:         List[str] = field(default_factory=list)
-    internal_names: List[str] = field(default_factory=list)
+    entries: List[DiscListEntryContents] = field(default_factory=list)
+    lengths: List[int] = field(default_factory=int)
+
+    def __len__(self):
+        return len(self.entries)
+
+    @property
+    def texture_files(self):
+        return [entry.texture_file for entry in self.entries]
+
+    @property
+    def track_files(self):
+        return [entry.track_file for entry in self.entries]
+
+    @property
+    def titles(self):
+        return [entry.title for entry in self.entries]
+
+    @property
+    def internal_names(self):
+        return [entry.internal_name for entry in self.entries]
+
+
+
+@dataclass
+class GeneratorContents:
+    settings: dict = field(default_factory=dict)
+    entry_list: DiscListContents = field(default_factory=DiscListContents)
+
+
+
+#TODO: define SettingsContents dict which is used to generate settings tab
+#   then you don't have to edit class anymore
+#also use factory model to generate settings, abstract specific construction
+#pass each setting the same dict, each can grab different portions of it
 
 
 

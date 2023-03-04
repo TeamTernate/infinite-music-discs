@@ -415,19 +415,15 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
 
     #get all stored track data
     def getDiscEntries(self):
-        entries = DiscListContents()
+        entry_list = DiscListContents()
 
         for i in range(self._childLayout.count()):
             widget = self._childLayout.itemAt(i).widget()
 
             if(type(widget) == DiscListEntry):
-                entry = widget.getEntry()
-                entries.texture_files.append(entry.texture_file)
-                entries.track_files.append(entry.track_file)
-                entries.titles.append(entry.title)
-                entries.internal_names.append(entry.internal_name)
+                entry_list.entries.append( widget.getEntry() )
 
-        return entries
+        return entry_list
 
     def getNumDiscEntries(self):
         return self._childLayout.count()-2

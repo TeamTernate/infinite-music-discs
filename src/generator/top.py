@@ -15,7 +15,7 @@ import pyffmpeg
 import tempfile
 
 from mutagen.mp3 import MP3, HeaderNotFoundError
-from src.definitions import Status
+from src.definitions import Status, GeneratorContents, DiscListContents, DiscListEntryContents
 from src.commands import ReplaceItemCommand, ItemSlot
 
 default_pack_name = 'infinite_music_discs'
@@ -36,56 +36,54 @@ tmp_path = None
 
 
 
-def validate(texture_files, track_files, titles, internal_names, packpng=''):
+def validate(generator_data: GeneratorContents):
     global tmp_path
 
-    #lists are all the same length
-    if(not ( len(texture_files) == len(track_files) == len(titles) == len(internal_names) )):
-        return Status.LIST_UNEVEN_LENGTH
+    packpng = generator_data.settings['pack']
 
     #lists are not empty
-    if(len(texture_files) == 0):
+    if(len(generator_data.entry_list) == 0):
         return Status.LIST_EMPTY
 
     #internal names are all unique
-    if( len(internal_names) > len(set(internal_names)) ):
+    if( len(generator_data.entry_list.internal_names) > len(set(generator_data.entry_list.internal_names)) ):
         return Status.DUP_INTERNAL_NAME
 
-    for i in range(len(texture_files)):
+    for e in generator_data.entry_list.entries:
         #image is provided
-        if(texture_files[i] == ''):
+        if(e.texture_file == ''):
             return Status.IMAGE_FILE_NOT_GIVEN
 
         #image files still exist
-        if(not os.path.isfile(texture_files[i])):
+        if(not os.path.isfile(e.texture_file)):
             return Status.IMAGE_FILE_MISSING
 
         #images are all .png
-        if(not ( '.png' in texture_files[i] )):
+        if(not ( '.png' in e.texture_file )):
             return Status.BAD_IMAGE_TYPE
 
         #track is provided
-        if(track_files[i] == ''):
+        if(e.track_file == ''):
             return Status.TRACK_FILE_NOT_GIVEN
 
         #track files still exist
-        if(not os.path.isfile(track_files[i])):
+        if(not os.path.isfile(e.track_file)):
             return Status.TRACK_FILE_MISSING
 
         #tracks are all .mp3, .wav, .ogg
-        if(not ( '.mp3' in track_files[i] or '.wav' in track_files[i] or '.ogg' in track_files[i] )):
+        if(not ( '.mp3' in e.track_file or '.wav' in e.track_file or '.ogg' in e.track_file )):
             return Status.BAD_TRACK_TYPE
 
         #internal names are not empty
-        if(internal_names[i] == ''):
+        if(e.internal_name == ''):
             return Status.BAD_INTERNAL_NAME
 
         #internal names are letters-only
-        if(not internal_names[i].isalpha()):
+        if(not e.internal_name.isalpha()):
             return Status.BAD_INTERNAL_NAME
 
         #internal names are all lowercase
-        if(not internal_names[i].islower()):
+        if(not e.internal_name.islower()):
             return Status.BAD_INTERNAL_NAME
 
     #if pack icon is provided
@@ -102,8 +100,13 @@ def validate(texture_files, track_files, titles, internal_names, packpng=''):
 
 
 
-def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup_tmp=False):
+#TODO: use mutagen to detect audio length and save for datapack use
+def convert_to_ogg(track_entry: DiscListEntryContents, mix_mono, create_tmp=True, cleanup_tmp=False):
     global tmp_path
+
+    track = track_entry.track_file
+    internal_name = track_entry.internal_name
+
     #FFmpeg object
     ffmpeg = pyffmpeg.FFmpeg()
 
@@ -113,9 +116,6 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
             shutil.rmtree(tmp_path)
 
         tmp_path = tempfile.mkdtemp()
-
-    #grab file reference
-    track = track_file[0]
 
     #build FFmpeg settings
     args = ''
@@ -149,37 +149,38 @@ def convert_to_ogg(track_file, internal_name, mix_mono, create_tmp=True, cleanup
 
     #exit if metadata removal failed
     if not os.path.isfile(tmp_track):
-        return Status.BAD_MP3_META
+        return Status.BAD_MP3_META, track
 
     #convert file
+    #FIXME: will this get logged in logfile? if exception is caught here?
     try:
         ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
     except Exception as e:
         print(e)
-        return Status.FFMPEG_CONVERT_FAIL
+        return Status.FFMPEG_CONVERT_FAIL, track
 
     #exit if file was not converted successfully
     if not os.path.isfile(out_track):
-        return Status.BAD_OGG_CONVERT
+        return Status.BAD_OGG_CONVERT, track
 
     if os.path.getsize(out_track) == 0:
-        return Status.BAD_OGG_CONVERT
-
-    #change file reference to new converted file
-    track_file[0] = out_track
+        return Status.BAD_OGG_CONVERT, track
 
     #usually won't clean up temp work directory here, wait until resource pack generation
     if cleanup_tmp:
         shutil.rmtree(tmp_path, ignore_errors=True)
         tmp_path = None
 
-    return Status.SUCCESS
+    return Status.SUCCESS, out_track
 
 
 
 #TODO: break into smaller functions so it's easier to understand behavior?
-def generate_datapack(texture_files, track_files, titles, internal_names, user_settings={}):
+def generate_datapack(entry_list: DiscListContents, user_settings={}):
     global tmp_path
+
+    titles = entry_list.titles
+    internal_names = entry_list.internal_names
 
     #read settings
     pack_format = user_settings.get('version').get('dp', default_pack_format)
@@ -363,8 +364,12 @@ def generate_datapack(texture_files, track_files, titles, internal_names, user_s
 
 
 
-def generate_resourcepack(texture_files, track_files, titles, internal_names, user_settings={}, cleanup_tmp=True):
+def generate_resourcepack(entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
     global tmp_path
+
+    texture_files = entry_list.texture_files
+    track_files = entry_list.track_files
+    internal_names = entry_list.internal_names
 
     #read settings
     pack_format = user_settings.get('version').get('rp', default_pack_format)
