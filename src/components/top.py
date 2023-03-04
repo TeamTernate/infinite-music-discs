@@ -610,7 +610,22 @@ class GeneratePackWorker(QtCore.QObject):
 
         self._data = generator_data
 
-    #TODO: make the status returning system more elegant - function to capture status and check that it's not success?
+    def emit_status_bad(self):
+        bad = (self._data.status != Status.SUCCESS)
+
+        if(bad):
+            self.status.emit(self._data.status)
+            self.finished.emit()
+        return bad
+
+    def emit_status_zip(self):
+        if(self._data.status == Status.BAD_ZIP):
+            self.status.emit(self._data.status)
+
+    def emit_update_progress(self):
+        self._data.progress += 1
+        self.progress.emit(self._data.progress)
+
     def generate(self):
         self.started.emit()
 
@@ -619,63 +634,43 @@ class GeneratePackWorker(QtCore.QObject):
         self.progress.emit(0)
         self.max_prog.emit(1 + len(self._data.entry_list) + 1 + 1)
 
-        status = Status.SUCCESS
-        progress = 0
+        self._data.status = Status.SUCCESS
+        self._data.progress = 0
 
-        #validate data before continuing
-        status = generator.validate(self._data)
-        if not status == Status.SUCCESS:
-            self.status.emit(status)
-            self.finished.emit()
+        #make sure data is valid before continuing
+        self._data.status = generator.validate(self._data)
+        if self.emit_status_bad():
             return
-
-        progress += 1
-        self.progress.emit(progress)
+        self.emit_update_progress()
         self.valid.emit()
 
         #convert track files to ogg
         for i,e in enumerate(self._data.entry_list.entries):
-            status, ogg_track = generator.convert_to_ogg(e, self._data.settings, (i == 0))
+            self._data.status, ogg_track = generator.convert_to_ogg(e, self._data.settings, (i == 0))
 
             self._data.entry_list.entries[i].track_file = ogg_track
 
-            if not status == Status.SUCCESS:
-                self.status.emit(status)
-                self.finished.emit()
-                return
-
-            progress += 1
-            self.progress.emit(progress)
+            if self.emit_status_bad(): return
+            self.emit_update_progress()
 
         #generate datapack
-        status = generator.generate_datapack(self._data.entry_list, self._data.settings)
+        self._data.status = generator.generate_datapack(self._data.entry_list, self._data.settings)
 
-        if not status == Status.SUCCESS:
-            self.status.emit(status)
-
-            if not status == Status.BAD_ZIP:
-                self.finished.emit()
-                return
-
-        progress += 1
-        self.progress.emit(progress)
+        if self.emit_status_bad(): return
+        self.emit_status_zip()
+        self.emit_update_progress()
 
         #generate resourcepack
-        status = generator.generate_resourcepack(self._data.entry_list,
-                                                 self._data.settings)
-        if not status == Status.SUCCESS:
-            self.status.emit(status)
+        self._data.status = generator.generate_resourcepack(self._data.entry_list, self._data.settings)
 
-            if not status == Status.BAD_ZIP:
-                self.finished.emit()
-                return
+        if self.emit_status_bad(): return
+        self.emit_status_zip()
+        self.emit_update_progress()
 
-        progress += 1
-        self.progress.emit(progress)
-
+        #finish up
         print("Successfully generated datapack and resourcepack!")
 
-        self.status.emit(status)
+        self.status.emit(self._data.status)
         self.finished.emit()
 
 

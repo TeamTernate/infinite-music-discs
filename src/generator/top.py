@@ -152,10 +152,10 @@ def convert_to_ogg(track_entry: DiscListEntryContents, mix_mono, create_tmp=True
         return Status.BAD_MP3_META, track
 
     #convert file
-    #FIXME: will this get logged in logfile? if exception is caught here?
     try:
         ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
     except Exception as e:
+        #TODO: how to reraise exception and also return?
         print(e)
         return Status.FFMPEG_CONVERT_FAIL, track
 

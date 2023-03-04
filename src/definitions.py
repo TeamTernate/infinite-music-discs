@@ -250,6 +250,8 @@ class DiscListContents:
 
 @dataclass
 class GeneratorContents:
+    status: Status = Status.LIST_EMPTY
+    progress: int = 0
     settings: dict = field(default_factory=dict)
     entry_list: DiscListContents = field(default_factory=DiscListContents)
 
