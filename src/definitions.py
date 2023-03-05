@@ -139,6 +139,7 @@ class DisplayStrings():
     STR_OFFSET_TITLE =      "CustomModelData offset"
     STR_ZIP_TITLE =         "Generate pack as .zip"
     STR_MIXMONO_TITLE =     "Mix stereo tracks to mono"
+    STR_DP_VER_TITLE =      "Use legacy datapack"
     STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
 
     STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you put a 'pack.png' in the same folder as the app."
@@ -147,6 +148,7 @@ class DisplayStrings():
     STR_OFFSET_TOOLTIP =    "Helps prevent discs in multiple packs from colliding with each other."
     STR_ZIP_TOOLTIP =       "Packs are generated as .zip files instead of folders."
     STR_MIXMONO_TOOLTIP =   "Tracks play near the jukebox, not 'inside your head'."
+    STR_DP_VER_TOOLTIP =    "1.19.3 and below only support legacy datapack."
     STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."
 
 #dictionary to associate Status : status message string
@@ -220,6 +222,14 @@ PackFormatsDict = {
     '1.16 - 1.16.1':    {'dp':5,  'rp':5},
     '1.15':             {'dp':5,  'rp':5},
     '1.14':             {'dp':4,  'rp':4}
+}
+
+#dictionary to track desired datapack version
+#   v2.x only supported in 1.19.4 and higher
+#   v1.x offer in 1.19.4 and higher for compatibility
+DatapackVersionDict = {
+    'v2.x': 2,
+    'v1.x': 1
 }
 
 
