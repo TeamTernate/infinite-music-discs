@@ -19,8 +19,6 @@ from src.generator.top import VirtualGenerator
 
 
 class GeneratorV1(VirtualGenerator):
-
-    #TODO: break into smaller functions so it's easier to understand behavior?
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
         titles = entry_list.titles
         internal_names = entry_list.internal_names
