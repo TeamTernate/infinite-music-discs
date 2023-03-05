@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#Infinite Music Discs datapack + resourcepack generator module
+#Infinite Music Discs generator module base class
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
 import os
@@ -12,6 +12,8 @@ import tempfile
 from mutagen.mp3 import MP3, HeaderNotFoundError
 from mutagen.oggvorbis import OggVorbis
 from src.definitions import Status, GeneratorContents, DiscListEntryContents
+
+
 
 class VirtualGenerator():
 

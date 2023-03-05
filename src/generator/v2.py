@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#Infinite Music Discs datapack + resourcepack generator module
+#Infinite Music Discs generator module implementation
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 #
 #Generates datapack v1.9
@@ -204,7 +204,6 @@ class GeneratorV2(VirtualGenerator):
             return Status.BAD_ZIP
 
         return Status.SUCCESS
-
 
 
 

@@ -6,10 +6,6 @@
 
 from src.generator.v1 import GeneratorV1
 
-#TODO: design this to be split into multiple variants for v1.x and v2.x
-#TODO: create generator_wrapper.py that handles all the status and validation stuff, and have
-#   generator_v1.py and generator_v2.py to handle datapack creation?
-
 def get_generator():
     return GeneratorV1()
 
