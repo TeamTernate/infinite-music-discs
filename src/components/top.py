@@ -11,7 +11,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
 
-from src.generator import top as generator
+import src.generator.top as generator_top
 from src.definitions import Status, GeneratorContents
 from src.definitions import CSS_STYLESHEET, GB_CSS_STYLESHEET
 
@@ -608,6 +608,7 @@ class GeneratePackWorker(QtCore.QObject):
     def __init__(self, generator_data: GeneratorContents):
         super().__init__()
 
+        self._generator = generator_top.get_generator()
         self._data = generator_data
 
     def emit_status_bad(self):
@@ -638,7 +639,7 @@ class GeneratePackWorker(QtCore.QObject):
         self._data.progress = 0
 
         #make sure data is valid before continuing
-        self._data.status = generator.validate(self._data)
+        self._data.status = self._generator.validate(self._data)
         if self.emit_status_bad():
             return
         self.emit_update_progress()
@@ -646,14 +647,14 @@ class GeneratePackWorker(QtCore.QObject):
 
         #convert track files to ogg
         for i,e in enumerate(self._data.entry_list.entries):
-            self._data.status, ogg_track = generator.convert_to_ogg(e, self._data.settings, (i == 0))
+            self._data.status, ogg_track = self._generator.convert_to_ogg(e, self._data.settings, (i == 0))
             self._data.entry_list.entries[i].track_file = ogg_track
 
             if self.emit_status_bad(): return
             self.emit_update_progress()
 
             #detect track length
-            self._data.status, length = generator.get_track_length(e)
+            self._data.status, length = self._generator.get_track_length(e)
             self._data.entry_list.entries[i].length = length
             print(length)
 
@@ -661,14 +662,14 @@ class GeneratePackWorker(QtCore.QObject):
             self.emit_update_progress()
 
         #generate datapack
-        self._data.status = generator.generate_datapack(self._data.entry_list, self._data.settings)
+        self._data.status = generator_top.generate_datapack(self._data.entry_list, self._data.settings)
 
         if self.emit_status_bad(): return
         self.emit_status_zip()
         self.emit_update_progress()
 
         #generate resourcepack
-        self._data.status = generator.generate_resourcepack(self._data.entry_list, self._data.settings)
+        self._data.status = generator_top.generate_resourcepack(self._data.entry_list, self._data.settings)
 
         if self.emit_status_bad(): return
         self.emit_status_zip()
