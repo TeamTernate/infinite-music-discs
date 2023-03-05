@@ -312,18 +312,21 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
         widget.setObjectName('SettingsChildWidget')
         scrollArea.setObjectName('SettingsScrollArea')
 
-    #TODO: define all these strings in definitions
+    #TODO: define all these dict keys in definitions
     def settingChangedEvent(self):
-        settings = self.getUserSettings()
+        gameVersionEntry = self.findChild(SettingsListEntry, 'version')
         dpVersionEntry = self.findChild(SettingsListEntry, 'dp_version')
 
+        gameVersion = gameVersionEntry.getKeyValue()['version']
+        dpVersion = dpVersionEntry.getKeyValue()['dp_version']
+
         #lock "legacy datapack" setting to its enabled state if an old game version is selected
-        if(settings['version']['dp'] < 12):
-            self.dp_ver = dpVersionEntry.getKeyValue()['dp_version']
+        if(dpVersionEntry.isEnabled() and gameVersion['dp'] <= Constants.LEGACY_DP_LATEST_VERSION):
+            self.dp_ver = dpVersion
             dpVersionEntry.forceValue(True, locked=True)
 
         # otherwise, restore original state
-        elif(not dpVersionEntry.isEnabled()):
+        elif(not dpVersionEntry.isEnabled() and gameVersion['dp'] > Constants.LEGACY_DP_LATEST_VERSION):
             dpVersionEntry.forceValue(self.dp_ver, locked=False)
 
     def getUserSettings(self):

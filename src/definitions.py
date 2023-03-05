@@ -19,6 +19,7 @@ class Constants():
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
     LINE_EDIT_MAX_CHARS = 100
     CUSTOM_MODEL_DATA_MAX = 16777000
+    LEGACY_DP_LATEST_VERSION = 11
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
 
