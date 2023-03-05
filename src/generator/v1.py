@@ -14,7 +14,7 @@ import zipfile
 from src.definitions import Constants, Status, DiscListContents
 from src.commands import ReplaceItemCommand, ItemSlot
 
-from src.generator.top import VirtualGenerator
+from src.generator.base import VirtualGenerator
 
 
 
