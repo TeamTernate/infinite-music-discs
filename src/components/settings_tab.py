@@ -87,66 +87,97 @@ class QAlphaLineEdit(QSettingLineEdit):
 
 
 #TODO: instead of getWidget(), use factory model to cast return type?
-#TODO: separate settingsselectors into different classes by function?
-class SettingsSelector(QtWidgets.QWidget):
-    def __init__(self, settingType = SettingType.PACKPNG, params = None, parent = None):
+class VirtualSettingSelector(QtWidgets.QWidget):
+    def __init__(self, parent = None):
         super().__init__(parent=parent)
 
         self._parent = parent
-        self._type = settingType
-
-        if(self._type == SettingType.PACKPNG):
-            self._parent.setObjectName("PACKPNG")
-            self._widget = MultiDragDropButton(ButtonType.PACKPNG, parent)
-            self._widget.multiDragEnter.connect(self._widget.multiDragEnterEvent)
-            self._widget.multiDragLeave.connect(self._widget.multiDragLeaveEvent)
-            self._widget.multiDrop.connect(self._widget.multiDropEvent)
-
-        elif(self._type == SettingType.CHECK):
-            self._parent.setObjectName("CHECK")
-            self._widget = QtWidgets.QCheckBox(self)
-
-        elif(self._type == SettingType.RADIO):
-            self._parent.setObjectName("RADIO")
-            self._widget = QtWidgets.QRadioButton(self)
-
-        elif(self._type == SettingType.DROPDOWN):
-            self._parent.setObjectName("DROPDOWN")
-            self._widget = QtWidgets.QComboBox(self)
-            self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
-
-            #on Linux, the QComboBox QAbstractItemView popup does not automatically hide on window movement.
-            #  manually trigger the popup hide if a "window moved" signal is received
-            self._parent.windowMoved.connect(self._widget.hidePopup)
-
-            if params is not None:
-                self._widget.addItems(params.keys())
-
-        elif(self._type == SettingType.NUM_ENTRY):
-            self._parent.setObjectName("NUM_ENTRY")
-            self._widget = QPosIntLineEdit(0, params, self)
-
-        elif(self._type == SettingType.TXT_ENTRY):
-            self._parent.setObjectName("TXT_ENTRY")
-            self._widget = QAlphaLineEdit(params, self)
-            self._widget.setMaxLength(Constants.LINE_EDIT_MAX_CHARS)
 
     def getWidget(self):
         return self._widget
 
     def getValue(self):
-        if(self._type == SettingType.PACKPNG):
-            return self._widget.getFile()
-        elif(self._type == SettingType.CHECK):
-            return self._widget.isChecked()
-        elif(self._type == SettingType.RADIO):
-            return self._widget.isChecked()
-        elif(self._type == SettingType.DROPDOWN):
-            return PackFormatsDict[ self._widget.currentText() ]
-        elif(self._type == SettingType.NUM_ENTRY):
-            return self._widget.text_int()
-        elif(self._type == SettingType.TXT_ENTRY):
-            return self._widget.text()
+        raise NotImplementedError
+
+class PackPngSettingSelector(VirtualSettingSelector):
+    def __init__(self, parent = None):
+        super().__init__(parent=parent)
+
+        self._parent.setObjectName("PACKPNG")
+
+        self._widget = MultiDragDropButton(ButtonType.PACKPNG, parent)
+        self._widget.multiDragEnter.connect(self._widget.multiDragEnterEvent)
+        self._widget.multiDragLeave.connect(self._widget.multiDragLeaveEvent)
+        self._widget.multiDrop.connect(self._widget.multiDropEvent)
+
+    def getValue(self):
+        return self._widget.getFile()
+
+class CheckSettingSelector(VirtualSettingSelector):
+    def __init__(self, parent = None):
+        super().__init__(parent=parent)
+
+        self._parent.setObjectName("CHECK")
+        self._widget = QtWidgets.QCheckBox(self)
+
+    def getValue(self):
+        return self._widget.isChecked()
+
+class NumEntrySettingSelector(VirtualSettingSelector):
+    def __init__(self, params, parent = None):
+        super().__init__(parent=parent)
+
+        self._parent.setObjectName("NUM_ENTRY")
+        self._widget = QPosIntLineEdit(0, params, self)
+
+    def getValue(self):
+        return self._widget.text_int()
+
+class TextEntrySettingSelector(VirtualSettingSelector):
+    def __init__(self, params, parent = None):
+        super().__init__(parent=parent)
+
+        self._parent.setObjectName("TXT_ENTRY")
+        self._widget = QAlphaLineEdit(params, self)
+        self._widget.setMaxLength(Constants.LINE_EDIT_MAX_CHARS)
+
+    def getValue(self):
+        return self._widget.text()
+
+class VirtualDropdownSettingSelector(VirtualSettingSelector):
+    def __init__(self, params, parent = None):
+        super().__init__(parent=parent)
+
+        self._parent.setObjectName("DROPDOWN")
+        self._widget = QtWidgets.QComboBox(self)
+        self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
+
+        #on Linux, the QComboBox QAbstractItemView popup does not automatically hide on window movement.
+        #  manually trigger the popup hide if a "window moved" signal is received
+        self._parent.windowMoved.connect(self._widget.hidePopup)
+
+        if params is not None:
+            self._widget.addItems(params.keys())
+
+class DropdownDictSettingSelector(VirtualDropdownSettingSelector):
+    def __init__(self, params, parent = None):
+        super().__init__(parent=parent, params=params)
+
+        if params is not None:
+            self._widget.addItems(params.keys())
+
+    def getValue(self):
+        return PackFormatsDict[ self._widget.currentText() ]
+
+class DropdownListSettingSelector(VirtualDropdownSettingSelector):
+    def __init__(self, params, parent = None):
+        super().__init__(parent=parent, params=params)
+
+        if params is not None:
+            self._widget.addItems(params)
+
+    def getValue(self):
+        return self._widget.currentText()
 
 
 
@@ -160,7 +191,12 @@ class SettingsListEntry(QtWidgets.QFrame):
         self._key = key
 
         self._label = QtWidgets.QLabel(label)
-        self._selector = SettingsSelector(settingType, params, self)
+
+        if(settingType == SettingType.PACKPNG):         self._selector = PackPngSettingSelector(self)
+        elif(settingType == SettingType.CHECK):         self._selector = CheckSettingSelector(self)
+        elif(settingType == SettingType.NUM_ENTRY):     self._selector = NumEntrySettingSelector(params, self)
+        elif(settingType == SettingType.TXT_ENTRY):     self._selector = TextEntrySettingSelector(params, self)
+        elif(settingType == SettingType.DROPDOWN):      self._selector = DropdownDictSettingSelector(params, self)
 
         layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(20)
