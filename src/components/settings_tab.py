@@ -97,8 +97,8 @@ class VirtualSettingSelector(QtWidgets.QWidget):
         self._parent = parent
         self.changed.connect(self._parent.settingChanged)
 
-    def settingUpdateEvent(self):
-        pass
+    def forceValue(self, value):
+        raise NotImplementedError
 
     def getWidget(self):
         return self._widget
@@ -129,6 +129,13 @@ class CheckSettingSelector(VirtualSettingSelector):
         self._widget = QtWidgets.QCheckBox(self)
 
         self._widget.stateChanged.connect(self.changed)
+
+    def forceValue(self, value):
+        #block value update from triggering signals, since the update
+        #  came internally and not from a user interaction
+        self.blockSignals(True)
+        self._widget.setChecked(value)
+        self.blockSignals(False)
 
     def getValue(self):
         return self._widget.isChecked()
@@ -240,6 +247,10 @@ class SettingsListEntry(QtWidgets.QFrame):
         self.setObjectName(key)
         self._label.setObjectName('SettingLabel')
 
+    def forceValue(self, value, locked):
+        self._selector.forceValue(value)
+        self.setEnabled(not locked)
+
     def getIndex(self):
         return 0
 
@@ -301,14 +312,19 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
         widget.setObjectName('SettingsChildWidget')
         scrollArea.setObjectName('SettingsScrollArea')
 
+    #TODO: define all these strings in definitions
     def settingChangedEvent(self):
         settings = self.getUserSettings()
-        dp_version = self.findChild(SettingsListEntry, 'dp_version')
+        dpVersionEntry = self.findChild(SettingsListEntry, 'dp_version')
 
+        #lock "legacy datapack" setting to its enabled state if an old game version is selected
         if(settings['version']['dp'] < 12):
-            dp_version.setDisabled(True)
-        else:
-             dp_version.setDisabled(False)
+            self.dp_ver = dpVersionEntry.getKeyValue()['dp_version']
+            dpVersionEntry.forceValue(True, locked=True)
+
+        # otherwise, restore original state
+        elif(not dpVersionEntry.isEnabled()):
+            dpVersionEntry.forceValue(self.dp_ver, locked=False)
 
     def getUserSettings(self):
         settingsDict = {}
