@@ -608,7 +608,7 @@ class GeneratePackWorker(QtCore.QObject):
     def __init__(self, generator_data: GeneratorContents):
         super().__init__()
 
-        self._generator = generator_top.get_generator()
+        self._generator = generator_top.get_generator(generator_data.settings)
         self._data = generator_data
 
     def emit_status_bad(self):
