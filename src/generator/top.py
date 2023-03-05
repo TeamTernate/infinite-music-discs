@@ -3,8 +3,6 @@
 #
 #Infinite Music Discs datapack + resourcepack generator module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
-#
-#Generates datapack v1.9
 
 import os
 import shutil
@@ -16,16 +14,6 @@ from mutagen.oggvorbis import OggVorbis
 from src.definitions import Status, GeneratorContents, DiscListEntryContents
 
 from src.generator.v1 import GeneratorV1
-
-default_pack_name = 'infinite_music_discs'
-
-datapack_suffix = '_dp'
-resourcepack_suffix = '_rp'
-zip_suffix = '.zip'
-
-datapack_desc = 'Adds %d custom music discs'
-resourcepack_desc = 'Adds %d custom music discs'
-default_pack_format = 8     #TODO: can this come from definitions?
 
 #TODO: design this to be split into multiple variants for v1.x and v2.x
 #TODO: create generator_wrapper.py that handles all the status and validation stuff, and have
@@ -43,6 +31,8 @@ class VirtualGenerator():
 
     def __init__(self):
         self.tmp_path = None
+
+
 
     def validate(self, generator_data: GeneratorContents):
         packpng = generator_data.settings['pack']

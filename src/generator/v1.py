@@ -1,10 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#Infinite Music Discs datapack + resourcepack generator module
+#Generation tool, datapack design, and resourcepack design by link2_thepast
+#
+#Generates datapack v1.9
 
 import os
 import json
 import shutil
 import zipfile
 
-from src.definitions import Status, DiscListContents
+from src.definitions import Constants, Status, DiscListContents
 from src.commands import ReplaceItemCommand, ItemSlot
 
 from src.generator.top import VirtualGenerator
@@ -19,12 +26,12 @@ class GeneratorV1(VirtualGenerator):
         internal_names = entry_list.internal_names
 
         #read settings
-        pack_format = user_settings.get('version').get('dp', default_pack_format)
+        pack_format = user_settings.get('version').get('dp', Constants.DEFAULT_PACK_FORMAT)
         offset = user_settings.get('offset', 0)
 
-        datapack_name = user_settings.get('name', default_pack_name)
-        datapack_name = datapack_name + datapack_suffix
-        datapack_name_zip = datapack_name + zip_suffix
+        datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
+        datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
+        datapack_name_zip = datapack_name + Constants.ZIP_SUFFIX
 
         try:
             #build datapack directory tree
@@ -35,7 +42,7 @@ class GeneratorV1(VirtualGenerator):
 
             #write 'pack.mcmeta'
             pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8')
-            pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(datapack_desc % len(internal_names))}}, indent=4))
+            pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(Constants.DATAPACK_DESC % len(internal_names))}}, indent=4))
             pack.close()
 
             #write 'load.json'
@@ -207,12 +214,12 @@ class GeneratorV1(VirtualGenerator):
         internal_names = entry_list.internal_names
 
         #read settings
-        pack_format = user_settings.get('version').get('rp', default_pack_format)
+        pack_format = user_settings.get('version').get('rp', Constants.DEFAULT_PACK_FORMAT)
         offset = user_settings.get('offset', 0)
 
-        resourcepack_name = user_settings.get('name', default_pack_name)
-        resourcepack_name = resourcepack_name + resourcepack_suffix
-        resourcepack_name_zip = resourcepack_name + zip_suffix
+        resourcepack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
+        resourcepack_name = resourcepack_name + Constants.RESOURCEPACK_SUFFIX
+        resourcepack_name_zip = resourcepack_name + Constants.ZIP_SUFFIX
 
         try:
             #build resourcepack directory tree
@@ -223,7 +230,7 @@ class GeneratorV1(VirtualGenerator):
 
             #write 'pack.mcmeta'
             pack = open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w', encoding='utf-8')
-            pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(resourcepack_desc % len(internal_names))}}, indent=4))
+            pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(Constants.RESOURCEPACK_DESC % len(internal_names))}}, indent=4))
             pack.close()
 
             #write 'sounds.json'

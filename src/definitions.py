@@ -19,7 +19,6 @@ class Constants():
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
     LINE_EDIT_MAX_CHARS = 100
     CUSTOM_MODEL_DATA_MAX = 16777000
-    DEFAULT_PACK_NAME = "infinite_music_discs"
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
     
@@ -28,6 +27,15 @@ class Constants():
     TIMESTAMP = datetime.now().strftime("%m-%d-%Y_%H%M%S")
     LOG_EXC_MSG = ""
     LOG_FILE_NAME = "imd-exception_" + TIMESTAMP + ".log"
+
+    DEFAULT_PACK_NAME = "infinite_music_discs"
+    DATAPACK_SUFFIX = '_dp'
+    RESOURCEPACK_SUFFIX = '_rp'
+    ZIP_SUFFIX = '.zip'
+
+    DATAPACK_DESC = 'Adds %d custom music discs'
+    RESOURCEPACK_DESC = 'Adds %d custom music discs'
+    DEFAULT_PACK_FORMAT = 8     #TODO: can this come from PackFormatsDict automatically?
 
 
 
