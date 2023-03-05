@@ -148,6 +148,9 @@ class VirtualDropdownSettingSelector(VirtualSettingSelector):
     def __init__(self, params, parent = None):
         super().__init__(parent=parent)
 
+        if params is None:
+            raise TypeError
+
         self._parent.setObjectName("DROPDOWN")
         self._widget = QtWidgets.QComboBox(self)
         self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
@@ -156,25 +159,21 @@ class VirtualDropdownSettingSelector(VirtualSettingSelector):
         #  manually trigger the popup hide if a "window moved" signal is received
         self._parent.windowMoved.connect(self._widget.hidePopup)
 
-        if params is not None:
-            self._widget.addItems(params.keys())
-
 class DropdownDictSettingSelector(VirtualDropdownSettingSelector):
     def __init__(self, params, parent = None):
         super().__init__(parent=parent, params=params)
 
-        if params is not None:
-            self._widget.addItems(params.keys())
+        self._dict = params
+        self._widget.addItems(params.keys())
 
     def getValue(self):
-        return PackFormatsDict[ self._widget.currentText() ]
+        return self._dict[ self._widget.currentText() ]
 
 class DropdownListSettingSelector(VirtualDropdownSettingSelector):
     def __init__(self, params, parent = None):
         super().__init__(parent=parent, params=params)
 
-        if params is not None:
-            self._widget.addItems(params)
+        self._widget.addItems(params)
 
     def getValue(self):
         return self._widget.currentText()
