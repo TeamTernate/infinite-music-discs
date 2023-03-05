@@ -29,8 +29,6 @@ datapack_desc = 'Adds %d custom music discs'
 resourcepack_desc = 'Adds %d custom music discs'
 default_pack_format = 8     #TODO: can this come from definitions?
 
-tmp_path = None
-
 #TODO: design this to be split into multiple variants for v1.x and v2.x
 #TODO: create generator_wrapper.py that handles all the status and validation stuff, and have
 #   generator_v1.py and generator_v2.py to handle datapack creation?
@@ -202,9 +200,7 @@ class VirtualGenerator():
 
 
     #TODO: break into smaller functions so it's easier to understand behavior?
-    def generate_datapack(entry_list: DiscListContents, user_settings={}):
-        global tmp_path
-
+    def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
         titles = entry_list.titles
         internal_names = entry_list.internal_names
 
@@ -390,9 +386,7 @@ class VirtualGenerator():
 
 
 
-    def generate_resourcepack(entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
-        global tmp_path
-
+    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
         texture_files = entry_list.texture_files
         track_files = entry_list.track_files
         internal_names = entry_list.internal_names
@@ -496,8 +490,8 @@ class VirtualGenerator():
 
         #cleanup temp work directory
         if cleanup_tmp:
-            shutil.rmtree(tmp_path, ignore_errors=True)
-            tmp_path = None
+            shutil.rmtree(self.tmp_path, ignore_errors=True)
+            self.tmp_path = None
 
         return Status.SUCCESS
 

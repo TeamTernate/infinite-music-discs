@@ -662,14 +662,14 @@ class GeneratePackWorker(QtCore.QObject):
             self.emit_update_progress()
 
         #generate datapack
-        self._data.status = generator_top.generate_datapack(self._data.entry_list, self._data.settings)
+        self._data.status = self._generator.generate_datapack(self._data.entry_list, self._data.settings)
 
         if self.emit_status_bad(): return
         self.emit_status_zip()
         self.emit_update_progress()
 
         #generate resourcepack
-        self._data.status = generator_top.generate_resourcepack(self._data.entry_list, self._data.settings)
+        self._data.status = self._generator.generate_resourcepack(self._data.entry_list, self._data.settings)
 
         if self.emit_status_bad(): return
         self.emit_status_zip()
