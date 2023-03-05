@@ -7,7 +7,7 @@
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 
 from src.definitions import Constants, ButtonType, SettingType, DisplayStrings
 from src.definitions import PackFormatsDict, DatapackVersionDict
@@ -88,10 +88,17 @@ class QAlphaLineEdit(QSettingLineEdit):
 
 #TODO: instead of getWidget(), use factory model to cast return type?
 class VirtualSettingSelector(QtWidgets.QWidget):
+
+    changed = pyqtSignal()
+
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
         self._parent = parent
+        self.changed.connect(self._parent.settingChanged)
+
+    def settingUpdateEvent(self):
+        pass
 
     def getWidget(self):
         return self._widget
@@ -109,6 +116,7 @@ class PackPngSettingSelector(VirtualSettingSelector):
         self._widget.multiDragEnter.connect(self._widget.multiDragEnterEvent)
         self._widget.multiDragLeave.connect(self._widget.multiDragLeaveEvent)
         self._widget.multiDrop.connect(self._widget.multiDropEvent)
+        self._widget.fileChanged.connect(self.changed)
 
     def getValue(self):
         return self._widget.getFile()
@@ -120,6 +128,8 @@ class CheckSettingSelector(VirtualSettingSelector):
         self._parent.setObjectName("CHECK")
         self._widget = QtWidgets.QCheckBox(self)
 
+        self._widget.stateChanged.connect(self.changed)
+
     def getValue(self):
         return self._widget.isChecked()
 
@@ -129,6 +139,8 @@ class NumEntrySettingSelector(VirtualSettingSelector):
 
         self._parent.setObjectName("NUM_ENTRY")
         self._widget = QPosIntLineEdit(0, params, self)
+
+        self._widget.editingFinished.connect(self.changed)
 
     def getValue(self):
         return self._widget.text_int()
@@ -140,6 +152,8 @@ class TextEntrySettingSelector(VirtualSettingSelector):
         self._parent.setObjectName("TXT_ENTRY")
         self._widget = QAlphaLineEdit(params, self)
         self._widget.setMaxLength(Constants.LINE_EDIT_MAX_CHARS)
+
+        self._widget.editingFinished.connect(self.changed)
 
     def getValue(self):
         return self._widget.text()
@@ -154,6 +168,8 @@ class VirtualDropdownSettingSelector(VirtualSettingSelector):
         self._parent.setObjectName("DROPDOWN")
         self._widget = QtWidgets.QComboBox(self)
         self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
+
+        self._widget.currentIndexChanged.connect(self.changed)
 
         #on Linux, the QComboBox QAbstractItemView popup does not automatically hide on window movement.
         #  manually trigger the popup hide if a "window moved" signal is received
@@ -182,6 +198,7 @@ class DropdownListSettingSelector(VirtualDropdownSettingSelector):
 
 class SettingsListEntry(QtWidgets.QFrame):
     windowMoved = QtCore.pyqtSignal()
+    settingChanged = QtCore.pyqtSignal()
 
     def __init__(self, key, settingType, label, tooltip = None, params = None, parent = None):
         super().__init__(parent=parent)
@@ -215,9 +232,12 @@ class SettingsListEntry(QtWidgets.QFrame):
         self.setLayout(layout)
 
         #provide child SettingsSelector with a "window moved" signal
+        #indicate to parent if setting updated its value
         if self._parent is not None:
             self._parent.windowMoved.connect(self.windowMoved)
+            self.settingChanged.connect(self._parent.settingChanged)
 
+        self.setObjectName(key)
         self._label.setObjectName('SettingLabel')
 
     def getIndex(self):
@@ -230,6 +250,7 @@ class SettingsListEntry(QtWidgets.QFrame):
 
 class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
     windowMoved = QtCore.pyqtSignal()
+    settingChanged = QtCore.pyqtSignal()
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
@@ -275,9 +296,19 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
 
         #provide settings entries (especially those with QComboBox selectors) with a "window moved" signal
         self._parent.windowMoved.connect(self.windowMoved)
+        self.settingChanged.connect(self.settingChangedEvent)
 
         widget.setObjectName('SettingsChildWidget')
         scrollArea.setObjectName('SettingsScrollArea')
+
+    def settingChangedEvent(self):
+        settings = self.getUserSettings()
+        dp_version = self.findChild(SettingsListEntry, 'dp_version')
+
+        if(settings['version']['dp'] < 12):
+            dp_version.setDisabled(True)
+        else:
+             dp_version.setDisabled(False)
 
     def getUserSettings(self):
         settingsDict = {}

@@ -148,7 +148,7 @@ class DisplayStrings():
     STR_OFFSET_TOOLTIP =    "Helps prevent discs in multiple packs from colliding with each other."
     STR_ZIP_TOOLTIP =       "Packs are generated as .zip files instead of folders."
     STR_MIXMONO_TOOLTIP =   "Tracks play near the jukebox, not 'inside your head'."
-    STR_DP_VER_TOOLTIP =    "1.19.3 and below only support legacy datapack."
+    STR_DP_VER_TOOLTIP =    "1.19.3 and below only support the legacy datapack."
     STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."
 
 #dictionary to associate Status : status message string
