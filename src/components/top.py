@@ -651,12 +651,10 @@ class GeneratePackWorker(QtCore.QObject):
             self._data.entry_list.entries[i].track_file = ogg_track
 
             if self.emit_status_bad(): return
-            self.emit_update_progress()
 
             #detect track length
             self._data.status, length = self._generator.get_track_length(e)
             self._data.entry_list.entries[i].length = length
-            print(length)
 
             if self.emit_status_bad(): return
             self.emit_update_progress()
