@@ -150,6 +150,7 @@ class NewDiscButton(DragDropButton, QSetsNameFromType):
 
 
 
+#TODO: should be VirtualDiscListEntry? b/c has some implementation
 #abstract class containing common code between DiscList entries
 #inherited by DiscListEntry and NewDiscEntry
 class AbstractDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):

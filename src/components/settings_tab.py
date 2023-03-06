@@ -31,6 +31,7 @@ class QPosIntLineEdit(QSettingLineEdit):
         self._min = minInt
         self._max = maxInt
 
+        #TODO: define regexes in definitions.py?
         #create validator to restrict input to integers
         # QRegExpValidator is more flexible than QIntValidator
         regexp = QtCore.QRegExp('(^[0-9]{0,8}$|^$)')
@@ -239,7 +240,7 @@ class SettingsListEntry(QtWidgets.QFrame):
         self.setLayout(layout)
 
         #provide child SettingsSelector with a "window moved" signal
-        #indicate to parent if setting updated its value
+        #also indicate to parent if setting updated its value
         if self._parent is not None:
             self._parent.windowMoved.connect(self.windowMoved)
             self.settingChanged.connect(self._parent.settingChanged)
@@ -274,8 +275,6 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
         #TODO: define all of this in definitions.py, parse dict to build settings tab
-        #TODO: automatically check / uncheck "dp_version" when selecting old versions
-        #TODO: automatically disable "dp_version" when selecting old versions
         self._childLayout.addWidget(SettingsListEntry('pack',       SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TITLE,   DisplayStrings.STR_PACKPNG_TOOLTIP,     None,                               self))
         self._childLayout.addWidget(SettingsListEntry('version',    SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TITLE,   DisplayStrings.STR_VERSION_TOOLTIP,     PackFormatsDict,                    self))
     #   self._childLayout.addWidget(SettingsListEntry('offset',     SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TITLE,    DisplayStrings.STR_OFFSET_TOOLTIP,      Constants.CUSTOM_MODEL_DATA_MAX,    self))
