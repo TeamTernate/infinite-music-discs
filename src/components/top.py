@@ -640,12 +640,11 @@ class GeneratePackWorker(QtCore.QObject):
 
         #make sure data is valid before continuing
         self._data.status = self._generator.validate(self._data)
-        if self.emit_status_bad():
-            return
+        if self.emit_status_bad(): return
         self.emit_update_progress()
         self.valid.emit()
 
-        #convert track files to ogg
+        #convert track files to ogg and grab reference to converted file
         for i,e in enumerate(self._data.entry_list.entries):
             self._data.status, ogg_track = self._generator.convert_to_ogg(e, self._data.settings, (i == 0))
             self._data.entry_list.entries[i].track_file = ogg_track

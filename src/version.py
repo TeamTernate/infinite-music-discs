@@ -4,6 +4,8 @@
 #Infinite Music Discs version number module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+#TODO: pull from this file to generate version.rc
+
 # app version
 MAJOR = 1
 MINOR = 3
