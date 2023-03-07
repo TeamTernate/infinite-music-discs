@@ -84,9 +84,10 @@ class VirtualGenerator():
 
 
 
-    def convert_to_ogg(self, track_entry: DiscListEntryContents, mix_mono, create_tmp=True, cleanup_tmp=False):
+    def convert_to_ogg(self, track_entry: DiscListEntryContents, user_settings={}, create_tmp=True, cleanup_tmp=False):
         track = track_entry.track_file
         internal_name = track_entry.internal_name
+        mix_mono = user_settings.get('mix_mono', False)
 
         #FFmpeg object
         ffmpeg = pyffmpeg.FFmpeg()
@@ -106,7 +107,7 @@ class VirtualGenerator():
 
         #skip files that don't need to be processed
         if args == '' and '.ogg' in track:
-            return Status.SUCCESS
+            return Status.SUCCESS, track
 
         #rename file so FFmpeg can process it
         track_ext = track.split('/')[-1].split('.')[-1]
