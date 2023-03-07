@@ -31,6 +31,8 @@ class GeneratorV1(VirtualGenerator):
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
         datapack_name_zip = datapack_name + Constants.ZIP_SUFFIX
 
+        dp_version_str = ("v%d.%d" % (self._version_major, self._version_minor))
+
         try:
             #build datapack directory tree
             shutil.rmtree(datapack_name, ignore_errors=True)
@@ -59,7 +61,7 @@ class GeneratorV1(VirtualGenerator):
             setup_load.writelines(['scoreboard objectives add usedDisc minecraft.used:minecraft.music_disc_11\n',
                                 'scoreboard objectives add heldDisc dummy\n',
                                 '\n',
-                                'tellraw @a {"text":"Infinite Music Discs v1.9 by link2_thepast","color":"yellow"}\n'])
+                                'tellraw @a {"text":"Infinite Music Discs %s by link2_thepast","color":"yellow"}\n' % (dp_version_str)])
             setup_load.close()
 
             #write 'detect_play_tick.mcfunction'

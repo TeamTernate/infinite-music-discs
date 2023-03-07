@@ -12,6 +12,8 @@ from datetime import datetime
 from typing import List
 from dataclasses import dataclass, field
 
+import src.version as version
+
 #constants
 #TODO: hold other container classes within this one?
 class Constants():
@@ -23,7 +25,7 @@ class Constants():
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
 
-    APP_TITLE = "IMD Datapack Generator - v1.3"     #TODO: can this come from a version number file automatically?
+    APP_TITLE = ("IMD Datapack Generator - v%d.%d" % (version.MAJOR, version.MINOR))
 
     TIMESTAMP = datetime.now().strftime("%m-%d-%Y_%H%M%S")
     LOG_EXC_MSG = ""
