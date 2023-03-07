@@ -18,7 +18,6 @@ import src.version as version
 
 
 #constants
-#TODO: hold other container classes within this one?
 class Constants():
     MAX_DRAW_MULTI_DRAGDROP = 10
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
@@ -233,7 +232,8 @@ PackFormatsDict = {
 
 #dictionary to track desired datapack version
 #   v2.x only supported in 1.19.4 and higher
-#   v1.x offer in 1.19.4 and higher for compatibility
+#   v1.x offered in 1.19.4 and higher for compatibility
+#   not currently used for anything
 DatapackVersionDict = {
     'v2.x': 2,
     'v1.x': 1
