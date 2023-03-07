@@ -26,6 +26,8 @@ from PyQt5 import QtWidgets
 from src.definitions import Assets, Constants
 from src.components.top import CentralWidget
 
+
+
 class UI(QtWidgets.QMainWindow):
     resized = QtCore.pyqtSignal()
     moved = QtCore.pyqtSignal()
