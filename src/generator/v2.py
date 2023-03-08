@@ -4,7 +4,7 @@
 #Infinite Music Discs generator module implementation
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 #
-#Generates datapack v1.9
+#Generates datapack v2.0
 
 import os
 import json
@@ -35,12 +35,15 @@ class GeneratorV2(VirtualGenerator):
 
         dp_version_str = ("v%d.%d" % (self._version_major, self._version_minor))
 
+        #TODO: use 'with expr as var'
+        #TODO: shorten lines if possible
         try:
             #build datapack directory tree
             shutil.rmtree(datapack_name, ignore_errors=True)
             os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
             os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
             os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
+            os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'advancements'))
 
             #write 'pack.mcmeta'
             pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8')
@@ -54,10 +57,21 @@ class GeneratorV2(VirtualGenerator):
 
             #write 'tick.json'
             tick = open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'tick.json'), 'w', encoding='utf-8')
-            tick.write(json.dumps({'values':['{}:detect_play_tick'.format(datapack_name), '{}:detect_stop_tick'.format(datapack_name)]}, indent=4))
+            tick.write(json.dumps({'values':['{}:register_players_tick'.format(datapack_name), '{}:jukebox_event_tick'.format(datapack_name)]}, indent=4))
             tick.close()
 
 
+            #write 'placed_disc.json'
+            placed_disc = open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_disc.json'), 'w', encoding='utf-8')
+            placed_disc.write(json.dumps({"criteria": {"placed_music_disc": {"trigger": "minecraft:item_used_on_block","conditions": {"location": {"block": {"blocks": [ "minecraft:jukebox" ], "state": { "has_record":"true" }}}, "item": {"tag": "minecraft:music_discs"}}}}, "rewards": {"function": "infinite_music_discs_dp:on_placed_disc"}}))
+            placed_disc.close()
+
+            #write 'placed_jukebox.json'
+            placed_jukebox = open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_jukebox.json'), 'w', encoding='utf-8')
+            placed_jukebox.write(json.dumps({"criteria": {"placed_jukebox": {"trigger": "minecraft:placed_block", "conditions": {"block": "minecraft:jukebox", "item": {"items": [ "minecraft:jukebox" ]}}}}, "rewards": {"function": "infinite_music_discs_dp:on_placed_jukebox"}}))
+            placed_jukebox.close()
+
+#-
             #write 'setup_load.mcfunction'
             setup_load = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w', encoding='utf-8')
             setup_load.writelines(['scoreboard objectives add usedDisc minecraft.used:minecraft.music_disc_11\n',
