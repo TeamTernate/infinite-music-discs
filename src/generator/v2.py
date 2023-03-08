@@ -37,6 +37,7 @@ class GeneratorV2(VirtualGenerator):
 
         #TODO: use 'with expr as var'
         #TODO: shorten lines if possible
+        #TODO: pretty-print json files
         try:
             #build datapack directory tree
             shutil.rmtree(datapack_name, ignore_errors=True)
@@ -63,12 +64,12 @@ class GeneratorV2(VirtualGenerator):
 
             #write 'placed_disc.json'
             placed_disc = open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_disc.json'), 'w', encoding='utf-8')
-            placed_disc.write(json.dumps({"criteria": {"placed_music_disc": {"trigger": "minecraft:item_used_on_block","conditions": {"location": {"block": {"blocks": [ "minecraft:jukebox" ], "state": { "has_record":"true" }}}, "item": {"tag": "minecraft:music_discs"}}}}, "rewards": {"function": "infinite_music_discs_dp:on_placed_disc"}}))
+            placed_disc.write(json.dumps({"criteria": {"placed_music_disc": {"trigger": "minecraft:item_used_on_block","conditions": {"location": {"block": {"blocks": [ "minecraft:jukebox" ], "state": { "has_record":"true" }}}, "item": {"tag": "minecraft:music_discs"}}}}, "rewards": {"function": "{}:on_placed_disc".format(datapack_name)}}))
             placed_disc.close()
 
             #write 'placed_jukebox.json'
             placed_jukebox = open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_jukebox.json'), 'w', encoding='utf-8')
-            placed_jukebox.write(json.dumps({"criteria": {"placed_jukebox": {"trigger": "minecraft:placed_block", "conditions": {"block": "minecraft:jukebox", "item": {"items": [ "minecraft:jukebox" ]}}}}, "rewards": {"function": "infinite_music_discs_dp:on_placed_jukebox"}}))
+            placed_jukebox.write(json.dumps({"criteria": {"placed_jukebox": {"trigger": "minecraft:placed_block", "conditions": {"block": "minecraft:jukebox", "item": {"items": [ "minecraft:jukebox" ]}}}}, "rewards": {"function": "{}:on_placed_jukebox".format(datapack_name)}}))
             placed_jukebox.close()
 
 
