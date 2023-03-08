@@ -275,6 +275,7 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
         #TODO: define all of this in definitions.py, parse dict to build settings tab
+        #TODO: rename dp_version to legacy_dp?
         self._childLayout.addWidget(SettingsListEntry('pack',       SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TITLE,   DisplayStrings.STR_PACKPNG_TOOLTIP,     None,                               self))
         self._childLayout.addWidget(SettingsListEntry('version',    SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TITLE,   DisplayStrings.STR_VERSION_TOOLTIP,     PackFormatsDict,                    self))
     #   self._childLayout.addWidget(SettingsListEntry('offset',     SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TITLE,    DisplayStrings.STR_OFFSET_TOOLTIP,      Constants.CUSTOM_MODEL_DATA_MAX,    self))
