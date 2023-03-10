@@ -109,6 +109,48 @@ class GeneratorV2(VirtualGenerator):
             reg_jukebox_marker.write('summon marker ~ ~ ~ {Tags:["imd_jukebox_marker"]}\n')
             reg_jukebox_marker.close()
 
+
+            #write 'jukebox_event_tick.mcfunction'
+            jb_event_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_event_tick.mcfunction'), 'w', encoding='utf-8')
+            jb_event_tick.writelines(['execute as @e[type=marker,tag=imd_jukebox_marker] at @s unless block ~ ~ ~ minecraft:jukebox run function %s:destroy_jukebox_marker\n' % (datapack_name),
+                                      'execute as @e[type=marker,tag=imd_jukebox_marker] at @s if block ~ ~ ~ minecraft:jukebox run function %s:jukebox_check_playing\n' % (datapack_name),
+                                      'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run function %s:jukebox_tick_timers\n' % (datapack_name)])
+            jb_event_tick.close()
+
+            #FIXME: only stop if jukebox is currently playing
+            #write 'destroy_jukebox_marker.mcfunction'
+            #TBD
+
+            #write 'jukebox_tick_timers.mcfunction'
+            jb_tick_timers = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_tick_timers.mcfunction'), 'w', encoding='utf-8')
+            jb_tick_timers.writelines(['execute as @s[scores={imd_play_time=1..}] run scoreboard players remove @s imd_play_time 1\n',
+                                       'execute as @s[scores={imd_stop_11_time=1..}] run scoreboard players remove @s imd_stop_11_time 1\n',
+                                       'execute as @s[scores={imd_play_time=0}] run data merge block ~ ~ ~ {RecordStartTick:-999999L}\n',
+                                       'execute as @s[scores={imd_stop_11_time=0},tag=!imd_stopped_11] run function %s:stop_11\n' % (datapack_name)])
+            jb_tick_timers.close()
+
+            #write 'jukebox_check_playing.mcfunction'
+            jb_check_playing = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_check_playing.mcfunction'), 'w', encoding='utf-8')
+            jb_check_playing.writelines(['execute as @s[tag=!imd_is_playing] if block ~ ~ ~ minecraft:jukebox{IsPlaying:1b} run function %s:jukebox_on_play\n' % (datapack_name),
+                                         'execute as @s[tag=imd_is_playing] unless block ~ ~ ~ minecraft:jukebox{IsPlaying:1b} run function %s:jukebox_on_stop\n' % (datapack_name)])
+            jb_check_playing.close()
+
+            #TODO: technically should check if custommodeldata is within acceptable range
+            #write 'jukebox_on_play.mcfunction'
+            jb_on_play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_on_play.mcfunction'), 'w', encoding='utf-8')
+            jb_on_play.writelines(['tag @s add imd_is_playing\n',
+                                   'execute if data block ~ ~ ~ RecordItem.tag.CustomModelData run tag @s add imd_has_custom_disc\n',
+                                   'execute as @s[tag=imd_has_custom_disc] run function %s:pre_play\n' % (datapack_name)])
+            jb_on_play.close()
+
+            #write 'jukebox_on_stop.mcfunction'
+            jb_on_stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_on_stop.mcfunction'), 'w', encoding='utf-8')
+            jb_on_stop.writelines(['tag @s remove imd_is_playing\n',
+                                   'tag @s remove imd_has_custom_disc\n',
+                                   'tag @s remove imd_stopped_11\n',
+                                   'function %s:stop\n' % (datapack_name)])
+            jb_on_stop.close()
+
 #-
             #write 'setup_load.mcfunction'
             setup_load = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w', encoding='utf-8')
