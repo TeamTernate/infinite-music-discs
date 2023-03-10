@@ -21,6 +21,7 @@ from src.generator.base import VirtualGenerator
 class GeneratorV2(VirtualGenerator):
 
     #TODO: break into smaller functions so it's easier to understand behavior?
+    #TODO: break by section into smaller functions
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
         titles = entry_list.titles
         internal_names = entry_list.internal_names
@@ -39,6 +40,7 @@ class GeneratorV2(VirtualGenerator):
         #TODO: shorten lines if possible
         #TODO: pretty-print json files
         try:
+            # generate basic framework files
             #build datapack directory tree
             shutil.rmtree(datapack_name, ignore_errors=True)
             os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
@@ -62,6 +64,7 @@ class GeneratorV2(VirtualGenerator):
             tick.close()
 
 
+            # generate advancements and related 'jukebox register' functions
             #write 'placed_disc.json'
             placed_disc = open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_disc.json'), 'w', encoding='utf-8')
             placed_disc.write(json.dumps({"criteria": {"placed_music_disc": {"trigger": "minecraft:item_used_on_block","conditions": {"location": {"block": {"blocks": [ "minecraft:jukebox" ], "state": { "has_record":"true" }}}, "item": {"tag": "minecraft:music_discs"}}}}, "rewards": {"function": "{}:on_placed_disc".format(datapack_name)}}))
@@ -71,7 +74,6 @@ class GeneratorV2(VirtualGenerator):
             placed_jukebox = open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_jukebox.json'), 'w', encoding='utf-8')
             placed_jukebox.write(json.dumps({"criteria": {"placed_jukebox": {"trigger": "minecraft:placed_block", "conditions": {"block": "minecraft:jukebox", "item": {"items": [ "minecraft:jukebox" ]}}}}, "rewards": {"function": "{}:on_placed_jukebox".format(datapack_name)}}))
             placed_jukebox.close()
-
 
             #write 'on_placed_disc.mcfunction'
             on_placed_disc = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'on_placed_disc.mcfunction'), 'w', encoding='utf-8')
@@ -110,6 +112,7 @@ class GeneratorV2(VirtualGenerator):
             reg_jukebox_marker.close()
 
 
+            # write jukebox related every-tick functions
             #write 'jukebox_event_tick.mcfunction'
             jb_event_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_event_tick.mcfunction'), 'w', encoding='utf-8')
             jb_event_tick.writelines(['execute as @e[type=marker,tag=imd_jukebox_marker] at @s unless block ~ ~ ~ minecraft:jukebox run function %s:destroy_jukebox_marker\n' % (datapack_name),
@@ -143,6 +146,24 @@ class GeneratorV2(VirtualGenerator):
                                    'execute as @s[tag=imd_has_custom_disc] run function %s:pre_play\n' % (datapack_name)])
             jb_on_play.close()
 
+            #write 'pre_play.mcfunction'
+            pre_play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'pre_play.mcfunction'), 'w', encoding='utf-8')
+            pre_play.writelines(['execute store result score @s imd_disc_id run data get block ~ ~ ~ RecordItem.tag.CustomModelData\n',
+                                 'function %s:play_duration\n' % (datapack_name),
+                                 'scoreboard players set @s imd_stop_11_time 2\n',
+                                 'function %s:watchdog_reset_tickcount\n' % (datapack_name),
+                                 'execute as @a[distance=..64] run function %s:register_jukebox_listener\n' % (datapack_name)])
+            pre_play.close()
+
+            #write 'register_jukebox_listener.mcfunction'
+            #TODO: 2 lists is sloppy, try to optimize
+            reg_jukebox_listener = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_jukebox_listener.mcfunction'), 'w', encoding='utf-8')
+            reg_jukebox_listener.writelines(['execute store result storage %s:global tmp.Player int 1.0 run scoreboard players get @s imd_player_id\n' % (datapack_name),
+                                             'data modify entity @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] data.Listeners append from storage %s:global tmp.Player\n' % (datapack_name),
+                                             'data modify entity @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] data.Listeners_11 append from storage %s:global tmp.Player\n' % (datapack_name),
+                                             'function %s:play\n' % (datapack_name)])
+            reg_jukebox_listener.close()
+
             #write 'jukebox_on_stop.mcfunction'
             jb_on_stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_on_stop.mcfunction'), 'w', encoding='utf-8')
             jb_on_stop.writelines(['tag @s remove imd_is_playing\n',
@@ -150,6 +171,9 @@ class GeneratorV2(VirtualGenerator):
                                    'tag @s remove imd_stopped_11\n',
                                    'function %s:stop\n' % (datapack_name)])
             jb_on_stop.close()
+
+
+
 
 #-
             #write 'setup_load.mcfunction'
