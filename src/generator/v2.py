@@ -63,6 +63,24 @@ class GeneratorV2(VirtualGenerator):
             tick.write(json.dumps({'values':['{}:register_players_tick'.format(datapack_name), '{}:jukebox_event_tick'.format(datapack_name)]}, indent=4))
             tick.close()
 
+            #write 'setup_load.mcfunction'
+            setup_load = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w', encoding='utf-8')
+            setup_load.writelines(['scoreboard objectives add imd_player_id dummy\n',
+                                   'scoreboard objectives add imd_disc_id dummy\n',
+                                   'scoreboard objectives add imd_rc_steps dummy\n',
+                                   'scoreboard objectives add imd_play_time dummy\n',
+                                   'scoreboard objectives add imd_stop_11_time dummy\n',
+                                   'advancement revoke @a only %s:placed_disc\n' % (datapack_name),
+                                   'advancement revoke @a only %s:placed_jukebox\n' % (datapack_name),
+                                   'tellraw @a {"text":"Infinite Music Discs v2.0 by link2_thepast","color":"gold"}'])
+            setup_load.close()
+
+            #write 'watchdog_reset_tickcount.mcfunction'
+            wd_reset_tickcount = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'watchdog_reset_tickcount.mcfunction'), 'w', encoding='utf-8')
+            wd_reset_tickcount.writelines(['execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
+                                           'schedule function %s:watchdog_reset_tickcount 10s replace\n' % (datapack_name)])
+            wd_reset_tickcount.close()
+
 
             # generate advancements and related 'jukebox register' functions
             #write 'placed_disc.json'
@@ -112,7 +130,7 @@ class GeneratorV2(VirtualGenerator):
             reg_jukebox_marker.close()
 
 
-            # write jukebox related every-tick functions
+            # generate jukebox related every-tick functions
             #write 'jukebox_event_tick.mcfunction'
             jb_event_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_event_tick.mcfunction'), 'w', encoding='utf-8')
             jb_event_tick.writelines(['execute as @e[type=marker,tag=imd_jukebox_marker] at @s unless block ~ ~ ~ minecraft:jukebox run function %s:destroy_jukebox_marker\n' % (datapack_name),
@@ -131,6 +149,16 @@ class GeneratorV2(VirtualGenerator):
                                        'execute as @s[scores={imd_play_time=0}] run data merge block ~ ~ ~ {RecordStartTick:-999999L}\n',
                                        'execute as @s[scores={imd_stop_11_time=0},tag=!imd_stopped_11] run function %s:stop_11\n' % (datapack_name)])
             jb_tick_timers.close()
+
+            #TODO: in multiplayer is marker tagged multiple times, once per player?
+            #write 'stop_11.mcfunction'
+            stop_11 = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'stop_11.mcfunction'), 'w', encoding='utf-8')
+            stop_11.writelines(['execute store result score @s imd_player_id run data get entity @s data.Listeners_11[0]\n',
+                                'data remove entity @s data.Listeners_11[0]\n',
+                                'execute as @a if score @s imd_player_id = @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_player_id run stopsound @s record minecraft:music_disc.11\n',
+                                'execute if data entity @s data.Listeners_11[0] run function %s:stop_11\n' % (datapack_name),
+                                'execute unless data entity @s data.Listeners_11[0] run tag @s add imd_stopped_11\n'])
+            stop_11.close()
 
             #write 'jukebox_check_playing.mcfunction'
             jb_check_playing = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_check_playing.mcfunction'), 'w', encoding='utf-8')
@@ -173,16 +201,22 @@ class GeneratorV2(VirtualGenerator):
             jb_on_stop.close()
 
 
+            # generate player related every-tick functions
+            #write 'register_players_tick.mcfunction'
+            reg_players_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_players_tick.mcfunction'), 'w', encoding='utf-8')
+            reg_players_tick.write('execute as @a[tag=!imd_has_id] run function %s:register_player\n' % (datapack_name))
+            reg_players_tick.close()
+
+            #TODO: different global id per-datapack?
+            #write 'register_player.mcfunction'
+            reg_player = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_player.mcfunction'), 'w', encoding='utf-8')
+            reg_player.writelines(['execute store result score @s imd_player_id run scoreboard players add #imd_id_global imd_player_id 1\n',
+                                   'tag @s[scores={imd_player_id=1..}] add imd_has_id'])
+            reg_player.close()
+
 
 
 #-
-            #write 'setup_load.mcfunction'
-            setup_load = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w', encoding='utf-8')
-            setup_load.writelines(['scoreboard objectives add usedDisc minecraft.used:minecraft.music_disc_11\n',
-                                'scoreboard objectives add heldDisc dummy\n',
-                                '\n',
-                                'tellraw @a {"text":"Infinite Music Discs %s by link2_thepast","color":"yellow"}\n' % (dp_version_str)])
-            setup_load.close()
 
             #write 'detect_play_tick.mcfunction'
             detect_play_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'detect_play_tick.mcfunction'), 'w', encoding='utf-8')
