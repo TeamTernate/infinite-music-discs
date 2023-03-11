@@ -295,13 +295,27 @@ class GeneratorV2(VirtualGenerator):
 
 #-
 
-            #write 'play_*.mcfunction' files
-            for i, name in enumerate(internal_names):
-                play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_%s.mcfunction' % name), 'w', encoding='utf-8')
-                play.writelines(['execute as @s at @s run title @a[distance=..64] actionbar {"text":"Now Playing: %s","color":"green"}\n' % (titles[i].replace('"', '')),
-                                'execute as @s at @s run stopsound @a[distance=..64] record minecraft:music_disc.11\n',
-                                'execute as @s at @s run playsound minecraft:music_disc.%s record @a[distance=..64] ~ ~ ~ 4 1\n' % name])
+            #write '*/play.mcfunction' files
+            for i, entry in enumerate(entry_list.entries):
+                play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8')
+                play.writelines(['title @s actionbar {"text":"Now Playing: %s","color":"green"}\n' % (entry.title.replace('"', '')),
+                                'playsound minecraft:music_disc.%s record @s ~ ~ ~ 4 1\n' % entry.internal_name])
                 play.close()
+
+            #write '*/play_duration.mcfunction' files
+            for i, entry in enumerate(entry_list.entries):
+                play_duration = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play_duration.mcfunction'), 'w', encoding='utf-8')
+                play_duration.write('scoreboard players set @s imd_play_time %d\n' % (entry.length))
+                play_duration.close()
+
+            #write '*/stop.mcfunction' files
+            for i, entry in enumerate(entry_list.entries):
+                stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'stop.mcfunction'), 'w', encoding='utf-8')
+                stop.writelines(['execute store result score @s imd_player_id run data get entity @s data.Listeners[0]\n',
+                                 'data remove entity @s data.Listeners[0]\n',
+                                 'execute as @a if score @s imd_player_id = @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_player_id run stopsound @s record minecraft:music_disc.%s\n' % (entry.internal_name),
+                                 'execute if data entity @s data.Listeners[0] run function %s:%s/stop\n' % (datapack_name, entry.internal_name)])
+                stop.close()
 
             #write 'give_*_disc.mcfunction' files
             for i, entry in enumerate(entry_list.entries):
