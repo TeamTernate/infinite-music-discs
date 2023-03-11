@@ -61,19 +61,24 @@ class GeneratorV2(VirtualGenerator):
 
             #write 'setup_load.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w', encoding='utf-8') as setup_load:
-                setup_load.writelines(['scoreboard objectives add imd_player_id dummy\n',
-                                       'scoreboard objectives add imd_disc_id dummy\n',
-                                       'scoreboard objectives add imd_rc_steps dummy\n',
-                                       'scoreboard objectives add imd_play_time dummy\n',
-                                       'scoreboard objectives add imd_stop_11_time dummy\n',
-                                       'advancement revoke @a only %s:placed_disc\n' % (datapack_name),
-                                       'advancement revoke @a only %s:placed_jukebox\n' % (datapack_name),
-                                       'tellraw @a {"text":"Infinite Music Discs %s by link2_thepast","color":"gold"}\n' % (dp_version_str)])
+                setup_load.writelines([
+                    'scoreboard objectives add imd_player_id dummy\n',
+                    'scoreboard objectives add imd_disc_id dummy\n',
+                    'scoreboard objectives add imd_rc_steps dummy\n',
+                    'scoreboard objectives add imd_play_time dummy\n',
+                    'scoreboard objectives add imd_stop_11_time dummy\n',
+                    '\n',
+                    f'advancement revoke @a only {datapack_name}:placed_disc\n',
+                    f'advancement revoke @a only {datapack_name}:placed_jukebox\n',
+                    f'tellraw @a {{"text":"Infinite Music Discs {dp_version_str} by link2_thepast","color":"gold"}}\n'
+                ])
 
             #write 'watchdog_reset_tickcount.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'watchdog_reset_tickcount.mcfunction'), 'w', encoding='utf-8') as wd_reset_tickcount:
-                wd_reset_tickcount.writelines(['execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
-                                               'schedule function %s:watchdog_reset_tickcount 10s replace\n' % (datapack_name)])
+                wd_reset_tickcount.writelines([
+                    'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
+                    f'schedule function {datapack_name}:watchdog_reset_tickcount 10s replace\n'
+                ])
 
 
             # generate advancements and related 'jukebox register' functions
