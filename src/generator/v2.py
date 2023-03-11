@@ -215,6 +215,42 @@ class GeneratorV2(VirtualGenerator):
             reg_player.close()
 
 
+            # generate files with lines for every disc
+            #write 'play.mcfunction'
+            play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play.mcfunction'), 'w', encoding='utf-8')
+
+            for i, name in enumerate(internal_names):
+                j = i + offset + 1
+
+                play.write('execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches %d run function %s:%s/play\n' % (j, datapack_name, name))
+
+            play.close()
+
+            #write 'play_duration.mcfunction'
+            play_duration = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_duration.mcfunction'), 'w', encoding='utf-8')
+
+            for i, name in enumerate(internal_names):
+                j = i + offset + 1
+
+                play_duration.write('execute if score @s imd_disc_id matches %d run function %s:%s/play_duration\n' % (j, datapack_name, name))
+
+            play_duration.close()
+
+            #write 'stop.mcfunction'
+            stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'stop.mcfunction'), 'w', encoding='utf-8')
+
+            for i, name in enumerate(internal_names):
+                j = i + offset + 1
+
+                stop.write('execute if score @s imd_disc_id matches %d run function %s:%s/stop\n' % (j, datapack_name, name))
+
+            stop.close()
+
+            #TODO: creeper.json here
+
+            # generate per-disc functions
+            #write
+
 
 #-
 
