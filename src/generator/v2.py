@@ -79,11 +79,11 @@ class GeneratorV2(VirtualGenerator):
             # generate advancements and related 'jukebox register' functions
             #write 'placed_disc.json'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_disc.json'), 'w', encoding='utf-8') as placed_disc:
-                placed_disc.write(json.dumps({"criteria": {"placed_music_disc": {"trigger": "minecraft:item_used_on_block","conditions": {"location": {"block": {"blocks": [ "minecraft:jukebox" ], "state": { "has_record":"true" }}}, "item": {"tag": "minecraft:music_discs"}}}}, "rewards": {"function": "{}:on_placed_disc".format(datapack_name)}}))
+                placed_disc.write(json.dumps({'criteria': {'placed_music_disc': {'trigger': 'minecraft:item_used_on_block','conditions': {'location': {'block': {'blocks': [ 'minecraft:jukebox' ], 'state': { 'has_record':'true' }}}, 'item': {'tag': 'minecraft:music_discs'}}}}, 'rewards': {'function': '{}:on_placed_disc'.format(datapack_name)}}))
 
             #write 'placed_jukebox.json'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_jukebox.json'), 'w', encoding='utf-8') as placed_jukebox:
-                placed_jukebox.write(json.dumps({"criteria": {"placed_jukebox": {"trigger": "minecraft:placed_block", "conditions": {"block": "minecraft:jukebox", "item": {"items": [ "minecraft:jukebox" ]}}}}, "rewards": {"function": "{}:on_placed_jukebox".format(datapack_name)}}))
+                placed_jukebox.write(json.dumps({'criteria': {'placed_jukebox': {'trigger': 'minecraft:placed_block', 'conditions': {'block': 'minecraft:jukebox', 'item': {'items': [ 'minecraft:jukebox' ]}}}}, 'rewards': {'function': '{}:on_placed_jukebox'.format(datapack_name)}}))
 
             #write 'on_placed_disc.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'on_placed_disc.mcfunction'), 'w', encoding='utf-8') as on_placed_disc:
