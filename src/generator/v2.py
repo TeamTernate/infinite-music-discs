@@ -363,22 +363,19 @@ class GeneratorV2(VirtualGenerator):
                 sounds.write('\n}')
 
             #write 'music_disc_11.json'
-            music_disc_11 = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'), 'w', encoding='utf-8')
+            with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'), 'w', encoding='utf-8') as music_disc_11:
+                json_list = []
+                for i, name in enumerate(internal_names):
+                    j = i + offset + 1
 
-            json_list = []
-            for i, name in enumerate(internal_names):
-                j = i + offset + 1
+                    json_list.append({'predicate': {'custom_model_data':j}, 'model': 'item/music_disc_{}'.format(name)})
 
-                json_list.append({'predicate': {'custom_model_data':j}, 'model': 'item/music_disc_{}'.format(name)})
-
-            music_disc_11.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_11'}, 'overrides': json_list}, indent=4))
-            music_disc_11.close()
+                music_disc_11.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_11'}, 'overrides': json_list}, indent=4))
 
             #write 'music_disc_*.json' files
             for name in internal_names:
-                music_disc = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_%s.json' % name), 'w', encoding='utf-8')
-                music_disc.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_{}'.format(name)}}, indent=4))
-                music_disc.close()
+                with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_%s.json' % name), 'w', encoding='utf-8') as music_disc:
+                    music_disc.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_{}'.format(name)}}, indent=4))
 
             #copy sound and texture files
             for i, entry in enumerate(entry_list.entries):
