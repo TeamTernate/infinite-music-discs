@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 
 import src.version as version
 
+#TODO: define some datapack strings here so they're in a known location
 
 
 #constants
