@@ -346,23 +346,21 @@ class GeneratorV2(VirtualGenerator):
             os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
 
             #write 'pack.mcmeta'
-            pack = open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w', encoding='utf-8')
-            pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(Constants.RESOURCEPACK_DESC % len(internal_names))}}, indent=4))
-            pack.close()
+            with open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
+                pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(Constants.RESOURCEPACK_DESC % len(internal_names))}}, indent=4))
 
             #write 'sounds.json'
-            pack = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w', encoding='utf-8')
-            pack.write('{')
+            with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w', encoding='utf-8') as sounds:
+                sounds.write('{')
 
-            for i, name in enumerate(internal_names):
-                pack.write('\n"music_disc.{}": '.format(name))
-                pack.write(json.dumps({'sounds': [{'name': 'records/{}'.format(name), 'stream':True}]}, indent=4))
+                for i, name in enumerate(internal_names):
+                    sounds.write('\n"music_disc.{}": '.format(name))
+                    sounds.write(json.dumps({'sounds': [{'name': 'records/{}'.format(name), 'stream':True}]}, indent=4))
 
-                if i < len(internal_names)-1:
-                    pack.write(',\n')
+                    if i < len(internal_names)-1:
+                        sounds.write(',\n')
 
-            pack.write('\n}')
-            pack.close()
+                sounds.write('\n}')
 
             #write 'music_disc_11.json'
             music_disc_11 = open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'), 'w', encoding='utf-8')
