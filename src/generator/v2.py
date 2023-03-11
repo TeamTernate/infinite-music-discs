@@ -281,7 +281,7 @@ class GeneratorV2(VirtualGenerator):
                     give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, entry.title))
 
 
-        except UnicodeEncodeError as e:
+        except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
 
         #copy pack.png
@@ -291,7 +291,7 @@ class GeneratorV2(VirtualGenerator):
             else:
                 raise FileNotFoundError
 
-        except (FileNotFoundError, IOError) as e:
+        except (FileNotFoundError, IOError):
             print("Warning: No pack.png found. Your datapack will not have an icon.")
 
         #move pack to .zip, if selected
@@ -313,7 +313,7 @@ class GeneratorV2(VirtualGenerator):
                 if os.path.exists(datapack_name_zip):
                     shutil.rmtree(datapack_name, ignore_errors=True)
 
-        except (OSError, zipfile.BadZipFile) as e:
+        except (OSError, zipfile.BadZipFile):
             #remove bad zip, if it exists
             if os.path.exists(datapack_name_zip):
                 os.remove(datapack_name_zip)
@@ -392,7 +392,7 @@ class GeneratorV2(VirtualGenerator):
             else:
                 raise FileNotFoundError
 
-        except (FileNotFoundError, IOError) as e:
+        except (FileNotFoundError, IOError):
             print("Warning: No pack.png found. Your resourcepack will not have an icon.")
 
         #move pack to .zip, if selected
@@ -414,7 +414,7 @@ class GeneratorV2(VirtualGenerator):
                 if os.path.exists(resourcepack_name_zip):
                     shutil.rmtree(resourcepack_name, ignore_errors=True)
 
-        except (OSError, zipfile.BadZipFile) as e:
+        except (OSError, zipfile.BadZipFile):
             #remove bad zip, if it exists
             if os.path.exists(resourcepack_name_zip):
                 os.remove(resourcepack_name_zip)
