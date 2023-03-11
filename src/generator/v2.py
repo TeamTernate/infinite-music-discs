@@ -290,26 +290,22 @@ class GeneratorV2(VirtualGenerator):
 
 
             # generate per-disc functions
-            #write
-
-
-#-
-
-            #write '*/play.mcfunction' files
             for i, entry in enumerate(entry_list.entries):
+                #make directory for per-disc functions
+                os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name))
+
+                #write '*/play.mcfunction' files
                 play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8')
                 play.writelines(['title @s actionbar {"text":"Now Playing: %s","color":"green"}\n' % (entry.title.replace('"', '')),
                                 'playsound minecraft:music_disc.%s record @s ~ ~ ~ 4 1\n' % entry.internal_name])
                 play.close()
 
-            #write '*/play_duration.mcfunction' files
-            for i, entry in enumerate(entry_list.entries):
+                #write '*/play_duration.mcfunction' files
                 play_duration = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play_duration.mcfunction'), 'w', encoding='utf-8')
                 play_duration.write('scoreboard players set @s imd_play_time %d\n' % (entry.length))
                 play_duration.close()
 
-            #write '*/stop.mcfunction' files
-            for i, entry in enumerate(entry_list.entries):
+                #write '*/stop.mcfunction' files
                 stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'stop.mcfunction'), 'w', encoding='utf-8')
                 stop.writelines(['execute store result score @s imd_player_id run data get entity @s data.Listeners[0]\n',
                                  'data remove entity @s data.Listeners[0]\n',
@@ -317,8 +313,7 @@ class GeneratorV2(VirtualGenerator):
                                  'execute if data entity @s data.Listeners[0] run function %s:%s/stop\n' % (datapack_name, entry.internal_name)])
                 stop.close()
 
-            #write 'give_*_disc.mcfunction' files
-            for i, entry in enumerate(entry_list.entries):
+                #write 'give_*_disc.mcfunction' files
                 j = i + offset + 1
 
                 give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % entry.internal_name), 'w', encoding='utf-8')
