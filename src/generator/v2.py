@@ -335,7 +335,6 @@ class GeneratorV2(VirtualGenerator):
 
         resourcepack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         resourcepack_name = resourcepack_name + Constants.RESOURCEPACK_SUFFIX
-        resourcepack_name_zip = resourcepack_name + Constants.ZIP_SUFFIX
 
         try:
             #build resourcepack directory tree
@@ -395,31 +394,12 @@ class GeneratorV2(VirtualGenerator):
             print("Warning: No pack.png found. Your resourcepack will not have an icon.")
 
         #move pack to .zip, if selected
-        try:
-            if 'zip' in user_settings and user_settings['zip']:
-                #remove old zip
-                if os.path.exists(resourcepack_name_zip):
-                    os.remove(resourcepack_name_zip)
+        if 'zip' in user_settings and user_settings['zip']:
+            zip_status = self.zip_pack(resourcepack_name)
 
-                #generate new zip archive
-                with zipfile.ZipFile(resourcepack_name_zip, 'w') as rp_zip:
-                    for root, dirs, files in os.walk(resourcepack_name):
-                        root_zip = os.path.relpath(root, resourcepack_name)
-
-                        for file in files:
-                            rp_zip.write(os.path.join(root, file), os.path.join(root_zip, file))
-
-                #remove resourcepack folder
-                if os.path.exists(resourcepack_name_zip):
-                    shutil.rmtree(resourcepack_name, ignore_errors=True)
-
-        except (OSError, zipfile.BadZipFile):
-            #remove bad zip, if it exists
-            if os.path.exists(resourcepack_name_zip):
-                os.remove(resourcepack_name_zip)
-
-            print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
-            return Status.BAD_ZIP
+            if(zip_status != Status.SUCCESS):
+                print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
+                return zip_status
 
         #cleanup temp work directory
         if cleanup_tmp:
@@ -430,7 +410,7 @@ class GeneratorV2(VirtualGenerator):
 
 
 
-    def zip_pack(pack_name):
+    def zip_pack(self, pack_name):
         pack_name_zip = pack_name + Constants.ZIP_SUFFIX
 
         try:
@@ -455,7 +435,6 @@ class GeneratorV2(VirtualGenerator):
             if os.path.exists(pack_name_zip):
                 os.remove(pack_name_zip)
 
-            print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
             return Status.BAD_ZIP
         
         return Status.SUCCESS
