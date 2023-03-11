@@ -32,7 +32,6 @@ class GeneratorV2(VirtualGenerator):
 
         datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
-        datapack_name_zip = datapack_name + Constants.ZIP_SUFFIX
 
         dp_version_str = ("v%d.%d" % (self._version_major, self._version_minor))
 
@@ -294,31 +293,12 @@ class GeneratorV2(VirtualGenerator):
             print("Warning: No pack.png found. Your datapack will not have an icon.")
 
         #move pack to .zip, if selected
-        try:
-            if 'zip' in user_settings and user_settings['zip']:
-                #remove old zip
-                if os.path.exists(datapack_name_zip):
-                    os.remove(datapack_name_zip)
+        if 'zip' in user_settings and user_settings['zip']:
+            zip_status = self.zip_pack(datapack_name)
 
-                #generate new zip archive
-                with zipfile.ZipFile(datapack_name_zip, 'w') as dp_zip:
-                    for root, dirs, files in os.walk(datapack_name):
-                        root_zip = os.path.relpath(root, datapack_name)
-
-                        for file in files:
-                            dp_zip.write(os.path.join(root, file), os.path.join(root_zip, file))
-
-                #remove datapack folder
-                if os.path.exists(datapack_name_zip):
-                    shutil.rmtree(datapack_name, ignore_errors=True)
-
-        except (OSError, zipfile.BadZipFile):
-            #remove bad zip, if it exists
-            if os.path.exists(datapack_name_zip):
-                os.remove(datapack_name_zip)
-
-            print("Error: Failed to zip datapack. Datapack has been generated as folder instead.")
-            return Status.BAD_ZIP
+            if(zip_status != Status.SUCCESS):
+                print("Error: Failed to zip datapack. Datapack has been generated as folder instead.")
+                return zip_status
 
         return Status.SUCCESS
 
