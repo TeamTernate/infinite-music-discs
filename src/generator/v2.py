@@ -39,6 +39,7 @@ class GeneratorV2(VirtualGenerator):
         #TODO: use 'with expr as var'
         #TODO: shorten lines if possible
         #TODO: pretty-print json files
+        #TODO: move pwd inside datapack as you go, cut down on os path join length
         try:
             # generate basic framework files
             #build datapack directory tree
@@ -49,31 +50,27 @@ class GeneratorV2(VirtualGenerator):
             os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'advancements'))
 
             #write 'pack.mcmeta'
-            pack = open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8')
-            pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(Constants.DATAPACK_DESC % len(internal_names))}}, indent=4))
-            pack.close()
+            with open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
+                pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(Constants.DATAPACK_DESC % len(internal_names))}}, indent=4))
 
             #write 'load.json'
-            load = open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'load.json'), 'w', encoding='utf-8')
-            load.write(json.dumps({'values':['{}:setup_load'.format(datapack_name)]}, indent=4))
-            load.close()
+            with open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'load.json'), 'w', encoding='utf-8') as load:
+                load.write(json.dumps({'values':['{}:setup_load'.format(datapack_name)]}, indent=4))
 
             #write 'tick.json'
-            tick = open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'tick.json'), 'w', encoding='utf-8')
-            tick.write(json.dumps({'values':['{}:register_players_tick'.format(datapack_name), '{}:jukebox_event_tick'.format(datapack_name)]}, indent=4))
-            tick.close()
+            with open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'tick.json'), 'w', encoding='utf-8') as tick:
+                tick.write(json.dumps({'values':['{}:register_players_tick'.format(datapack_name), '{}:jukebox_event_tick'.format(datapack_name)]}, indent=4))
 
             #write 'setup_load.mcfunction'
-            setup_load = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w', encoding='utf-8')
-            setup_load.writelines(['scoreboard objectives add imd_player_id dummy\n',
-                                   'scoreboard objectives add imd_disc_id dummy\n',
-                                   'scoreboard objectives add imd_rc_steps dummy\n',
-                                   'scoreboard objectives add imd_play_time dummy\n',
-                                   'scoreboard objectives add imd_stop_11_time dummy\n',
-                                   'advancement revoke @a only %s:placed_disc\n' % (datapack_name),
-                                   'advancement revoke @a only %s:placed_jukebox\n' % (datapack_name),
-                                   'tellraw @a {"text":"Infinite Music Discs %s by link2_thepast","color":"gold"}\n' % (dp_version_str)])
-            setup_load.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w', encoding='utf-8') as setup_load:
+                setup_load.writelines(['scoreboard objectives add imd_player_id dummy\n',
+                                       'scoreboard objectives add imd_disc_id dummy\n',
+                                       'scoreboard objectives add imd_rc_steps dummy\n',
+                                       'scoreboard objectives add imd_play_time dummy\n',
+                                       'scoreboard objectives add imd_stop_11_time dummy\n',
+                                       'advancement revoke @a only %s:placed_disc\n' % (datapack_name),
+                                       'advancement revoke @a only %s:placed_jukebox\n' % (datapack_name),
+                                       'tellraw @a {"text":"Infinite Music Discs %s by link2_thepast","color":"gold"}\n' % (dp_version_str)])
 
             #write 'watchdog_reset_tickcount.mcfunction'
             wd_reset_tickcount = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'watchdog_reset_tickcount.mcfunction'), 'w', encoding='utf-8')
