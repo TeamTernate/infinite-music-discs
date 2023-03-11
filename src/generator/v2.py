@@ -304,11 +304,11 @@ class GeneratorV2(VirtualGenerator):
                 play.close()
 
             #write 'give_*_disc.mcfunction' files
-            for i, track in enumerate(titles):
+            for i, entry in enumerate(entry_list.entries):
                 j = i + offset + 1
 
-                give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % internal_names[i]), 'w', encoding='utf-8')
-                give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, track))
+                give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % entry.internal_name), 'w', encoding='utf-8')
+                give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, entry.title))
                 give.close()
 
 
