@@ -72,7 +72,7 @@ class GeneratorV2(VirtualGenerator):
                                    'scoreboard objectives add imd_stop_11_time dummy\n',
                                    'advancement revoke @a only %s:placed_disc\n' % (datapack_name),
                                    'advancement revoke @a only %s:placed_jukebox\n' % (datapack_name),
-                                   'tellraw @a {"text":"Infinite Music Discs v2.0 by link2_thepast","color":"gold"}'])
+                                   'tellraw @a {"text":"Infinite Music Discs %s by link2_thepast","color":"gold"}\n' % (dp_version_str)])
             setup_load.close()
 
             #write 'watchdog_reset_tickcount.mcfunction'
