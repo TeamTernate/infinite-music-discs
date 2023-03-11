@@ -259,30 +259,26 @@ class GeneratorV2(VirtualGenerator):
                 os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name))
 
                 #write '*/play.mcfunction' files
-                play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8')
-                play.writelines(['title @s actionbar {"text":"Now Playing: %s","color":"green"}\n' % (entry.title.replace('"', '')),
-                                'playsound minecraft:music_disc.%s record @s ~ ~ ~ 4 1\n' % entry.internal_name])
-                play.close()
+                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8') as play:
+                    play.writelines(['title @s actionbar {"text":"Now Playing: %s","color":"green"}\n' % (entry.title.replace('"', '')),
+                                     'playsound minecraft:music_disc.%s record @s ~ ~ ~ 4 1\n' % entry.internal_name])
 
                 #write '*/play_duration.mcfunction' files
-                play_duration = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play_duration.mcfunction'), 'w', encoding='utf-8')
-                play_duration.write('scoreboard players set @s imd_play_time %d\n' % (entry.length))
-                play_duration.close()
+                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
+                    play_duration.write('scoreboard players set @s imd_play_time %d\n' % (entry.length))
 
                 #write '*/stop.mcfunction' files
-                stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'stop.mcfunction'), 'w', encoding='utf-8')
-                stop.writelines(['execute store result score @s imd_player_id run data get entity @s data.Listeners[0]\n',
-                                 'data remove entity @s data.Listeners[0]\n',
-                                 'execute as @a if score @s imd_player_id = @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_player_id run stopsound @s record minecraft:music_disc.%s\n' % (entry.internal_name),
-                                 'execute if data entity @s data.Listeners[0] run function %s:%s/stop\n' % (datapack_name, entry.internal_name)])
-                stop.close()
+                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
+                    stop.writelines(['execute store result score @s imd_player_id run data get entity @s data.Listeners[0]\n',
+                                     'data remove entity @s data.Listeners[0]\n',
+                                     'execute as @a if score @s imd_player_id = @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_player_id run stopsound @s record minecraft:music_disc.%s\n' % (entry.internal_name),
+                                     'execute if data entity @s data.Listeners[0] run function %s:%s/stop\n' % (datapack_name, entry.internal_name)])
 
                 #write 'give_*_disc.mcfunction' files
                 j = i + offset + 1
 
-                give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % entry.internal_name), 'w', encoding='utf-8')
-                give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, entry.title))
-                give.close()
+                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % entry.internal_name), 'w', encoding='utf-8') as give:
+                    give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, entry.title))
 
 
         except UnicodeEncodeError as e:
