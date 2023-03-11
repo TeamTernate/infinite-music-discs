@@ -246,54 +246,6 @@ class GeneratorV2(VirtualGenerator):
 
             stop.close()
 
-            #TODO: creeper.json here
-
-            # generate per-disc functions
-            #write
-
-
-#-
-
-            #write 'detect_play_tick.mcfunction'
-            detect_play_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'detect_play_tick.mcfunction'), 'w', encoding='utf-8')
-            detect_play_tick.writelines(['execute as @a[scores={usedDisc=0}] run scoreboard players set @s heldDisc -1\n',
-                                        'execute as @a[scores={usedDisc=0},nbt={Inventory:[{Slot:-106b,id:"minecraft:music_disc_11"}]}] store result score @s heldDisc run data get entity @s Inventory[{Slot:-106b}].tag.CustomModelData\n',
-                                        'execute as @a[scores={usedDisc=0},nbt={SelectedItem:{id:"minecraft:music_disc_11"}}] store result score @s heldDisc run data get entity @s SelectedItem.tag.CustomModelData\n',
-                                        'execute as @a[scores={usedDisc=2}] run function %s:disc_play\n' % (datapack_name),
-                                        '\n',
-                                        'execute as @a run scoreboard players add @s usedDisc 0\n',
-                                        'execute as @a[scores={usedDisc=2..}] run scoreboard players set @s usedDisc 0\n',
-                                        'scoreboard players add @a[scores={usedDisc=1}] usedDisc 1\n'])
-            detect_play_tick.close()
-
-            #write 'disc_play.mcfunction'
-            disc_play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'disc_play.mcfunction'), 'w', encoding='utf-8')
-
-            for i, name in enumerate(internal_names):
-                j = i + offset + 1
-
-                disc_play.write('execute as @s[scores={heldDisc=%d}] run function %s:play_%s\n' % (j, datapack_name, name))
-
-            disc_play.close()
-
-            #write 'detect_stop_tick.mcfunction'
-            detect_stop_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'detect_stop_tick.mcfunction'), 'w', encoding='utf-8')
-
-            detect_stop_tick.writelines(['execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] if block ~ ~-1 ~ minecraft:jukebox run function %s:disc_stop\n' % (datapack_name),
-                                        'execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] if block ~ ~ ~ minecraft:jukebox run function %s:disc_stop\n' % (datapack_name),
-                                        'execute as @e[type=item, nbt={Item:{id:"minecraft:music_disc_11"}}] at @s unless entity @s[tag=old] run tag @s add old\n'])
-            detect_stop_tick.close()
-
-            #write 'disc_stop.mcfunction'
-            disc_stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'disc_stop.mcfunction'), 'w', encoding='utf-8')
-
-            for i, name in enumerate(internal_names):
-                j = i + offset + 1
-
-                disc_stop.write('execute as @s[nbt={Item:{tag:{CustomModelData:%d}}}] at @s run stopsound @a[distance=..64] record minecraft:music_disc.%s\n' % (j, name))
-
-            disc_stop.close()
-
             #write 'set_disc_track.mcfunction'
             set_disc_track = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'set_disc_track.mcfunction'), 'w', encoding='utf-8')
 
@@ -308,29 +260,13 @@ class GeneratorV2(VirtualGenerator):
 
             set_disc_track.close()
 
-            #write 'play_*.mcfunction' files
-            for i, name in enumerate(internal_names):
-                play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_%s.mcfunction' % name), 'w', encoding='utf-8')
-                play.writelines(['execute as @s at @s run title @a[distance=..64] actionbar {"text":"Now Playing: %s","color":"green"}\n' % (titles[i].replace('"', '')),
-                                'execute as @s at @s run stopsound @a[distance=..64] record minecraft:music_disc.11\n',
-                                'execute as @s at @s run playsound minecraft:music_disc.%s record @a[distance=..64] ~ ~ ~ 4 1\n' % name])
-                play.close()
-
-            #write 'give_*_disc.mcfunction' files
-            for i, track in enumerate(titles):
-                j = i + offset + 1
-
-                give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % internal_names[i]), 'w', encoding='utf-8')
-                give.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, track))
-                give.close()
-
             #write 'give_all_discs.mcfunction'
             give_all = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_all_discs.mcfunction'), 'w', encoding='utf-8')
 
-            for i, track in enumerate(titles):
+            for i, name in enumerate(internal_names):
                 j = i + offset + 1
 
-                give_all.write('execute as @s at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, track))
+                give_all.write('execute at @s run function %s:give_%s\n' % (datapack_name, name))
 
             give_all.close()
 
@@ -351,6 +287,29 @@ class GeneratorV2(VirtualGenerator):
             creeper_normentries = [{'type':'minecraft:item','functions':[{'function':'minecraft:set_count', 'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}}, {'function':'minecraft:looting_enchant', 'count':{'min':0.0, 'max':1.0}}], 'name':'minecraft:gunpowder'}]
             creeper.write(json.dumps({'type':'minecraft:entity', 'pools':[{'rolls':1, 'entries':creeper_normentries}, {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{'condition':'minecraft:entity_properties', 'predicate':{'type':'#minecraft:skeletons'}, 'entity':'killer'}]}]}, indent=4))
             creeper.close()
+
+
+            # generate per-disc functions
+            #write
+
+
+#-
+
+            #write 'play_*.mcfunction' files
+            for i, name in enumerate(internal_names):
+                play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_%s.mcfunction' % name), 'w', encoding='utf-8')
+                play.writelines(['execute as @s at @s run title @a[distance=..64] actionbar {"text":"Now Playing: %s","color":"green"}\n' % (titles[i].replace('"', '')),
+                                'execute as @s at @s run stopsound @a[distance=..64] record minecraft:music_disc.11\n',
+                                'execute as @s at @s run playsound minecraft:music_disc.%s record @a[distance=..64] ~ ~ ~ 4 1\n' % name])
+                play.close()
+
+            #write 'give_*_disc.mcfunction' files
+            for i, track in enumerate(titles):
+                j = i + offset + 1
+
+                give = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % internal_names[i]), 'w', encoding='utf-8')
+                give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, track))
+                give.close()
 
 
         except UnicodeEncodeError as e:
