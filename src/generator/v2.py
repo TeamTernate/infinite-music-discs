@@ -36,7 +36,6 @@ class GeneratorV2(VirtualGenerator):
 
         dp_version_str = ("v%d.%d" % (self._version_major, self._version_minor))
 
-        #TODO: use 'with expr as var'
         #TODO: shorten lines if possible
         #TODO: pretty-print json files
         #TODO: move pwd inside datapack as you go, cut down on os path join length
@@ -427,6 +426,38 @@ class GeneratorV2(VirtualGenerator):
             shutil.rmtree(self.tmp_path, ignore_errors=True)
             self.tmp_path = None
 
+        return Status.SUCCESS
+
+
+
+    def zip_pack(pack_name):
+        pack_name_zip = pack_name + Constants.ZIP_SUFFIX
+
+        try:
+            #remove old zip
+            if os.path.exists(pack_name_zip):
+                os.remove(pack_name_zip)
+
+            #generate new zip archive
+            with zipfile.ZipFile(pack_name_zip, 'w') as rp_zip:
+                for root, dirs, files in os.walk(pack_name):
+                    root_zip = os.path.relpath(root, pack_name)
+
+                    for file in files:
+                        rp_zip.write(os.path.join(root, file), os.path.join(root_zip, file))
+
+            #remove resourcepack folder
+            if os.path.exists(pack_name_zip):
+                shutil.rmtree(pack_name, ignore_errors=True)
+
+        except (OSError, zipfile.BadZipFile):
+            #remove bad zip, if it exists
+            if os.path.exists(pack_name_zip):
+                os.remove(pack_name_zip)
+
+            print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
+            return Status.BAD_ZIP
+        
         return Status.SUCCESS
 
 
