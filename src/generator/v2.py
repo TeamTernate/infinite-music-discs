@@ -197,58 +197,43 @@ class GeneratorV2(VirtualGenerator):
 
             # generate files with lines for every disc
             #write 'play.mcfunction'
-            play = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play.mcfunction'), 'w', encoding='utf-8')
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play.mcfunction'), 'w', encoding='utf-8') as play:
+                for i, name in enumerate(internal_names):
+                    j = i + offset + 1
 
-            for i, name in enumerate(internal_names):
-                j = i + offset + 1
-
-                play.write('execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches %d run function %s:%s/play\n' % (j, datapack_name, name))
-
-            play.close()
+                    play.write('execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches %d run function %s:%s/play\n' % (j, datapack_name, name))
 
             #write 'play_duration.mcfunction'
-            play_duration = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_duration.mcfunction'), 'w', encoding='utf-8')
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
+                for i, name in enumerate(internal_names):
+                    j = i + offset + 1
 
-            for i, name in enumerate(internal_names):
-                j = i + offset + 1
-
-                play_duration.write('execute if score @s imd_disc_id matches %d run function %s:%s/play_duration\n' % (j, datapack_name, name))
-
-            play_duration.close()
+                    play_duration.write('execute if score @s imd_disc_id matches %d run function %s:%s/play_duration\n' % (j, datapack_name, name))
 
             #write 'stop.mcfunction'
-            stop = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'stop.mcfunction'), 'w', encoding='utf-8')
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
+                for i, name in enumerate(internal_names):
+                    j = i + offset + 1
 
-            for i, name in enumerate(internal_names):
-                j = i + offset + 1
-
-                stop.write('execute if score @s imd_disc_id matches %d run function %s:%s/stop\n' % (j, datapack_name, name))
-
-            stop.close()
+                    stop.write('execute if score @s imd_disc_id matches %d run function %s:%s/stop\n' % (j, datapack_name, name))
 
             #write 'set_disc_track.mcfunction'
-            set_disc_track = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'set_disc_track.mcfunction'), 'w', encoding='utf-8')
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'set_disc_track.mcfunction'), 'w', encoding='utf-8') as set_disc_track:
+                for i, track in enumerate(titles):
+                    j = i + offset + 1
 
-            for i, track in enumerate(titles):
-                j = i + offset + 1
+                    # Create command, and add command as string to the rest of the command.
+                    item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
+                    cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_pack_format(pack_format) + '\n'
 
-                # Create command, and add command as string to the rest of the command.
-                item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
-                cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_pack_format(pack_format) + '\n'
-
-                set_disc_track.write(cmd_str % (j, j, track.replace('"', '')))
-
-            set_disc_track.close()
+                    set_disc_track.write(cmd_str % (j, j, track.replace('"', '')))
 
             #write 'give_all_discs.mcfunction'
-            give_all = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_all_discs.mcfunction'), 'w', encoding='utf-8')
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_all_discs.mcfunction'), 'w', encoding='utf-8') as give_all:
+                for i, name in enumerate(internal_names):
+                    j = i + offset + 1
 
-            for i, name in enumerate(internal_names):
-                j = i + offset + 1
-
-                give_all.write('execute at @s run function %s:give_%s\n' % (datapack_name, name))
-
-            give_all.close()
+                    give_all.write('execute at @s run function %s:give_%s\n' % (datapack_name, name))
 
             #write 'creeper.json'
             creeper = open(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'), 'w', encoding='utf-8')
