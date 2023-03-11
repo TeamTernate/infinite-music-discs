@@ -185,16 +185,14 @@ class GeneratorV2(VirtualGenerator):
 
             # generate player related every-tick functions
             #write 'register_players_tick.mcfunction'
-            reg_players_tick = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_players_tick.mcfunction'), 'w', encoding='utf-8')
-            reg_players_tick.write('execute as @a[tag=!imd_has_id] run function %s:register_player\n' % (datapack_name))
-            reg_players_tick.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_players_tick.mcfunction'), 'w', encoding='utf-8') as reg_players_tick:
+                reg_players_tick.write('execute as @a[tag=!imd_has_id] run function %s:register_player\n' % (datapack_name))
 
             #TODO: different global id per-datapack?
             #write 'register_player.mcfunction'
-            reg_player = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_player.mcfunction'), 'w', encoding='utf-8')
-            reg_player.writelines(['execute store result score @s imd_player_id run scoreboard players add #imd_id_global imd_player_id 1\n',
-                                   'tag @s[scores={imd_player_id=1..}] add imd_has_id'])
-            reg_player.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_player.mcfunction'), 'w', encoding='utf-8') as reg_player:
+                reg_player.writelines(['execute store result score @s imd_player_id run scoreboard players add #imd_id_global imd_player_id 1\n',
+                                       'tag @s[scores={imd_player_id=1..}] add imd_has_id'])
 
 
             # generate files with lines for every disc
