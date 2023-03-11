@@ -140,7 +140,9 @@ class GeneratorV2(VirtualGenerator):
 
             #FIXME: only stop if jukebox is currently playing
             #write 'destroy_jukebox_marker.mcfunction'
-            #TBD
+            destroy_jb_marker = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'destroy_jukebox_marker.mcfunction'), 'w', encoding='utf-8')
+            destroy_jb_marker.writelines(['function %s:stop\n' % (datapack_name),
+                                          'kill @s\n'])
 
             #write 'jukebox_tick_timers.mcfunction'
             jb_tick_timers = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'jukebox_tick_timers.mcfunction'), 'w', encoding='utf-8')
