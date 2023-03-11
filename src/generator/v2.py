@@ -73,58 +73,49 @@ class GeneratorV2(VirtualGenerator):
                                        'tellraw @a {"text":"Infinite Music Discs %s by link2_thepast","color":"gold"}\n' % (dp_version_str)])
 
             #write 'watchdog_reset_tickcount.mcfunction'
-            wd_reset_tickcount = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'watchdog_reset_tickcount.mcfunction'), 'w', encoding='utf-8')
-            wd_reset_tickcount.writelines(['execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
-                                           'schedule function %s:watchdog_reset_tickcount 10s replace\n' % (datapack_name)])
-            wd_reset_tickcount.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'watchdog_reset_tickcount.mcfunction'), 'w', encoding='utf-8') as wd_reset_tickcount:
+                wd_reset_tickcount.writelines(['execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
+                                               'schedule function %s:watchdog_reset_tickcount 10s replace\n' % (datapack_name)])
 
 
             # generate advancements and related 'jukebox register' functions
             #write 'placed_disc.json'
-            placed_disc = open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_disc.json'), 'w', encoding='utf-8')
-            placed_disc.write(json.dumps({"criteria": {"placed_music_disc": {"trigger": "minecraft:item_used_on_block","conditions": {"location": {"block": {"blocks": [ "minecraft:jukebox" ], "state": { "has_record":"true" }}}, "item": {"tag": "minecraft:music_discs"}}}}, "rewards": {"function": "{}:on_placed_disc".format(datapack_name)}}))
-            placed_disc.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_disc.json'), 'w', encoding='utf-8') as placed_disc:
+                placed_disc.write(json.dumps({"criteria": {"placed_music_disc": {"trigger": "minecraft:item_used_on_block","conditions": {"location": {"block": {"blocks": [ "minecraft:jukebox" ], "state": { "has_record":"true" }}}, "item": {"tag": "minecraft:music_discs"}}}}, "rewards": {"function": "{}:on_placed_disc".format(datapack_name)}}))
 
             #write 'placed_jukebox.json'
-            placed_jukebox = open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_jukebox.json'), 'w', encoding='utf-8')
-            placed_jukebox.write(json.dumps({"criteria": {"placed_jukebox": {"trigger": "minecraft:placed_block", "conditions": {"block": "minecraft:jukebox", "item": {"items": [ "minecraft:jukebox" ]}}}}, "rewards": {"function": "{}:on_placed_jukebox".format(datapack_name)}}))
-            placed_jukebox.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_jukebox.json'), 'w', encoding='utf-8') as placed_jukebox:
+                placed_jukebox.write(json.dumps({"criteria": {"placed_jukebox": {"trigger": "minecraft:placed_block", "conditions": {"block": "minecraft:jukebox", "item": {"items": [ "minecraft:jukebox" ]}}}}, "rewards": {"function": "{}:on_placed_jukebox".format(datapack_name)}}))
 
             #write 'on_placed_disc.mcfunction'
-            on_placed_disc = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'on_placed_disc.mcfunction'), 'w', encoding='utf-8')
-            on_placed_disc.writelines(['advancement revoke @s only %s:placed_disc\n' % (datapack_name),
-                                       'execute as @s run function %s:raycast_start\n' % (datapack_name)])
-            on_placed_disc.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'on_placed_disc.mcfunction'), 'w', encoding='utf-8') as on_placed_disc:
+                on_placed_disc.writelines(['advancement revoke @s only %s:placed_disc\n' % (datapack_name),
+                                           'execute as @s run function %s:raycast_start\n' % (datapack_name)])
 
             #write 'on_placed_jukebox.mcfunction'
-            on_placed_jukebox = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'on_placed_jukebox.mcfunction'), 'w', encoding='utf-8')
-            on_placed_jukebox.writelines(['advancement revoke @s only %s:placed_jukebox\n' % (datapack_name),
-                                          'execute as @s run function %s:raycast_start\n' % (datapack_name)])
-            on_placed_jukebox.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'on_placed_jukebox.mcfunction'), 'w', encoding='utf-8') as on_placed_jukebox:
+                on_placed_jukebox.writelines(['advancement revoke @s only %s:placed_jukebox\n' % (datapack_name),
+                                              'execute as @s run function %s:raycast_start\n' % (datapack_name)])
 
             #write 'raycast_start.mcfunction'
-            rc_start = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'raycast_start.mcfunction'), 'w', encoding='utf-8')
-            rc_start.writelines(['scoreboard players set @s imd_rc_steps 1000\n',
-                                 'execute at @s anchored eyes positioned ^ ^ ^ run function %s:raycast_step\n' % (datapack_name)])
-            rc_start.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'raycast_start.mcfunction'), 'w', encoding='utf-8') as rc_start:
+                rc_start.writelines(['scoreboard players set @s imd_rc_steps 1000\n',
+                                     'execute at @s anchored eyes positioned ^ ^ ^ run function %s:raycast_step\n' % (datapack_name)])
 
             #write 'raycast_step.mcfunction'
-            rc_step = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'raycast_step.mcfunction'), 'w', encoding='utf-8')
-            rc_step.writelines(['execute if block ~ ~ ~ minecraft:jukebox run function %s:raycast_hit\n' % (datapack_name),
-                                'scoreboard players remove @s imd_rc_steps 1\n',
-                                'execute if score @s imd_rc_steps matches 1.. positioned ^ ^ ^0.005 run function %s:raycast_step\n' % (datapack_name)])
-            rc_step.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'raycast_step.mcfunction'), 'w', encoding='utf-8') as rc_step:
+                rc_step.writelines(['execute if block ~ ~ ~ minecraft:jukebox run function %s:raycast_hit\n' % (datapack_name),
+                                    'scoreboard players remove @s imd_rc_steps 1\n',
+                                    'execute if score @s imd_rc_steps matches 1.. positioned ^ ^ ^0.005 run function %s:raycast_step\n' % (datapack_name)])
 
             #write 'raycast_hit.mcfunction'
-            rc_hit = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'raycast_hit.mcfunction'), 'w', encoding='utf-8')
-            rc_hit.writelines(['scoreboard players set @s imd_rc_steps 1\n',
-                               'execute align xyz positioned ~0.5 ~0.5 ~0.5 unless entity @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] run function %s:register_jukebox_marker\n' % (datapack_name)])
-            rc_hit.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'raycast_hit.mcfunction'), 'w', encoding='utf-8') as rc_hit:
+                rc_hit.writelines(['scoreboard players set @s imd_rc_steps 1\n',
+                                   'execute align xyz positioned ~0.5 ~0.5 ~0.5 unless entity @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] run function %s:register_jukebox_marker\n' % (datapack_name)])
 
             #write 'register_jukebox_marker.mcfunction'
-            reg_jukebox_marker = open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_jukebox_marker.mcfunction'), 'w', encoding='utf-8')
-            reg_jukebox_marker.write('summon marker ~ ~ ~ {Tags:["imd_jukebox_marker"]}\n')
-            reg_jukebox_marker.close()
+            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_jukebox_marker.mcfunction'), 'w', encoding='utf-8') as reg_jukebox_marker:
+                reg_jukebox_marker.write('summon marker ~ ~ ~ {Tags:["imd_jukebox_marker"]}\n')
 
 
             # generate jukebox related every-tick functions
