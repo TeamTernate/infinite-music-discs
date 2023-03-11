@@ -425,9 +425,9 @@ class GeneratorV2(VirtualGenerator):
                 music_disc.close()
 
             #copy sound and texture files
-            for i, name in enumerate(internal_names):
-                shutil.copyfile(track_files[i], os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records', '%s.ogg' % name))
-                shutil.copyfile(texture_files[i], os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item', 'music_disc_%s.png' % name))
+            for i, entry in enumerate(entry_list.entries):
+                shutil.copyfile(entry.track_file, os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records', '%s.ogg' % entry.internal_name))
+                shutil.copyfile(entry.texture_file, os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item', 'music_disc_%s.png' % entry.internal_name))
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
