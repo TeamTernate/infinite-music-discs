@@ -448,18 +448,20 @@ class GeneratorV2(VirtualGenerator):
                 }, indent=4))
 
             #write 'sounds.json'
-            #TODO: use json formatting better here
             with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w', encoding='utf-8') as sounds:
-                sounds.write('{')
+                json_dict = {}
 
-                for i, name in enumerate(internal_names):
-                    sounds.write(f'\n"music_disc.{name}": ')
-                    sounds.write(json.dumps({'sounds': [{'name': f'records/{name}', 'stream':True}]}, indent=4))
+                for name in internal_names:
+                    sound = {
+                        'sounds': [{
+                            'name': f'records/{name}',
+                            'stream':True
+                        }]
+                    }
 
-                    if i < len(internal_names)-1:
-                        sounds.write(',\n')
+                    json_dict[f'music_disc.{name}'] = sound
 
-                sounds.write('\n}')
+                sounds.write(json.dumps(json_dict, indent=4))
 
             #write 'music_disc_11.json'
             with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'), 'w', encoding='utf-8') as music_disc_11:
