@@ -279,21 +279,21 @@ class GeneratorV2(VirtualGenerator):
                 for i, name in enumerate(internal_names):
                     j = i + offset + 1
 
-                    play.write('execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches %d run function %s:%s/play\n' % (j, datapack_name, name))
+                    play.write(f'execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches {j} run function {datapack_name}:{name}/play\n')
 
             #write 'play_duration.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
                 for i, name in enumerate(internal_names):
                     j = i + offset + 1
 
-                    play_duration.write('execute if score @s imd_disc_id matches %d run function %s:%s/play_duration\n' % (j, datapack_name, name))
+                    play_duration.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/play_duration\n')
 
             #write 'stop.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
                 for i, name in enumerate(internal_names):
                     j = i + offset + 1
 
-                    stop.write('execute if score @s imd_disc_id matches %d run function %s:%s/stop\n' % (j, datapack_name, name))
+                    stop.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/stop\n')
 
             #write 'set_disc_track.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'set_disc_track.mcfunction'), 'w', encoding='utf-8') as set_disc_track:
@@ -311,7 +311,7 @@ class GeneratorV2(VirtualGenerator):
                 for i, name in enumerate(internal_names):
                     j = i + offset + 1
 
-                    give_all.write('execute at @s run function %s:give_%s\n' % (datapack_name, name))
+                    give_all.write(f'execute at @s run function {datapack_name}:give_{name}\n')
 
             #write 'creeper.json'
             with open(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'), 'w', encoding='utf-8') as creeper:
@@ -325,10 +325,39 @@ class GeneratorV2(VirtualGenerator):
                 for i, track in enumerate(titles):
                     j = i + offset + 1
 
-                    creeper_mdentries.append({'type':'minecraft:item', 'weight':1, 'name':'minecraft:music_disc_11', 'functions':[{'function':'minecraft:set_nbt', 'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track.replace('"', ''))}]})
+                    creeper_mdentries.append({
+                        'type':'minecraft:item',
+                        'weight':1,
+                        'name':'minecraft:music_disc_11',
+                        'functions': [{
+                            'function':'minecraft:set_nbt',
+                            'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track.replace('"', ''))
+                        }]
+                    })
 
-                creeper_normentries = [{'type':'minecraft:item','functions':[{'function':'minecraft:set_count', 'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}}, {'function':'minecraft:looting_enchant', 'count':{'min':0.0, 'max':1.0}}], 'name':'minecraft:gunpowder'}]
-                creeper.write(json.dumps({'type':'minecraft:entity', 'pools':[{'rolls':1, 'entries':creeper_normentries}, {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{'condition':'minecraft:entity_properties', 'predicate':{'type':'#minecraft:skeletons'}, 'entity':'killer'}]}]}, indent=4))
+                creeper_normentries = [{
+                    'type':'minecraft:item',
+                    'functions':[{
+                            'function':'minecraft:set_count',
+                            'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}
+                        }, {
+                            'function':'minecraft:looting_enchant',
+                            'count':{'min':0.0, 'max':1.0}
+                        }],
+                    'name':'minecraft:gunpowder'
+                }]
+
+                creeper.write(json.dumps({
+                    'type':'minecraft:entity',
+                    'pools':[
+                        {'rolls':1, 'entries':creeper_normentries},
+                        {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{
+                            'condition':'minecraft:entity_properties',
+                            'predicate':{'type':'#minecraft:skeletons'},
+                            'entity':'killer'
+                        }]
+                    }]
+                }, indent=4))
 
 
             # generate per-disc functions
