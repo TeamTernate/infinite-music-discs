@@ -365,21 +365,27 @@ class GeneratorV2(VirtualGenerator):
                 #make directory for per-disc functions
                 os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name))
 
+                #FIXME: sanitize " from titles earlier than here
+
                 #write '*/play.mcfunction' files
                 with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8') as play:
-                    play.writelines(['title @s actionbar {"text":"Now Playing: %s","color":"green"}\n' % (entry.title.replace('"', '')),
-                                     'playsound minecraft:music_disc.%s record @s ~ ~ ~ 4 1\n' % entry.internal_name])
+                    play.writelines([
+                        f'title @s actionbar {{"text":"Now Playing: {entry.title}","color":"green"}}\n',
+                        f'playsound minecraft:music_disc.{entry.internal_name} record @s ~ ~ ~ 4 1\n'
+                    ])
 
                 #write '*/play_duration.mcfunction' files
                 with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
-                    play_duration.write('scoreboard players set @s imd_play_time %d\n' % (entry.length))
+                    play_duration.write(f'scoreboard players set @s imd_play_time {entry.length}\n')
 
                 #write '*/stop.mcfunction' files
                 with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
-                    stop.writelines(['execute store result score @s imd_player_id run data get entity @s data.Listeners[0]\n',
-                                     'data remove entity @s data.Listeners[0]\n',
-                                     'execute as @a if score @s imd_player_id = @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_player_id run stopsound @s record minecraft:music_disc.%s\n' % (entry.internal_name),
-                                     'execute if data entity @s data.Listeners[0] run function %s:%s/stop\n' % (datapack_name, entry.internal_name)])
+                    stop.writelines([
+                        'execute store result score @s imd_player_id run data get entity @s data.Listeners[0]\n',
+                        'data remove entity @s data.Listeners[0]\n',
+                        f'execute as @a if score @s imd_player_id = @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_player_id run stopsound @s record minecraft:music_disc.{entry.internal_name}\n',
+                        f'execute if data entity @s data.Listeners[0] run function {datapack_name}:{entry.internal_name}/stop\n'
+                    ])
 
                 #write 'give_*_disc.mcfunction' files
                 j = i + offset + 1
