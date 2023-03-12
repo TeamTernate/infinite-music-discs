@@ -33,8 +33,12 @@ class GeneratorV2(VirtualGenerator):
 
         dp_version_str = f'v{self._version_major}.{self._version_minor}'
 
+        #capture base dir
+        base_dir = os.getcwd()
+
+        #FIXME: sanitize " from titles before this function
+
         #TODO: shorten lines if possible
-        #TODO: pretty-print json files
         #TODO: move pwd inside datapack as you go, cut down on os path join length
         try:
             # generate basic framework files
@@ -45,8 +49,6 @@ class GeneratorV2(VirtualGenerator):
             os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
             os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'advancements'))
 
-            #FIXME: sanitize " from titles before this function
-
             #write 'pack.mcmeta'
             with open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
                 pack.write(json.dumps({
@@ -56,14 +58,18 @@ class GeneratorV2(VirtualGenerator):
                     }
                 }, indent=4))
 
+
+            #generate minecraft function tags
+            os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'tags', 'functions'))
+
             #write 'load.json'
-            with open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'load.json'), 'w', encoding='utf-8') as load:
+            with open('load.json', 'w', encoding='utf-8') as load:
                 load.write(json.dumps({
                     'values': [ f'{datapack_name}:setup_load' ]
                 }, indent=4))
 
             #write 'tick.json'
-            with open(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions', 'tick.json'), 'w', encoding='utf-8') as tick:
+            with open('tick.json', 'w', encoding='utf-8') as tick:
                 tick.write(json.dumps({
                     'values': [
                         f'{datapack_name}:register_players_tick',
@@ -71,8 +77,12 @@ class GeneratorV2(VirtualGenerator):
                     ]
                 }, indent=4))
 
+
+            #generate global functions
+            os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
+
             #write 'setup_load.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'setup_load.mcfunction'), 'w', encoding='utf-8') as setup_load:
+            with open('setup_load.mcfunction', 'w', encoding='utf-8') as setup_load:
                 setup_load.writelines([
                     'scoreboard objectives add imd_player_id dummy\n',
                     'scoreboard objectives add imd_disc_id dummy\n',
@@ -86,12 +96,13 @@ class GeneratorV2(VirtualGenerator):
                 ])
 
             #write 'watchdog_reset_tickcount.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'watchdog_reset_tickcount.mcfunction'), 'w', encoding='utf-8') as wd_reset_tickcount:
+            with open('watchdog_reset_tickcount.mcfunction', 'w', encoding='utf-8') as wd_reset_tickcount:
                 wd_reset_tickcount.writelines([
                     'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
                     f'schedule function {datapack_name}:watchdog_reset_tickcount 10s replace\n'
                 ])
 
+            os.chdir(base_dir)
 
             # generate advancements and related 'jukebox register' functions
             #write 'placed_disc.json'
@@ -394,6 +405,9 @@ class GeneratorV2(VirtualGenerator):
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
+        
+        finally:
+            os.chdir(base_dir)
 
         #copy pack.png
         try:
