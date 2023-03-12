@@ -78,6 +78,51 @@ class GeneratorV2(VirtualGenerator):
                 }, indent=4))
 
 
+            # generate advancements
+            os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'advancements'))
+
+            #write 'placed_disc.json'
+            with open('placed_disc.json', 'w', encoding='utf-8') as placed_disc:
+                placed_disc.write(json.dumps({
+                    'criteria': {
+                        'placed_music_disc': {
+                            'trigger': 'minecraft:item_used_on_block',
+                            'conditions': {
+                                'location': {
+                                    'block': {
+                                        'blocks': [ 'minecraft:jukebox' ],
+                                        'state': { 'has_record':'true' }
+                                    }
+                                },
+                                'item': {'tag': 'minecraft:music_discs'}
+                            }
+                        }
+                    },
+                    'rewards': {
+                        'function': f'{datapack_name}:on_placed_disc'
+                    }
+                }, indent=4))
+
+            #write 'placed_jukebox.json'
+            with open('placed_jukebox.json', 'w', encoding='utf-8') as placed_jukebox:
+                placed_jukebox.write(json.dumps({
+                    'criteria': {
+                        'placed_jukebox': {
+                            'trigger': 'minecraft:placed_block',
+                            'conditions': {
+                                'block': 'minecraft:jukebox',
+                                'item': {
+                                    'items': [ 'minecraft:jukebox' ]
+                                }
+                            }
+                        }
+                    },
+                    'rewards': {
+                        'function': f'{datapack_name}:on_placed_jukebox'
+                    }
+                }, indent=4))
+
+
             #generate global functions
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
 
@@ -102,50 +147,8 @@ class GeneratorV2(VirtualGenerator):
                     f'schedule function {datapack_name}:watchdog_reset_tickcount 10s replace\n'
                 ])
 
-            os.chdir(base_dir)
 
-            # generate advancements and related 'jukebox register' functions
-            #write 'placed_disc.json'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_disc.json'), 'w', encoding='utf-8') as placed_disc:
-                placed_disc.write(json.dumps({
-                    'criteria': {
-                        'placed_music_disc': {
-                            'trigger': 'minecraft:item_used_on_block',
-                            'conditions': {
-                                'location': {
-                                    'block': {
-                                        'blocks': [ 'minecraft:jukebox' ],
-                                        'state': { 'has_record':'true' }
-                                    }
-                                },
-                                'item': {'tag': 'minecraft:music_discs'}
-                            }
-                        }
-                    },
-                    'rewards': {
-                        'function': f'{datapack_name}:on_placed_disc'
-                    }
-                }, indent=4))
-
-            #write 'placed_jukebox.json'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'advancements', 'placed_jukebox.json'), 'w', encoding='utf-8') as placed_jukebox:
-                placed_jukebox.write(json.dumps({
-                    'criteria': {
-                        'placed_jukebox': {
-                            'trigger': 'minecraft:placed_block',
-                            'conditions': {
-                                'block': 'minecraft:jukebox',
-                                'item': {
-                                    'items': [ 'minecraft:jukebox' ]
-                                }
-                            }
-                        }
-                    },
-                    'rewards': {
-                        'function': f'{datapack_name}:on_placed_jukebox'
-                    }
-                }, indent=4))
-
+            #generate 'jukebox register' functions
             #write 'on_placed_disc.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'on_placed_disc.mcfunction'), 'w', encoding='utf-8') as on_placed_disc:
                 on_placed_disc.writelines([
