@@ -33,7 +33,7 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
-        dp_version_str = ("v%d.%d" % (self._version_major, self._version_minor))
+        dp_version_str = f'v{self._version_major}.{self._version_minor}'
 
         #TODO: shorten lines if possible
         #TODO: pretty-print json files
@@ -46,6 +46,8 @@ class GeneratorV2(VirtualGenerator):
             os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
             os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
             os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'advancements'))
+
+            #FIXME: sanitize " from titles before this function
 
             #write 'pack.mcmeta'
             with open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
@@ -365,8 +367,6 @@ class GeneratorV2(VirtualGenerator):
                 #make directory for per-disc functions
                 os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name))
 
-                #FIXME: sanitize " from titles earlier than here
-
                 #write '*/play.mcfunction' files
                 with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8') as play:
                     play.writelines([
@@ -390,7 +390,7 @@ class GeneratorV2(VirtualGenerator):
                 #write 'give_*_disc.mcfunction' files
                 j = i + offset + 1
 
-                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_%s.mcfunction' % entry.internal_name), 'w', encoding='utf-8') as give:
+                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', f'give_{entry.internal_name}.mcfunction'), 'w', encoding='utf-8') as give:
                     give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, entry.title))
 
 
