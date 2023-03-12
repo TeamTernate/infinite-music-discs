@@ -444,6 +444,9 @@ class GeneratorV2(VirtualGenerator):
         resourcepack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         resourcepack_name = resourcepack_name + Constants.RESOURCEPACK_SUFFIX
 
+        #capture base dir
+        base_dir = os.getcwd()
+
         try:
             #build resourcepack directory tree
             shutil.rmtree(resourcepack_name, ignore_errors=True)
@@ -476,8 +479,12 @@ class GeneratorV2(VirtualGenerator):
 
                 sounds.write(json.dumps(json_dict, indent=4))
 
+
+            #generate item models
+            os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
+
             #write 'music_disc_11.json'
-            with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'), 'w', encoding='utf-8') as music_disc_11:
+            with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
                 json_list = []
                 for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
@@ -495,19 +502,26 @@ class GeneratorV2(VirtualGenerator):
 
             #write 'music_disc_*.json' files
             for name in entry_list.internal_names:
-                with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', f'music_disc_{name}.json'), 'w', encoding='utf-8') as music_disc:
+                with open(f'music_disc_{name}.json', 'w', encoding='utf-8') as music_disc:
                     music_disc.write(json.dumps({
                         'parent':'item/generated',
                         'textures':{'layer0': f'item/music_disc_{name}'}
                     }, indent=4))
 
+
+            #generate assets
+            os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft'))
+
             #copy sound and texture files
             for i, entry in enumerate(entry_list.entries):
-                shutil.copyfile(entry.track_file, os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records', f'{entry.internal_name}.ogg'))
-                shutil.copyfile(entry.texture_file, os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item', f'music_disc_{entry.internal_name}.png'))
+                shutil.copyfile(entry.track_file, os.path.join('sounds', 'records', f'{entry.internal_name}.ogg'))
+                shutil.copyfile(entry.texture_file, os.path.join('textures', 'item', f'music_disc_{entry.internal_name}.png'))
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
+        
+        finally:
+            os.chdir(base_dir)
 
         #copy pack.png
         try:
