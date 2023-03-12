@@ -275,12 +275,12 @@ class GeneratorV2(VirtualGenerator):
 
             # generate player related every-tick functions
             #write 'register_players_tick.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_players_tick.mcfunction'), 'w', encoding='utf-8') as reg_players_tick:
+            with open('register_players_tick.mcfunction', 'w', encoding='utf-8') as reg_players_tick:
                 reg_players_tick.write(f'execute as @a[tag=!imd_has_id] run function {datapack_name}:register_player\n')
 
             #TODO: different global id per-datapack?
             #write 'register_player.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'register_player.mcfunction'), 'w', encoding='utf-8') as reg_player:
+            with open('register_player.mcfunction', 'w', encoding='utf-8') as reg_player:
                 reg_player.writelines([
                     'execute store result score @s imd_player_id run scoreboard players add #imd_id_global imd_player_id 1\n',
                     'tag @s[scores={imd_player_id=1..}] add imd_has_id'
@@ -289,28 +289,28 @@ class GeneratorV2(VirtualGenerator):
 
             # generate files with lines for every disc
             #write 'play.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play.mcfunction'), 'w', encoding='utf-8') as play:
+            with open('play.mcfunction', 'w', encoding='utf-8') as play:
                 for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     play.write(f'execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches {j} run function {datapack_name}:{name}/play\n')
 
             #write 'play_duration.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
+            with open('play_duration.mcfunction', 'w', encoding='utf-8') as play_duration:
                 for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     play_duration.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/play_duration\n')
 
             #write 'stop.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
+            with open('stop.mcfunction', 'w', encoding='utf-8') as stop:
                 for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     stop.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/stop\n')
 
             #write 'set_disc_track.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'set_disc_track.mcfunction'), 'w', encoding='utf-8') as set_disc_track:
+            with open('set_disc_track.mcfunction', 'w', encoding='utf-8') as set_disc_track:
                 for i, track in enumerate(entry_list.titles):
                     j = i + offset + 1
 
@@ -321,13 +321,14 @@ class GeneratorV2(VirtualGenerator):
                     set_disc_track.write(cmd_str % (j, j, track.replace('"', '')))
 
             #write 'give_all_discs.mcfunction'
-            with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_all_discs.mcfunction'), 'w', encoding='utf-8') as give_all:
+            with open('give_all_discs.mcfunction', 'w', encoding='utf-8') as give_all:
                 for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     give_all.write(f'execute at @s run function {datapack_name}:give_{name}\n')
 
             #write 'creeper.json'
+            os.chdir(base_dir)
             with open(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'), 'w', encoding='utf-8') as creeper:
 
                 discs_tag = 'minecraft:creeper_drop_music_discs'
@@ -375,23 +376,25 @@ class GeneratorV2(VirtualGenerator):
 
 
             # generate per-disc functions
+            os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
+
             for i, entry in enumerate(entry_list.entries):
                 #make directory for per-disc functions
-                os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name))
+                os.makedirs(entry.internal_name)
 
                 #write '*/play.mcfunction' files
-                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8') as play:
+                with open(os.path.join(entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8') as play:
                     play.writelines([
                         f'title @s actionbar {{"text":"Now Playing: {entry.title}","color":"green"}}\n',
                         f'playsound minecraft:music_disc.{entry.internal_name} record @s ~ ~ ~ 4 1\n'
                     ])
 
                 #write '*/play_duration.mcfunction' files
-                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
+                with open(os.path.join(entry.internal_name, 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
                     play_duration.write(f'scoreboard players set @s imd_play_time {entry.length}\n')
 
                 #write '*/stop.mcfunction' files
-                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', entry.internal_name, 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
+                with open(os.path.join(entry.internal_name, 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
                     stop.writelines([
                         'execute store result score @s imd_player_id run data get entity @s data.Listeners[0]\n',
                         'data remove entity @s data.Listeners[0]\n',
@@ -402,7 +405,7 @@ class GeneratorV2(VirtualGenerator):
                 #write 'give_*_disc.mcfunction' files
                 j = i + offset + 1
 
-                with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', f'give_{entry.internal_name}.mcfunction'), 'w', encoding='utf-8') as give:
+                with open(f'give_{entry.internal_name}.mcfunction', 'w', encoding='utf-8') as give:
                     give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, entry.title))
 
 
