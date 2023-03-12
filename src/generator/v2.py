@@ -38,8 +38,6 @@ class GeneratorV2(VirtualGenerator):
 
         #FIXME: sanitize " from titles before this function
 
-        #TODO: shorten lines if possible
-        #TODO: move pwd inside datapack as you go, cut down on os path join length
         try:
             # generate basic framework files
             #build datapack directory tree
@@ -65,13 +63,13 @@ class GeneratorV2(VirtualGenerator):
             #write 'load.json'
             with open('load.json', 'w', encoding='utf-8') as load:
                 load.write(json.dumps({
-                    'values': [ f'{datapack_name}:setup_load' ]
+                    'values':[ f'{datapack_name}:setup_load' ]
                 }, indent=4))
 
             #write 'tick.json'
             with open('tick.json', 'w', encoding='utf-8') as tick:
                 tick.write(json.dumps({
-                    'values': [
+                    'values':[
                         f'{datapack_name}:register_players_tick',
                         f'{datapack_name}:jukebox_event_tick'
                     ]
@@ -84,41 +82,41 @@ class GeneratorV2(VirtualGenerator):
             #write 'placed_disc.json'
             with open('placed_disc.json', 'w', encoding='utf-8') as placed_disc:
                 placed_disc.write(json.dumps({
-                    'criteria': {
-                        'placed_music_disc': {
-                            'trigger': 'minecraft:item_used_on_block',
-                            'conditions': {
-                                'location': {
-                                    'block': {
-                                        'blocks': [ 'minecraft:jukebox' ],
-                                        'state': { 'has_record':'true' }
+                    'criteria':{
+                        'placed_music_disc':{
+                            'trigger':'minecraft:item_used_on_block',
+                            'conditions':{
+                                'location':{
+                                    'block':{
+                                        'blocks':[ 'minecraft:jukebox' ],
+                                        'state':{ 'has_record':'true' }
                                     }
                                 },
-                                'item': {'tag': 'minecraft:music_discs'}
+                                'item':{'tag': 'minecraft:music_discs'}
                             }
                         }
                     },
-                    'rewards': {
-                        'function': f'{datapack_name}:on_placed_disc'
+                    'rewards':{
+                        'function':f'{datapack_name}:on_placed_disc'
                     }
                 }, indent=4))
 
             #write 'placed_jukebox.json'
             with open('placed_jukebox.json', 'w', encoding='utf-8') as placed_jukebox:
                 placed_jukebox.write(json.dumps({
-                    'criteria': {
-                        'placed_jukebox': {
-                            'trigger': 'minecraft:placed_block',
-                            'conditions': {
-                                'block': 'minecraft:jukebox',
-                                'item': {
-                                    'items': [ 'minecraft:jukebox' ]
+                    'criteria':{
+                        'placed_jukebox':{
+                            'trigger':'minecraft:placed_block',
+                            'conditions':{
+                                'block':'minecraft:jukebox',
+                                'item':{
+                                    'items':[ 'minecraft:jukebox' ]
                                 }
                             }
                         }
                     },
-                    'rewards': {
-                        'function': f'{datapack_name}:on_placed_jukebox'
+                    'rewards':{
+                        'function':f'{datapack_name}:on_placed_jukebox'
                     }
                 }, indent=4))
 
@@ -344,7 +342,7 @@ class GeneratorV2(VirtualGenerator):
                         'type':'minecraft:item',
                         'weight':1,
                         'name':'minecraft:music_disc_11',
-                        'functions': [{
+                        'functions':[{
                             'function':'minecraft:set_nbt',
                             'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track.replace('"', ''))
                         }]
@@ -468,8 +466,8 @@ class GeneratorV2(VirtualGenerator):
 
                 for name in entry_list.internal_names:
                     sound = {
-                        'sounds': [{
-                            'name': f'records/{name}',
+                        'sounds':[{
+                            'name':f'records/{name}',
                             'stream':True
                         }]
                     }
@@ -485,22 +483,22 @@ class GeneratorV2(VirtualGenerator):
                     j = i + offset + 1
 
                     json_list.append({
-                        'predicate': {'custom_model_data':j},
-                        'model': f'item/music_disc_{name}'
+                        'predicate':{'custom_model_data':j},
+                        'model':f'item/music_disc_{name}'
                     })
 
                 music_disc_11.write(json.dumps({
-                    'parent': 'item/generated',
-                    'textures': {'layer0': 'item/music_disc_11'},
-                    'overrides': json_list
+                    'parent':'item/generated',
+                    'textures':{'layer0': 'item/music_disc_11'},
+                    'overrides':json_list
                 }, indent=4))
 
             #write 'music_disc_*.json' files
             for name in entry_list.internal_names:
                 with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', f'music_disc_{name}.json'), 'w', encoding='utf-8') as music_disc:
                     music_disc.write(json.dumps({
-                        'parent': 'item/generated',
-                        'textures': {'layer0': f'item/music_disc_{name}'}
+                        'parent':'item/generated',
+                        'textures':{'layer0': f'item/music_disc_{name}'}
                     }, indent=4))
 
             #copy sound and texture files
