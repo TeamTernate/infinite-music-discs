@@ -23,8 +23,6 @@ class GeneratorV2(VirtualGenerator):
     #TODO: break into smaller functions so it's easier to understand behavior?
     #TODO: break by section into smaller functions
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
-        titles = entry_list.titles
-        internal_names = entry_list.internal_names
 
         #read settings
         pack_format = user_settings.get('version').get('dp', Constants.DEFAULT_PACK_FORMAT)
@@ -54,7 +52,7 @@ class GeneratorV2(VirtualGenerator):
                 pack.write(json.dumps({
                     'pack': {
                         'pack_format': pack_format,
-                        'description': (Constants.DATAPACK_DESC % len(internal_names))
+                        'description': (Constants.DATAPACK_DESC % len(entry_list.internal_names))
                     }
                 }, indent=4))
 
@@ -278,28 +276,28 @@ class GeneratorV2(VirtualGenerator):
             # generate files with lines for every disc
             #write 'play.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play.mcfunction'), 'w', encoding='utf-8') as play:
-                for i, name in enumerate(internal_names):
+                for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     play.write(f'execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches {j} run function {datapack_name}:{name}/play\n')
 
             #write 'play_duration.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
-                for i, name in enumerate(internal_names):
+                for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     play_duration.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/play_duration\n')
 
             #write 'stop.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
-                for i, name in enumerate(internal_names):
+                for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     stop.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/stop\n')
 
             #write 'set_disc_track.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'set_disc_track.mcfunction'), 'w', encoding='utf-8') as set_disc_track:
-                for i, track in enumerate(titles):
+                for i, track in enumerate(entry_list.titles):
                     j = i + offset + 1
 
                     # Create command, and add command as string to the rest of the command.
@@ -310,7 +308,7 @@ class GeneratorV2(VirtualGenerator):
 
             #write 'give_all_discs.mcfunction'
             with open(os.path.join(datapack_name, 'data', datapack_name, 'functions', 'give_all_discs.mcfunction'), 'w', encoding='utf-8') as give_all:
-                for i, name in enumerate(internal_names):
+                for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     give_all.write(f'execute at @s run function {datapack_name}:give_{name}\n')
@@ -324,7 +322,7 @@ class GeneratorV2(VirtualGenerator):
 
                 creeper_mdentries = []
                 creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':discs_tag, 'expand':True})
-                for i, track in enumerate(titles):
+                for i, track in enumerate(entry_list.titles):
                     j = i + offset + 1
 
                     creeper_mdentries.append({
@@ -420,9 +418,6 @@ class GeneratorV2(VirtualGenerator):
 
 
     def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
-        texture_files = entry_list.texture_files
-        track_files = entry_list.track_files
-        internal_names = entry_list.internal_names
 
         #read settings
         pack_format = user_settings.get('version').get('rp', Constants.DEFAULT_PACK_FORMAT)
@@ -443,7 +438,7 @@ class GeneratorV2(VirtualGenerator):
                 pack.write(json.dumps({
                     'pack':{
                         'pack_format':pack_format,
-                        'description':(Constants.RESOURCEPACK_DESC % len(internal_names))
+                        'description':(Constants.RESOURCEPACK_DESC % len(entry_list.internal_names))
                     }
                 }, indent=4))
 
@@ -451,7 +446,7 @@ class GeneratorV2(VirtualGenerator):
             with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w', encoding='utf-8') as sounds:
                 json_dict = {}
 
-                for name in internal_names:
+                for name in entry_list.internal_names:
                     sound = {
                         'sounds': [{
                             'name': f'records/{name}',
@@ -466,7 +461,7 @@ class GeneratorV2(VirtualGenerator):
             #write 'music_disc_11.json'
             with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'), 'w', encoding='utf-8') as music_disc_11:
                 json_list = []
-                for i, name in enumerate(internal_names):
+                for i, name in enumerate(entry_list.internal_names):
                     j = i + offset + 1
 
                     json_list.append({
@@ -481,7 +476,7 @@ class GeneratorV2(VirtualGenerator):
                 }, indent=4))
 
             #write 'music_disc_*.json' files
-            for name in internal_names:
+            for name in entry_list.internal_names:
                 with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', f'music_disc_{name}.json'), 'w', encoding='utf-8') as music_disc:
                     music_disc.write(json.dumps({
                         'parent': 'item/generated',
