@@ -440,15 +440,21 @@ class GeneratorV2(VirtualGenerator):
 
             #write 'pack.mcmeta'
             with open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
-                pack.write(json.dumps({'pack':{'pack_format':pack_format, 'description':(Constants.RESOURCEPACK_DESC % len(internal_names))}}, indent=4))
+                pack.write(json.dumps({
+                    'pack':{
+                        'pack_format':pack_format,
+                        'description':(Constants.RESOURCEPACK_DESC % len(internal_names))
+                    }
+                }, indent=4))
 
             #write 'sounds.json'
+            #TODO: use json formatting better here
             with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w', encoding='utf-8') as sounds:
                 sounds.write('{')
 
                 for i, name in enumerate(internal_names):
-                    sounds.write('\n"music_disc.{}": '.format(name))
-                    sounds.write(json.dumps({'sounds': [{'name': 'records/{}'.format(name), 'stream':True}]}, indent=4))
+                    sounds.write(f'\n"music_disc.{name}": ')
+                    sounds.write(json.dumps({'sounds': [{'name': f'records/{name}', 'stream':True}]}, indent=4))
 
                     if i < len(internal_names)-1:
                         sounds.write(',\n')
@@ -461,19 +467,29 @@ class GeneratorV2(VirtualGenerator):
                 for i, name in enumerate(internal_names):
                     j = i + offset + 1
 
-                    json_list.append({'predicate': {'custom_model_data':j}, 'model': 'item/music_disc_{}'.format(name)})
+                    json_list.append({
+                        'predicate': {'custom_model_data':j},
+                        'model': f'item/music_disc_{name}'
+                    })
 
-                music_disc_11.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_11'}, 'overrides': json_list}, indent=4))
+                music_disc_11.write(json.dumps({
+                    'parent': 'item/generated',
+                    'textures': {'layer0': 'item/music_disc_11'},
+                    'overrides': json_list
+                }, indent=4))
 
             #write 'music_disc_*.json' files
             for name in internal_names:
-                with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_%s.json' % name), 'w', encoding='utf-8') as music_disc:
-                    music_disc.write(json.dumps({'parent': 'item/generated', 'textures': {'layer0': 'item/music_disc_{}'.format(name)}}, indent=4))
+                with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', f'music_disc_{name}.json'), 'w', encoding='utf-8') as music_disc:
+                    music_disc.write(json.dumps({
+                        'parent': 'item/generated',
+                        'textures': {'layer0': f'item/music_disc_{name}'}
+                    }, indent=4))
 
             #copy sound and texture files
             for i, entry in enumerate(entry_list.entries):
-                shutil.copyfile(entry.track_file, os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records', '%s.ogg' % entry.internal_name))
-                shutil.copyfile(entry.texture_file, os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item', 'music_disc_%s.png' % entry.internal_name))
+                shutil.copyfile(entry.track_file, os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records', f'{entry.internal_name}.ogg'))
+                shutil.copyfile(entry.texture_file, os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item', f'music_disc_{entry.internal_name}.png'))
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
