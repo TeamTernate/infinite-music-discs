@@ -14,6 +14,8 @@
 
 #TODO: consider type-annotating all functions, to clarify in/out types
 
+#TODO: can you generate disc textures automatically using armor trims?
+
 import sys
 import ctypes
 import platform
