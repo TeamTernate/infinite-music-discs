@@ -36,8 +36,6 @@ class GeneratorV2(VirtualGenerator):
         #capture base dir
         base_dir = os.getcwd()
 
-        #FIXME: sanitize " from titles before this function
-
         try:
             # generate basic framework files
             #build datapack directory tree
@@ -197,7 +195,6 @@ class GeneratorV2(VirtualGenerator):
                     f'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run function {datapack_name}:jukebox_tick_timers\n'
                 ])
 
-            #FIXME: only stop if jukebox is currently playing
             #write 'destroy_jukebox_marker.mcfunction'
             with open('destroy_jukebox_marker.mcfunction', 'w', encoding='utf-8') as destroy_jb_marker:
                 destroy_jb_marker.writelines([
@@ -316,7 +313,7 @@ class GeneratorV2(VirtualGenerator):
                     item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
                     cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_pack_format(pack_format) + '\n'
 
-                    set_disc_track.write(cmd_str % (j, j, track.replace('"', '')))
+                    set_disc_track.write(cmd_str % (j, j, track))
 
             #write 'give_all_discs.mcfunction'
             with open('give_all_discs.mcfunction', 'w', encoding='utf-8') as give_all:
@@ -344,7 +341,7 @@ class GeneratorV2(VirtualGenerator):
                         'name':'minecraft:music_disc_11',
                         'functions':[{
                             'function':'minecraft:set_nbt',
-                            'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track.replace('"', ''))
+                            'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track)
                         }]
                     })
 

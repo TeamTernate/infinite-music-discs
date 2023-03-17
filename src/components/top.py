@@ -656,6 +656,12 @@ class GeneratePackWorker(QtCore.QObject):
             self._data.entry_list.entries[i].length = length
 
             if self.emit_status_bad(): return
+
+            #sanitize track title to be datapack-compatible
+            self._data.status, title = self._generator.sanitize(e)
+            self._data.entry_list.entries[i].title = title
+
+            if self.emit_status_bad(): return
             self.emit_update_progress()
 
         #generate datapack

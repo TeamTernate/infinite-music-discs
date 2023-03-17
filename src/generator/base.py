@@ -174,6 +174,10 @@ class VirtualGenerator():
 
         return Status.SUCCESS, length_t
 
+    #TODO: replace quote with visually similar unicode character?
+    def sanitize(self, track_entry: DiscListEntryContents):
+        return Status.SUCCESS, track_entry.title.replace('"', '')
+
     def generate_datapack(self):
         raise NotImplementedError
 
