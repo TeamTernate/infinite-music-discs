@@ -306,37 +306,7 @@ class GeneratorContents:
 
 
 
-#CSS sheets
-GB_CSS_STYLESHEET = """
-GenerateButton {
-    background-color: rgb(32,32,32);
-
-    border-outer-color: rgb(0,0,0);
-    border-left-color: rgb(49,108,66);
-    border-top-color: rgb(98,202,85);
-    border-right-color: rgb(49,108,66);
-    border-bottom-color: rgb(32,75,45);
-    button-color: rgb(62,139,78);
-}
-
-GenerateButton[hover="true"] {
-    button-color: rgb(68,150,88);
-}
-
-GenerateButton[pressed="true"] {
-    border-outer-color: rgb(255,255,255);
-    border-top-color: rgb(32,75,45);
-    border-bottom-color: rgb(74,162,53);
-    button-color: rgb(62,140,78);
-}
-
-GenerateButton[disabled="true"] {
-    border-top-color: rgb(65,136,57);
-    border-bottom-color: rgb(22,52,31);
-    button-color: rgb(41,93,52);
-}
-"""
-
+#Style definitions
 GenerateButtonColorsDict = {
     'background-color': {
         'base':     QColor(32,32,32),
@@ -387,8 +357,6 @@ GenerateButtonColorsDict = {
         'disabled': QColor(41,93,52)
     }
 }
-
-
 
 CSS_STYLESHEET = """
 CentralWidget {
