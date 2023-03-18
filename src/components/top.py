@@ -4,8 +4,6 @@
 #Infinite Music Discs top-level GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-import re
-
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -15,7 +13,7 @@ import src.generator.top as generator_top
 from src.definitions import Status, GeneratorContents
 from src.definitions import CSS_STYLESHEET
 
-from src.definitions import Assets, Constants, Regexes, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
+from src.definitions import Assets, Constants, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
 from src.components.common import QSetsNameFromType, QRepolishMixin
 from src.components.settings_tab import SettingsList
 from src.components.tracks_tab import DiscList
@@ -138,6 +136,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         qp.setPen(Qt.NoPen)
 
         #decide palette based on set properties
+        # disabled > pressed > hover > base colors
         if self.property(StyleProperties.DISABLED):
             style = StyleProperties.DISABLED
         elif self.property(StyleProperties.PRESSED):
@@ -145,7 +144,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         elif self.property(StyleProperties.HOVER):
             style = StyleProperties.HOVER
         else:
-            style = 'base'
+            style = StyleProperties.BASE
 
         r = self.rect()
 
@@ -212,6 +211,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         qp.drawRect(btn_rect)
 
     #apply setProperty() to this widget and all children
+    #properties are used to select different CSS styles
     def setPropertyComplete(self, prop, value):
         self.setProperty(prop, value)
         self._label.setProperty(prop, value)

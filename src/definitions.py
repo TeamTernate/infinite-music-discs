@@ -46,12 +46,6 @@ class Constants():
     DEFAULT_PACK_FORMAT = 8     #TODO: can this come from PackFormatsDict automatically?
 
 class Regexes():
-    # GenerateButton
-    GB_CAPTURE = 'GenerateButton(\[.*?\])?\s*?\{(.*?)\}'
-    GB_CAPTURE_TAG = '\[(.*?)='
-    GB_CLEAN_WHITESPACE = '\n|\t| '
-    GB_RGB = 'rgb\((.*?)\)'
-
     # QPosIntLineEdit
     LE_POS_INT = '(^[0-9]{0,8}$|^$)'
 
@@ -145,6 +139,7 @@ class Assets():
     ICON_DELETE =           Helpers.data_path() + 'data/delete-btn.png'
 
 class StyleProperties():
+    BASE = 'base'
     DRAG_HELD = 'drag_held'
     ALPHA =     'alpha'
     DISABLED =  'disabled'
@@ -319,7 +314,7 @@ GenerateButtonColorsDict = {
         'base':     QColor(0,0,0),
         'hover':    QColor(0,0,0),
         'pressed':  QColor(255,255,255),
-        'disabled': QColor(255,255,255)
+        'disabled': QColor(0,0,0)
     },
 
     'border-left-color': {
