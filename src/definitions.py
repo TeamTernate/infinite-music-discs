@@ -50,6 +50,12 @@ class Regexes():
     GB_CLEAN_WHITESPACE = '\n|\t| '
     GB_RGB = 'rgb\((.*?)\)'
 
+    # QPosIntLineEdit
+    LE_POS_INT = '(^[0-9]{0,8}$|^$)'
+
+    # QAlphaLineEdit
+    LE_ALPHA = '(^[a-z_]*$|^$)'
+
 
 
 #typedefs

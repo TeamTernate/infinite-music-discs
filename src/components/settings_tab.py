@@ -9,7 +9,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal
 
-from src.definitions import Constants, ButtonType, SettingType, DisplayStrings
+from src.definitions import Constants, Regexes, ButtonType, SettingType, DisplayStrings
 from src.definitions import PackFormatsDict, DatapackVersionDict
 from src.components.common import QSetsNameFromType, QFocusLineEdit, MultiDragDropButton
 
@@ -31,10 +31,9 @@ class QPosIntLineEdit(QSettingLineEdit):
         self._min = minInt
         self._max = maxInt
 
-        #TODO: define regexes in definitions.py?
         #create validator to restrict input to integers
         # QRegExpValidator is more flexible than QIntValidator
-        regexp = QtCore.QRegExp('(^[0-9]{0,8}$|^$)')
+        regexp = QtCore.QRegExp(Regexes.LE_POS_INT)
         validator = QtGui.QRegExpValidator(regexp)
         self.setValidator(validator)
 
@@ -75,7 +74,7 @@ class QAlphaLineEdit(QSettingLineEdit):
         self._defaultText = text
 
         #create validator to restrict input to lowercase letters and underscores
-        regexp = QtCore.QRegExp('(^[a-z_]*$|^$)')
+        regexp = QtCore.QRegExp(Regexes.LE_ALPHA)
         validator = QtGui.QRegExpValidator(regexp)
         self.setValidator(validator)
 
