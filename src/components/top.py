@@ -21,8 +21,6 @@ from src.components.tracks_tab import DiscList
 
 
 #button for generating datapack/resourcepack
-#TODO: optimize a lot
-#TODO: use something other than stylesheet for optimization? or are there built in methods to parse stylesheet?
 class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
     BD_OUTER_WIDTH = 2
