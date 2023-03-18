@@ -274,14 +274,13 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
         #TODO: define all of this in definitions.py, parse dict to build settings tab
-        #TODO: rename dp_version to legacy_dp?
         self._childLayout.addWidget(SettingsListEntry('pack',       SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TITLE,   DisplayStrings.STR_PACKPNG_TOOLTIP,     None,                               self))
         self._childLayout.addWidget(SettingsListEntry('version',    SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TITLE,   DisplayStrings.STR_VERSION_TOOLTIP,     PackFormatsDict,                    self))
     #   self._childLayout.addWidget(SettingsListEntry('offset',     SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TITLE,    DisplayStrings.STR_OFFSET_TOOLTIP,      Constants.CUSTOM_MODEL_DATA_MAX,    self))
         self._childLayout.addWidget(SettingsListEntry('name',       SettingType.TXT_ENTRY,  DisplayStrings.STR_PACKNAME_TITLE,  DisplayStrings.STR_PACKNAME_TOOLTIP,    Constants.DEFAULT_PACK_NAME,        self))
         self._childLayout.addWidget(SettingsListEntry('zip',        SettingType.CHECK,      DisplayStrings.STR_ZIP_TITLE,       DisplayStrings.STR_ZIP_TOOLTIP,         None,                               self))
         self._childLayout.addWidget(SettingsListEntry('mix_mono',   SettingType.CHECK,      DisplayStrings.STR_MIXMONO_TITLE,   DisplayStrings.STR_MIXMONO_TOOLTIP,     None,                               self))
-        self._childLayout.addWidget(SettingsListEntry('dp_version', SettingType.CHECK,      DisplayStrings.STR_DP_VER_TITLE,    DisplayStrings.STR_DP_VER_TOOLTIP,      None,                               self))
+        self._childLayout.addWidget(SettingsListEntry('legacy_dp',  SettingType.CHECK,      DisplayStrings.STR_DP_VER_TITLE,    DisplayStrings.STR_DP_VER_TOOLTIP,      None,                               self))
     #   self._childLayout.addWidget(SettingsListEntry('keep_tmp',   SettingType.CHECK,      DisplayStrings.STR_KEEPTMP_TITLE,   DisplayStrings.STR_KEEPTMP_TOOLTIP,     None,                               self))
         self._childLayout.addStretch()
 
@@ -314,10 +313,10 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
     #TODO: define all these dict keys in definitions
     def settingChangedEvent(self):
         gameVersionEntry = self.findChild(SettingsListEntry, 'version')
-        dpVersionEntry = self.findChild(SettingsListEntry, 'dp_version')
+        dpVersionEntry = self.findChild(SettingsListEntry, 'legacy_dp')
 
         gameVersion = gameVersionEntry.getKeyValue()['version']
-        dpVersion = dpVersionEntry.getKeyValue()['dp_version']
+        dpVersion = dpVersionEntry.getKeyValue()['legacy_dp']
 
         #lock "legacy datapack" setting to its enabled state if an old game version is selected
         if(dpVersionEntry.isEnabled() and gameVersion['dp'] <= Constants.LEGACY_DP_LATEST_VERSION):
