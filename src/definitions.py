@@ -43,6 +43,13 @@ class Constants():
     RESOURCEPACK_DESC = 'Adds %d custom music discs'
     DEFAULT_PACK_FORMAT = 8     #TODO: can this come from PackFormatsDict automatically?
 
+class Regexes():
+    # GenerateButton
+    GB_CAPTURE = 'GenerateButton(\[.*?\])?\s*?\{(.*?)\}'
+    GB_CAPTURE_TAG = '\[(.*?)='
+    GB_CLEAN_WHITESPACE = '\n|\t| '
+    GB_RGB = 'rgb\((.*?)\)'
+
 
 
 #typedefs
@@ -274,8 +281,6 @@ class DiscListContents:
     @property
     def internal_names(self):
         return [entry.internal_name for entry in self.entries]
-
-
 
 @dataclass
 class GeneratorContents:

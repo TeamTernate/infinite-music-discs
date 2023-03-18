@@ -15,7 +15,7 @@ import src.generator.top as generator_top
 from src.definitions import Status, GeneratorContents
 from src.definitions import CSS_STYLESHEET, GB_CSS_STYLESHEET
 
-from src.definitions import Assets, Constants, StyleProperties, StatusMessageDict, StatusStickyDict
+from src.definitions import Assets, Constants, Regexes, StyleProperties, StatusMessageDict, StatusStickyDict
 from src.components.common import QSetsNameFromType, QRepolishMixin
 from src.components.settings_tab import SettingsList
 from src.components.tracks_tab import DiscList
@@ -34,11 +34,6 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
     BD_TOP_FULL_WIDTH = BD_OUTER_WIDTH + BD_TOP_WIDTH
     BD_SIDE_FULL_WIDTH = BD_OUTER_WIDTH + BD_SIDE_WIDTH
-
-    REGEX_CAPTURE = 'GenerateButton(\[.*?\])?\s*?\{(.*?)\}'
-    REGEX_CAPTURE_TAG = '\[(.*?)='
-    REGEX_CLEAN_WHITESPACE = '\n|\t| '
-    REGEX_RGB = 'rgb\((.*?)\)'
 
     generate = pyqtSignal()
     setCurrentIndex = pyqtSignal(int)
@@ -231,7 +226,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         ss = self._styleSheet
 
         #capture CSS groups with regex
-        matches = re.findall(self.REGEX_CAPTURE, ss, flags=re.DOTALL)
+        matches = re.findall(Regexes.GB_CAPTURE, ss, flags=re.DOTALL)
         for match in matches:
             #store key-value pairs in dict
             groupDict = {}
@@ -241,11 +236,11 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
             #strip extra characters
             if not tag == '':
-                tag = re.findall(self.REGEX_CAPTURE_TAG, tag)[0]
-                tag = re.sub(self.REGEX_CLEAN_WHITESPACE, '', tag)
+                tag = re.findall(Regexes.GB_CAPTURE_TAG, tag)[0]
+                tag = re.sub(Regexes.GB_CLEAN_WHITESPACE, '', tag)
 
             #strip whitespace
-            group = re.sub(self.REGEX_CLEAN_WHITESPACE, '', group, flags=re.DOTALL)
+            group = re.sub(Regexes.GB_CLEAN_WHITESPACE, '', group, flags=re.DOTALL)
 
             #split group by ';', ignoring empty last element
             for prop in group.split(';')[:-1]:
@@ -295,8 +290,8 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
     def qColorFromRgb(self, rgb_str):
         #get contents of rgb(...) and remove whitespace
-        rgb_tuple = re.findall(self.REGEX_RGB, rgb_str)[0]
-        rgb_tuple = re.sub(self.REGEX_CLEAN_WHITESPACE, '', rgb_tuple)
+        rgb_tuple = re.findall(Regexes.GB_RGB, rgb_str)[0]
+        rgb_tuple = re.sub(Regexes.GB_CLEAN_WHITESPACE, '', rgb_tuple)
 
         #split by ',' and create QColor
         rgb = rgb_tuple.split(',')
