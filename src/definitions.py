@@ -10,7 +10,7 @@ import unidecode
 
 from enum import Enum
 from datetime import datetime
-from typing import List
+from typing import List, Any
 from dataclasses import dataclass, field
 
 from PyQt5.QtGui import QColor
@@ -294,10 +294,26 @@ class GeneratorContents:
 
 
 
-#TODO: define SettingsContents dict which is used to generate settings tab
-#   then you don't have to edit class anymore
-#also use factory model to generate settings, abstract specific construction
-#pass each setting the same dict, each can grab different portions of it
+#dataclass to collect info about SettingsList entries
+@dataclass
+class SettingContents:
+    key: str
+    type: SettingType
+    label: str
+    tooltip: str
+    params: Any = None
+
+#list to store settings tab contents
+SettingsListContents = [
+    SettingContents(key='pack',         type=SettingType.PACKPNG,   label=DisplayStrings.STR_PACKPNG_TITLE,     tooltip=DisplayStrings.STR_PACKPNG_TOOLTIP      ),
+    SettingContents(key='version',      type=SettingType.DROPDOWN,  label=DisplayStrings.STR_VERSION_TITLE,     tooltip=DisplayStrings.STR_VERSION_TOOLTIP,     params=PackFormatsDict),
+#   SettingContents(key='offset',       type=SettingType.NUM_ENTRY, label=DisplayStrings.STR_OFFSET_TITLE,      tooltip=DisplayStrings.STR_OFFSET_TOOLTIP,      params=Constants.CUSTOM_MODEL_DATA_MAX),
+    SettingContents(key='name',         type=SettingType.TXT_ENTRY, label=DisplayStrings.STR_PACKNAME_TITLE,    tooltip=DisplayStrings.STR_PACKNAME_TOOLTIP,    params=Constants.DEFAULT_PACK_NAME),
+    SettingContents(key='zip',          type=SettingType.CHECK,     label=DisplayStrings.STR_ZIP_TITLE,         tooltip=DisplayStrings.STR_ZIP_TOOLTIP          ),
+    SettingContents(key='mix_mono',     type=SettingType.CHECK,     label=DisplayStrings.STR_MIXMONO_TITLE,     tooltip=DisplayStrings.STR_MIXMONO_TOOLTIP      ),
+    SettingContents(key='legacy_dp',    type=SettingType.CHECK,     label=DisplayStrings.STR_DP_VER_TITLE,      tooltip=DisplayStrings.STR_DP_VER_TOOLTIP       ),
+#   SettingContents(key='keep_tmp',     type=SettingType.CHECK,     label=DisplayStrings.STR_KEEPTMP_TITLE,     tooltip=DisplayStrings.STR_KEEPTMP_TOOLTIP      )
+]
 
 
 

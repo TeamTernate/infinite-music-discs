@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from src.definitions import Constants, Regexes, ButtonType, SettingType, DisplayStrings
-from src.definitions import PackFormatsDict, DatapackVersionDict
+from src.definitions import PackFormatsDict, SettingsListContents
 from src.components.common import QSetsNameFromType, QFocusLineEdit, MultiDragDropButton
 
 
@@ -273,15 +273,11 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
         self._childLayout.setSpacing(0)
         self._childLayout.setContentsMargins(1, 1, 1, 1)
 
-        #TODO: define all of this in definitions.py, parse dict to build settings tab
-        self._childLayout.addWidget(SettingsListEntry('pack',       SettingType.PACKPNG,    DisplayStrings.STR_PACKPNG_TITLE,   DisplayStrings.STR_PACKPNG_TOOLTIP,     None,                               self))
-        self._childLayout.addWidget(SettingsListEntry('version',    SettingType.DROPDOWN,   DisplayStrings.STR_VERSION_TITLE,   DisplayStrings.STR_VERSION_TOOLTIP,     PackFormatsDict,                    self))
-    #   self._childLayout.addWidget(SettingsListEntry('offset',     SettingType.NUM_ENTRY,  DisplayStrings.STR_OFFSET_TITLE,    DisplayStrings.STR_OFFSET_TOOLTIP,      Constants.CUSTOM_MODEL_DATA_MAX,    self))
-        self._childLayout.addWidget(SettingsListEntry('name',       SettingType.TXT_ENTRY,  DisplayStrings.STR_PACKNAME_TITLE,  DisplayStrings.STR_PACKNAME_TOOLTIP,    Constants.DEFAULT_PACK_NAME,        self))
-        self._childLayout.addWidget(SettingsListEntry('zip',        SettingType.CHECK,      DisplayStrings.STR_ZIP_TITLE,       DisplayStrings.STR_ZIP_TOOLTIP,         None,                               self))
-        self._childLayout.addWidget(SettingsListEntry('mix_mono',   SettingType.CHECK,      DisplayStrings.STR_MIXMONO_TITLE,   DisplayStrings.STR_MIXMONO_TOOLTIP,     None,                               self))
-        self._childLayout.addWidget(SettingsListEntry('legacy_dp',  SettingType.CHECK,      DisplayStrings.STR_DP_VER_TITLE,    DisplayStrings.STR_DP_VER_TOOLTIP,      None,                               self))
-    #   self._childLayout.addWidget(SettingsListEntry('keep_tmp',   SettingType.CHECK,      DisplayStrings.STR_KEEPTMP_TITLE,   DisplayStrings.STR_KEEPTMP_TOOLTIP,     None,                               self))
+        for s in SettingsListContents:
+            self._childLayout.addWidget(
+                SettingsListEntry(key=s.key, settingType=s.type, label=s.label, tooltip=s.tooltip, params=s.params, parent=self)
+            )
+
         self._childLayout.addStretch()
 
         #child widget, contains child layout
