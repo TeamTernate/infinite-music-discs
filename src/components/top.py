@@ -15,7 +15,7 @@ import src.generator.top as generator_top
 from src.definitions import Status, GeneratorContents
 from src.definitions import CSS_STYLESHEET, GB_CSS_STYLESHEET
 
-from src.definitions import Assets, Constants, Regexes, StyleProperties, StatusMessageDict, StatusStickyDict
+from src.definitions import Assets, Constants, Regexes, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
 from src.components.common import QSetsNameFromType, QRepolishMixin
 from src.components.settings_tab import SettingsList
 from src.components.tracks_tab import DiscList
@@ -24,7 +24,6 @@ from src.components.tracks_tab import DiscList
 
 #button for generating datapack/resourcepack
 #TODO: optimize a lot
-#TODO: don't use properties? what's the point if you're just overriding them with stylesheets anyway
 #TODO: use something other than stylesheet for optimization? or are there built in methods to parse stylesheet?
 class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
@@ -149,9 +148,8 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         elif self.property(StyleProperties.HOVER):
             style = StyleProperties.HOVER
         else:
-            style = ''
+            style = 'base'
 
-        #TODO: should these points/sizes be constants? don't recalculate every time?
         r = self.rect()
 
         #define corner cutout rects
@@ -185,39 +183,35 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
         #define central button rect
         btn_tl_pt = r.topLeft() + QPoint(self.BD_SIDE_FULL_WIDTH, self.BD_TOP_FULL_WIDTH)
-        btn_tr_pt = r.topRight() + QPoint(-self.BD_SIDE_FULL_WIDTH, self.BD_TOP_FULL_WIDTH)
-        btn_bl_pt = r.bottomLeft() + QPoint(self.BD_SIDE_FULL_WIDTH, -self.BD_TOP_FULL_WIDTH)
-        btn_br_pt = r.bottomRight() + QPoint(-self.BD_SIDE_FULL_WIDTH, -self.BD_TOP_FULL_WIDTH)
-
         btn_size = QSize(bd_top_width, bd_side_height)
         btn_rect = QRect(btn_tl_pt, btn_size)
 
         #draw outer border
-        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-outer-color', style)))
+        qp.setBrush(QtGui.QBrush(GenerateButtonColorsDict['border-outer-color'][style]))
         qp.drawRect(r)
 
         #"cut out" corners
-        qp.setBrush(QtGui.QBrush(self.getCSSProperty('background-color', style)))
+        qp.setBrush(QtGui.QBrush(GenerateButtonColorsDict['background-color'][style]))
         qp.drawRect(corn_tl_rect)
         qp.drawRect(corn_tr_rect)
         qp.drawRect(corn_bl_rect)
         qp.drawRect(corn_br_rect)
 
         #draw inner borders
-        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-left-color', style)))
+        qp.setBrush(QtGui.QBrush(GenerateButtonColorsDict['border-left-color'][style]))
         qp.drawRect(bd_left_rect)
 
-        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-top-color', style)))
+        qp.setBrush(QtGui.QBrush(GenerateButtonColorsDict['border-top-color'][style]))
         qp.drawRect(bd_top_rect)
 
-        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-right-color', style)))
+        qp.setBrush(QtGui.QBrush(GenerateButtonColorsDict['border-right-color'][style]))
         qp.drawRect(bd_right_rect)
 
-        qp.setBrush(QtGui.QBrush(self.getCSSProperty('border-bottom-color', style)))
+        qp.setBrush(QtGui.QBrush(GenerateButtonColorsDict['border-bottom-color'][style]))
         qp.drawRect(bd_bottom_rect)
 
         #draw main button rect
-        qp.setBrush(QtGui.QBrush(self.getCSSProperty('button-color', style)))
+        qp.setBrush(QtGui.QBrush(GenerateButtonColorsDict['button-color'][style]))
         qp.drawRect(btn_rect)
 
     #parse this widget's CSS properties into a dictionary
