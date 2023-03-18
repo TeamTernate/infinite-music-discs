@@ -13,7 +13,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
 
 import src.generator.top as generator_top
 from src.definitions import Status, GeneratorContents
-from src.definitions import CSS_STYLESHEET, GB_CSS_STYLESHEET
+from src.definitions import CSS_STYLESHEET
 
 from src.definitions import Assets, Constants, Regexes, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
 from src.components.common import QSetsNameFromType, QRepolishMixin
@@ -92,9 +92,6 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
         self._label.setObjectName('GenLabel')
         self._progress.setObjectName('GenProgress')
-
-        self._styleSheet = GB_CSS_STYLESHEET
-        self._styleDict = self.getStyleSheetDict()
 
     def sizeHint(self):
         return QSize(350, 66)
@@ -214,63 +211,6 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         qp.setBrush(QtGui.QBrush(GenerateButtonColorsDict['button-color'][style]))
         qp.drawRect(btn_rect)
 
-    #parse this widget's CSS properties into a dictionary
-    def getStyleSheetDict(self):
-        ssDict = {}
-        ss = self._styleSheet
-
-        #capture CSS groups with regex
-        matches = re.findall(Regexes.GB_CAPTURE, ss, flags=re.DOTALL)
-        for match in matches:
-            #store key-value pairs in dict
-            groupDict = {}
-
-            tag = match[0]
-            group = match[1]
-
-            #strip extra characters
-            if not tag == '':
-                tag = re.findall(Regexes.GB_CAPTURE_TAG, tag)[0]
-                tag = re.sub(Regexes.GB_CLEAN_WHITESPACE, '', tag)
-
-            #strip whitespace
-            group = re.sub(Regexes.GB_CLEAN_WHITESPACE, '', group, flags=re.DOTALL)
-
-            #split group by ';', ignoring empty last element
-            for prop in group.split(';')[:-1]:
-                #split properties by ':' to get key-value pairs
-                p = prop.split(':')
-
-                groupDict[ p[0] ] = p[1]
-
-            #add group dict to full sheet dict
-            ssDict[ tag ] = groupDict
-
-        return ssDict
-
-    def getCSSProperty(self, prop, style=''):
-        inheritDict = {StyleProperties.DISABLED: '',
-                       StyleProperties.PRESSED: StyleProperties.HOVER,
-                       StyleProperties.HOVER: '',
-                       '': None}
-
-        #end recursion if property could not be found
-        if style is None:
-            return ''
-
-        #get property from style dictionary
-        prop_val = self._styleDict[style].get(prop)
-
-        #if property could not be found, recurse until it is
-        if prop_val is None:
-            return self.getCSSProperty(prop, inheritDict[style])
-
-        #convert color-type properties into QColor
-        if 'rgb(' in prop_val:
-            return self.qColorFromRgb(prop_val)
-
-        return prop_val
-
     #apply setProperty() to this widget and all children
     def setPropertyComplete(self, prop, value):
         self.setProperty(prop, value)
@@ -280,18 +220,6 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         self.repolish(self)
         self.repolish(self._label)
         self.repolish(self._progress)
-        self._styleDict = self.getStyleSheetDict()
-
-    def qColorFromRgb(self, rgb_str):
-        #get contents of rgb(...) and remove whitespace
-        rgb_tuple = re.findall(Regexes.GB_RGB, rgb_str)[0]
-        rgb_tuple = re.sub(Regexes.GB_CLEAN_WHITESPACE, '', rgb_tuple)
-
-        #split by ',' and create QColor
-        rgb = rgb_tuple.split(',')
-        rgb = list(map(int, rgb))
-
-        return QtGui.QColor(rgb[0], rgb[1], rgb[2])
 
 
 
