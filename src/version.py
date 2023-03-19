@@ -8,7 +8,7 @@
 
 # app version
 MAJOR = 1
-MINOR = 3
+MINOR = 4
 
 # datapack version
 DP_MAJOR = 2
