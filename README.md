@@ -41,10 +41,15 @@ The build environment is set up for Windows and Linux, though pyinstaller is cro
 ```bash
 $ git clone https://github.com/TeamTernate/infinite-music-discs
 ```
-2. Run the build script. If dependencies like python3 are not installed, it may require sudo privileges to install them:
+2. Run the build script. If dependencies like python3 are not installed, it may ask for sudo privileges to install them:
 ```bash
 $ cd infinite-music-discs
 $ ./build.sh
+```
+3. The built binary will be placed in `infinite-music-discs/bin`. You may need to make it executable before it can be run:
+```bash
+$ chmod +x bin/imd-gui
+$ ./bin/imd-gui
 ```
 
 #### Supported Build Linux distributions:
