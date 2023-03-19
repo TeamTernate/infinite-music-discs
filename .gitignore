@@ -1,5 +1,5 @@
 bin/*
-build/*
+build/build/*
 release/*
 
 *.png
@@ -37,3 +37,5 @@ src/imd-tmp/*
 #Linux build script
 tmp/*
 .environment_setup_complete
+build/tmp/*
+build/.environment_setup_complete
