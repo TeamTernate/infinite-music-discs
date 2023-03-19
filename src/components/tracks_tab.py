@@ -150,10 +150,9 @@ class NewDiscButton(DragDropButton, QSetsNameFromType):
 
 
 
-#TODO: should be VirtualDiscListEntry? b/c has some implementation
-#abstract class containing common code between DiscList entries
+#virtual class containing common code between DiscList entries
 #inherited by DiscListEntry and NewDiscEntry
-class AbstractDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):
+class VirtualDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
@@ -175,7 +174,7 @@ class AbstractDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):
 #TODO: move some parsing / helper functions to Helpers() class
 #TODO: create data subclass to store magic numbers by name? reduce confusing magic numbers?
 #entry in list of tracks
-class DiscListEntry(AbstractDiscListEntry):
+class DiscListEntry(VirtualDiscListEntry):
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
@@ -315,7 +314,7 @@ class DiscListEntry(AbstractDiscListEntry):
 
 
 #blank entry in list of tracks
-class NewDiscEntry(AbstractDiscListEntry):
+class NewDiscEntry(VirtualDiscListEntry):
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
@@ -330,7 +329,6 @@ class NewDiscEntry(AbstractDiscListEntry):
 
 
 
-#TODO: create AbstractList with standard setup for DiscList and SettingsList?
 #list of tracks
 class DiscList(QtWidgets.QWidget, QSetsNameFromType):
 
