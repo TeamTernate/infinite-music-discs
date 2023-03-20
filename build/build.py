@@ -1,5 +1,4 @@
 import os
-import sys
 import subprocess
 
 import version
@@ -15,6 +14,7 @@ with open(os.path.join(build_dir, 'version.rc'), 'r') as v_orig:
             v_temp.write(line.format(version_csv=version_csv, version_literal=version_literal))
 
 # Run pyinstaller
+# Raise exception if pyinstaller errors out; calling process can check STDERR to detect pass/fail
 pyinstaller_cmd = [
     'pyinstaller main.pyw',
     '--onefile',
