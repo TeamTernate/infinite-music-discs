@@ -123,18 +123,16 @@ fi
 printf "%b %bBuilding package...%b\\n" "${INFO}" "${COL_LIGHT_YELLOW}"
 
 #Build the package, using the official instructions
-#Log pyinstaller output to both console and a logfile with tee
-python3 ./build/build.py 2>&1 | tee build/latest.log
+python3 ./build/build.py
 
 #Determine if build has succeeded or failed
-if tail -1 build/latest.log | grep successfully >/dev/null; then
+#Check exit code of previous command (0 -> succeeded)
+if [ $? -eq 0 ]; then
     printf "%b %bBuild succeeded!%b\\n" "${TICK}" "${COL_LIGHT_GREEN}" "${COL_NC}"
 else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
     #Silently remove .environment_setup_complete to force dependency checks next time, in case of failure
-    #Does not occur when it has been aborted by the user
-    if ! tail -1 latest.log | grep user >/dev/null; then
-        rm .environment_setup_complete
-    fi
+    #CTRL-C ends execution early, script should never reach this point unless the build command completed with errors
+    rm .environment_setup_complete
 fi
