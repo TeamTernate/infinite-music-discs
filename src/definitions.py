@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 
 from PyQt5.QtGui import QColor
 
-import src.version as version
+import build.version as version
 
 #TODO: define some datapack strings here so they're in a known location
 

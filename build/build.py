@@ -2,12 +2,9 @@ import os
 import sys
 import subprocess
 
-# Add "infinite-music-discs" to the python PATH so src.version may be imported
+import version
+
 build_dir = os.path.dirname(__file__)
-sys.path.append(os.path.abspath(os.path.join(build_dir, os.pardir)))
-
-import src.version as version
-
 version_csv = f'{version.MAJOR}, {version.MINOR}, 0, 0'
 version_literal = f'{version.MAJOR}.{version.MINOR}.0.0'
 
