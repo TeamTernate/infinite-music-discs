@@ -43,12 +43,11 @@ $ git clone https://github.com/TeamTernate/infinite-music-discs
 ```
 2. Run the build script. If dependencies like python3 are not installed, it may ask for sudo privileges to install them:
 ```bash
-$ cd infinite-music-discs/build
-$ ./build.sh
+$ cd infinite-music-discs
+$ ./build_linux.sh
 ```
 3. The built binary will be placed in `infinite-music-discs/bin`. You may need to make it executable before it can be run:
 ```bash
-$ cd ..
 $ chmod +x bin/imd-gui
 $ ./bin/imd-gui
 ```
@@ -65,6 +64,6 @@ Others:
 - Arch Linux (and all Arch-based distros, such as Manjaro)
 
 #### Notes for Linux users:
-- If your distribution ships Python 3 by default, then you don't need to do anything prior to running the script.
+- If your distribution ships Python 3 by default (under the name python3), then you don't need to do anything prior to running the script.
 - The script will auto-install all the required dependencies. You might need to provide your sudo password.
 - A tmp directory will be created (inside the cloned repository) where temporary files will be stored.
