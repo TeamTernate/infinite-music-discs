@@ -106,7 +106,7 @@ if ! [ -f .environment_setup_complete ]; then
 
     #Install dev dependencies
     printf "%b %bInstalling dependencies...%b\\n" "${INFO}"
-    pip3 install -r requirements.rc > /dev/null
+    pip3 install -r ../requirements.rc > /dev/null
 
     #Check if pyinstaller is installed
     if ! hash pyinstaller 2>/dev/null; then
@@ -125,25 +125,25 @@ printf "%b %bBuilding package...%b\\n" "${INFO}" "${COL_LIGHT_YELLOW}"
 #Build the package, using the official instructions
 #Log pyinstaller output to both console and a logfile with tee
 #  note that pyinstaller cannot log to build/ directly
-pyinstaller main.pyw --onefile --clean --noconfirm \
+pyinstaller ../main.pyw --onefile --clean --noconfirm \
     --version-file "version.rc" \
-    --add-data "data/*:data" \
+    --add-data "../data/*:data" \
     --name "imd-gui" \
-    --icon "data/jukebox_256.ico" \
-    --distpath bin \
+    --icon "../data/jukebox_256.ico" \
+    --distpath "../bin" \
     2>&1 | tee tmp-build-latest.log
 
-mv tmp-build-latest.log build/latest.log
+cp tmp-build-latest.log latest.log
 
 #Determine if build has succeeded or failed
-if tail -1 build/latest.log | grep successfully >/dev/null; then
+if tail -1 latest.log | grep successfully >/dev/null; then
     printf "%b %bBuild succeeded!%b\\n" "${TICK}" "${COL_LIGHT_GREEN}" "${COL_NC}"
 else
     printf "%b %bBuild failed!%b\\n" "${CROSS}" "${COL_LIGHT_RED}" "${COL_NC}"
 
     #Silently remove .environment_setup_complete to force dependency checks next time, in case of failure
     #Does not occur when it has been aborted by the user
-    if ! tail -1 build/latest.log | grep user >/dev/null; then
+    if ! tail -1 latest.log | grep user >/dev/null; then
         rm .environment_setup_complete
     fi
 fi
