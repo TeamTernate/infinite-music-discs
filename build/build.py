@@ -16,16 +16,16 @@ with open(os.path.join(build_dir, 'version.rc'), 'r') as v_orig:
 # Run pyinstaller
 # Raise exception if pyinstaller errors out; calling process can check STDERR to detect pass/fail
 pyinstaller_cmd = [
-    'pyinstaller main.pyw',
+    'pyinstaller', 'main.pyw',
     '--onefile',
     '--clean',
     '--noconfirm',
-    '--version-file "build/version.rc.tmp"',
-    '--add-data "data/*;data"',
-    '--name "imd-gui"',
-    '--icon "data/jukebox_256.ico"',
-    '--distpath "bin"',
-    '--workpath "build"'
+    '--version-file', 'build/version.rc.tmp',
+    '--add-data', f'data/*{os.pathsep}data',
+    '--name', 'imd-gui',
+    '--icon', 'data/jukebox_256.ico',
+    '--distpath', 'bin',
+    '--workpath', 'build'
 ]
 
-subprocess.run(' '.join(pyinstaller_cmd), check=True)
+subprocess.run(pyinstaller_cmd, check=True)
