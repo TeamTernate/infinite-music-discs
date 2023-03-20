@@ -33,8 +33,9 @@ The build environment is set up for Windows and Linux, though pyinstaller is cro
 3. Add Python to your PATH environment variable.
 4. Open a command prompt in the *infinite-music-discs* directory and run `pip install -r requirements.rc`.
 5. Try running `main.pyw` to verify the application works in your environment. Make sure you can generate a pack, convert files to .ogg with pyffmpeg, etc.
-6. Run `build.bat` to compile the source into a Windows executable binary.
-7. Run your executable! Note that your antivirus may flag your executable as suspicious because it's an unknown, unsigned program. You should be safe to ignore this warning, but of course, always use caution and common sense when ignoring the warnings of your antivirus.
+6. Move execution into the *build* directory: `cd build`
+7. Run `build.bat` from within the *build* directory to compile the source into a Windows executable binary. The output exe will be placed in *infinite-music-discs/bin*.
+8. Run your executable! Note that your antivirus may flag your executable as suspicious because it's an unknown, unsigned program. You should be safe to ignore this warning, but of course, always use caution and common sense when ignoring the warnings of your antivirus.
 
 ### Linux:
 1. Clone this repository:
@@ -43,11 +44,12 @@ $ git clone https://github.com/TeamTernate/infinite-music-discs
 ```
 2. Run the build script. If dependencies like python3 are not installed, it may ask for sudo privileges to install them:
 ```bash
-$ cd infinite-music-discs
+$ cd infinite-music-discs/build
 $ ./build.sh
 ```
 3. The built binary will be placed in `infinite-music-discs/bin`. You may need to make it executable before it can be run:
 ```bash
+$ cd ..
 $ chmod +x bin/imd-gui
 $ ./bin/imd-gui
 ```
