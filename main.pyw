@@ -10,8 +10,6 @@
 
 #TODO: add ffmpeg speed <-> quality double-sided slider?
 
-#TODO: drag-dropping a track title with "." in the name causes it to truncate
-
 #TODO: consider type-annotating all functions, to clarify in/out types
 
 #TODO: can you generate disc textures automatically using armor trims?

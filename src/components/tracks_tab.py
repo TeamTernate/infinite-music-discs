@@ -303,7 +303,6 @@ class DiscListEntry(VirtualDiscListEntry):
         self.setTitle([ entry_contents.track_file ])
 
     def setTitle(self, fFileList):
-        #TODO: using completeBaseName here breaks if there are "." in the track name
         title = QtCore.QFileInfo(fFileList[0]).completeBaseName()
         self._leTitle.setText(title)
 
