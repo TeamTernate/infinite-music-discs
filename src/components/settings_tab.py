@@ -8,8 +8,8 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal
 
-from src.definitions import Constants, Regexes, ButtonType, SettingType, DisplayStrings
-from src.definitions import PackFormatsDict, SettingsListContents
+from src.definitions import Constants, Regexes, ButtonType, SettingType
+from src.definitions import SettingsListContents
 from src.components.common import QSetsNameFromType, QFocusLineEdit, MultiDragDropButton
 
 

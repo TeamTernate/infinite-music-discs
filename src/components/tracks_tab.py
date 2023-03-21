@@ -170,7 +170,6 @@ class VirtualDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):
 
 
 
-#TODO: move some parsing / helper functions to Helpers() class
 #TODO: create data subclass to store magic numbers by name? reduce confusing magic numbers?
 #entry in list of tracks
 class DiscListEntry(VirtualDiscListEntry):
@@ -286,9 +285,8 @@ class DiscListEntry(VirtualDiscListEntry):
     def deleteSelf(self):
         self._parent.removeDiscEntry(self.getIndex())
 
-    #TODO: too brittle, implement getIndex in parent
     def getIndex(self):
-        return self._parent._childLayout.indexOf(self)
+        return self._parent.getDiscEntryIndex(self)
 
     def getEntry(self):
         return DiscListEntryContents(texture_file   = self._btnIcon.getFile(),
@@ -424,6 +422,9 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
 
     def getNumDiscEntries(self):
         return self._childLayout.count()-2
+    
+    def getDiscEntryIndex(self, entry):
+        return self._childLayout.indexOf(entry)
 
     #insert a new track object into the list of tracks
     def addDiscEntry(self, entry_contents):
