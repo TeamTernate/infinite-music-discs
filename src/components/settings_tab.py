@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #Infinite Music Discs settings-tab-specific GUI components module

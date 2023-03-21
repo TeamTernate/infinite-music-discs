@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #Infinite Music Discs common/shared/abstract GUI components module
