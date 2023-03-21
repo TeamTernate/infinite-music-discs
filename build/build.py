@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+#Infinite Music Discs cross-platform build script
+#Script by link2_thepast
+
 import os
 import subprocess
 
