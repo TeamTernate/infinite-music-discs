@@ -50,48 +50,10 @@ class GeneratorV2(VirtualGenerator):
             self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(datapack_name)
             self.write_player_tick_funcs(datapack_name)
+            self.write_funcs_entry_per_disc(entry_list, datapack_name, pack_format, offset)
 
 
 
-            # generate files with lines for every disc
-            #write 'play.mcfunction'
-            with open('play.mcfunction', 'w', encoding='utf-8') as play:
-                for i, name in enumerate(entry_list.internal_names):
-                    j = i + offset + 1
-
-                    play.write(f'execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches {j} run function {datapack_name}:{name}/play\n')
-
-            #write 'play_duration.mcfunction'
-            with open('play_duration.mcfunction', 'w', encoding='utf-8') as play_duration:
-                for i, name in enumerate(entry_list.internal_names):
-                    j = i + offset + 1
-
-                    play_duration.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/play_duration\n')
-
-            #write 'stop.mcfunction'
-            with open('stop.mcfunction', 'w', encoding='utf-8') as stop:
-                for i, name in enumerate(entry_list.internal_names):
-                    j = i + offset + 1
-
-                    stop.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/stop\n')
-
-            #write 'set_disc_track.mcfunction'
-            with open('set_disc_track.mcfunction', 'w', encoding='utf-8') as set_disc_track:
-                for i, track in enumerate(entry_list.titles):
-                    j = i + offset + 1
-
-                    # Create command, and add command as string to the rest of the command.
-                    item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
-                    cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_pack_format(pack_format) + '\n'
-
-                    set_disc_track.write(cmd_str % (j, j, track))
-
-            #write 'give_all_discs.mcfunction'
-            with open('give_all_discs.mcfunction', 'w', encoding='utf-8') as give_all:
-                for i, name in enumerate(entry_list.internal_names):
-                    j = i + offset + 1
-
-                    give_all.write(f'execute at @s run function {datapack_name}:give_{name}\n')
 
             #write 'creeper.json'
             os.chdir(base_dir)
@@ -450,6 +412,50 @@ class GeneratorV2(VirtualGenerator):
                 'execute store result score @s imd_player_id run scoreboard players add #imd_id_global imd_player_id 1\n',
                 'tag @s[scores={imd_player_id=1..}] add imd_has_id'
             ])
+
+    # generate files with lines for every disc
+    # used to select which disc-specific function to run
+    def write_funcs_entry_per_disc(self, entry_list: DiscListContents, datapack_name, pack_format, offset):
+
+            #write 'play.mcfunction'
+            with open('play.mcfunction', 'w', encoding='utf-8') as play:
+                for i, name in enumerate(entry_list.internal_names):
+                    j = i + offset + 1
+
+                    play.write(f'execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches {j} run function {datapack_name}:{name}/play\n')
+
+            #write 'play_duration.mcfunction'
+            with open('play_duration.mcfunction', 'w', encoding='utf-8') as play_duration:
+                for i, name in enumerate(entry_list.internal_names):
+                    j = i + offset + 1
+
+                    play_duration.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/play_duration\n')
+
+            #write 'stop.mcfunction'
+            with open('stop.mcfunction', 'w', encoding='utf-8') as stop:
+                for i, name in enumerate(entry_list.internal_names):
+                    j = i + offset + 1
+
+                    stop.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/stop\n')
+
+            #write 'set_disc_track.mcfunction'
+            with open('set_disc_track.mcfunction', 'w', encoding='utf-8') as set_disc_track:
+                for i, track in enumerate(entry_list.titles):
+                    j = i + offset + 1
+
+                    # Create command, and add command as string to the rest of the command.
+                    item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
+                    cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_pack_format(pack_format) + '\n'
+
+                    set_disc_track.write(cmd_str % (j, j, track))
+
+            #write 'give_all_discs.mcfunction'
+            with open('give_all_discs.mcfunction', 'w', encoding='utf-8') as give_all:
+                for i, name in enumerate(entry_list.internal_names):
+                    j = i + offset + 1
+
+                    give_all.write(f'execute at @s run function {datapack_name}:give_{name}\n')
+
 
 
     def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
