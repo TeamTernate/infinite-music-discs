@@ -52,55 +52,8 @@ class GeneratorV2(VirtualGenerator):
             self.write_player_tick_funcs(datapack_name)
             self.write_funcs_entry_per_disc(entry_list, datapack_name, pack_format, offset)
 
-
-
-
-            #write 'creeper.json'
-            os.chdir(base_dir)
-            with open(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'), 'w', encoding='utf-8') as creeper:
-
-                discs_tag = 'minecraft:creeper_drop_music_discs'
-                if pack_format < 6:
-                    discs_tag = 'minecraft:music_discs'
-
-                creeper_mdentries = []
-                creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':discs_tag, 'expand':True})
-                for i, track in enumerate(entry_list.titles):
-                    j = i + offset + 1
-
-                    creeper_mdentries.append({
-                        'type':'minecraft:item',
-                        'weight':1,
-                        'name':'minecraft:music_disc_11',
-                        'functions':[{
-                            'function':'minecraft:set_nbt',
-                            'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track)
-                        }]
-                    })
-
-                creeper_normentries = [{
-                    'type':'minecraft:item',
-                    'functions':[{
-                            'function':'minecraft:set_count',
-                            'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}
-                        }, {
-                            'function':'minecraft:looting_enchant',
-                            'count':{'min':0.0, 'max':1.0}
-                        }],
-                    'name':'minecraft:gunpowder'
-                }]
-
-                creeper.write(json.dumps({
-                    'type':'minecraft:entity',
-                    'pools':[
-                        {'rolls':1, 'entries':creeper_normentries},
-                        {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{
-                            'condition':'minecraft:entity_properties',
-                            'predicate':{'type':'#minecraft:skeletons'},
-                            'entity':'killer'
-                        }]
-                    }]
-                }, indent=4))
+            os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
+            self.write_creeper_loottable(entry_list, pack_format, offset)
 
 
             # generate per-disc functions
@@ -455,6 +408,55 @@ class GeneratorV2(VirtualGenerator):
                     j = i + offset + 1
 
                     give_all.write(f'execute at @s run function {datapack_name}:give_{name}\n')
+
+    # generate creeper loottable
+    def write_creeper_loottable(self, entry_list: DiscListContents, pack_format, offset):
+
+        #write 'creeper.json'
+        with open(os.path.join('creeper.json'), 'w', encoding='utf-8') as creeper:
+
+            discs_tag = 'minecraft:creeper_drop_music_discs'
+            if pack_format < 6:
+                discs_tag = 'minecraft:music_discs'
+
+            creeper_mdentries = []
+            creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':discs_tag, 'expand':True})
+            for i, track in enumerate(entry_list.titles):
+                j = i + offset + 1
+
+                creeper_mdentries.append({
+                    'type':'minecraft:item',
+                    'weight':1,
+                    'name':'minecraft:music_disc_11',
+                    'functions':[{
+                        'function':'minecraft:set_nbt',
+                        'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track)
+                    }]
+                })
+
+            creeper_normentries = [{
+                'type':'minecraft:item',
+                'functions':[{
+                        'function':'minecraft:set_count',
+                        'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}
+                    }, {
+                        'function':'minecraft:looting_enchant',
+                        'count':{'min':0.0, 'max':1.0}
+                    }],
+                'name':'minecraft:gunpowder'
+            }]
+
+            creeper.write(json.dumps({
+                'type':'minecraft:entity',
+                'pools':[
+                    {'rolls':1, 'entries':creeper_normentries},
+                    {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{
+                        'condition':'minecraft:entity_properties',
+                        'predicate':{'type':'#minecraft:skeletons'},
+                        'entity':'killer'
+                    }]
+                }]
+            }, indent=4))
 
 
 
