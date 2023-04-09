@@ -104,7 +104,7 @@ class GeneratorV2(VirtualGenerator):
                 }
             }, indent=4))
 
-    #generate minecraft function tags
+    # generate minecraft function tags
     def write_func_tags(self, datapack_name):
 
         #write 'load.json'
@@ -122,7 +122,7 @@ class GeneratorV2(VirtualGenerator):
                 ]
             }, indent=4))
 
-    #generate advancements
+    # generate advancements
     def write_advancements(self, datapack_name):
 
         #write 'placed_disc.json'
@@ -166,7 +166,7 @@ class GeneratorV2(VirtualGenerator):
                 }
             }, indent=4))
 
-    #generate global functions
+    # generate global functions
     def write_global_funcs(self, datapack_name, dp_version_str):
 
         #write 'setup_load.mcfunction'
@@ -190,8 +190,8 @@ class GeneratorV2(VirtualGenerator):
                 f'schedule function {datapack_name}:watchdog_reset_tickcount 10s replace\n'
             ])
 
-    #generate 'jukebox registration' functions
-    #every jukebox must be registered with the datapack to detect
+    # generate 'jukebox registration' functions
+    # every jukebox must be registered with the datapack to detect
     #    discs inserted/removed with hoppers
     def write_funcs_to_register_jukebox(self, datapack_name):
 
@@ -235,8 +235,8 @@ class GeneratorV2(VirtualGenerator):
         with open('register_jukebox_marker.mcfunction', 'w', encoding='utf-8') as reg_jukebox_marker:
             reg_jukebox_marker.write('summon marker ~ ~ ~ {Tags:["imd_jukebox_marker"]}\n')
 
-    #generate jukebox related every-tick functions
-    #not all functions run every tick; some are simply called by
+    # generate jukebox related every-tick functions
+    # not all functions run every tick; some are simply called by
     #    functions that run every tick
     def write_jukebox_tick_funcs(self, datapack_name):
 
@@ -502,7 +502,9 @@ class GeneratorV2(VirtualGenerator):
             print("Warning: No pack.png found. Your resourcepack will not have an icon.")
 
         #move pack to .zip, if selected
-        if 'zip' in user_settings and user_settings['zip']:
+        use_zip = user_settings.get('zip', False)
+
+        if use_zip:
             zip_status = self.zip_pack(resourcepack_name)
 
             if(zip_status != Status.SUCCESS):
@@ -582,7 +584,7 @@ class GeneratorV2(VirtualGenerator):
     def copy_assets(self, entry_list: DiscListContents):
 
         #copy sound and texture files
-        for i, entry in enumerate(entry_list.entries):
+        for entry in entry_list.entries:
             shutil.copyfile(entry.track_file, os.path.join('sounds', 'records', f'{entry.internal_name}.ogg'))
             shutil.copyfile(entry.texture_file, os.path.join('textures', 'item', f'music_disc_{entry.internal_name}.png'))
 
