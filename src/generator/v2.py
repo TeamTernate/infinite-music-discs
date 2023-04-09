@@ -479,34 +479,8 @@ class GeneratorV2(VirtualGenerator):
         try:
             self.write_rp_framework(entry_list, resourcepack_name, pack_format)
 
-            #generate item models
             os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
-
-            #write 'music_disc_11.json'
-            with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
-                json_list = []
-                for i, name in enumerate(entry_list.internal_names):
-                    j = i + offset + 1
-
-                    json_list.append({
-                        'predicate':{'custom_model_data':j},
-                        'model':f'item/music_disc_{name}'
-                    })
-
-                music_disc_11.write(json.dumps({
-                    'parent':'item/generated',
-                    'textures':{'layer0': 'item/music_disc_11'},
-                    'overrides':json_list
-                }, indent=4))
-
-            #write 'music_disc_*.json' files
-            for name in entry_list.internal_names:
-                with open(f'music_disc_{name}.json', 'w', encoding='utf-8') as music_disc:
-                    music_disc.write(json.dumps({
-                        'parent':'item/generated',
-                        'textures':{'layer0': f'item/music_disc_{name}'}
-                    }, indent=4))
-
+            self.write_item_models(self, entry_list, offset)
 
             #generate assets
             os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft'))
@@ -549,6 +523,7 @@ class GeneratorV2(VirtualGenerator):
 
     # generate directory structure and framework files
     def write_rp_framework(self, entry_list: DiscListContents, resourcepack_name, pack_format):
+
         #build resourcepack directory tree
         shutil.rmtree(resourcepack_name, ignore_errors=True)
         os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
@@ -580,6 +555,33 @@ class GeneratorV2(VirtualGenerator):
 
             sounds.write(json.dumps(json_dict, indent=4))
 
+    # generate item models
+    def write_item_models(self, entry_list:DiscListContents, offset):
+
+        #write 'music_disc_11.json'
+        with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
+            json_list = []
+            for i, name in enumerate(entry_list.internal_names):
+                j = i + offset + 1
+
+                json_list.append({
+                    'predicate':{'custom_model_data':j},
+                    'model':f'item/music_disc_{name}'
+                })
+
+            music_disc_11.write(json.dumps({
+                'parent':'item/generated',
+                'textures':{'layer0': 'item/music_disc_11'},
+                'overrides':json_list
+            }, indent=4))
+
+        #write 'music_disc_*.json' files
+        for name in entry_list.internal_names:
+            with open(f'music_disc_{name}.json', 'w', encoding='utf-8') as music_disc:
+                music_disc.write(json.dumps({
+                    'parent':'item/generated',
+                    'textures':{'layer0': f'item/music_disc_{name}'}
+                }, indent=4))
 
 
     def zip_pack(self, pack_name):
