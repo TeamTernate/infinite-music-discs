@@ -480,7 +480,7 @@ class GeneratorV2(VirtualGenerator):
             self.write_rp_framework(entry_list, resourcepack_name, pack_format)
 
             os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
-            self.write_item_models(self, entry_list, offset)
+            self.write_item_models(entry_list, offset)
 
             os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft'))
             self.copy_assets(entry_list)
