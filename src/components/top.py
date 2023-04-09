@@ -351,7 +351,6 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
             self.setGeometry(w_pos.x(), w_pos.y(), r.width(), r.height())
 
     def unsetVisible(self):
-        self.animation.finished.disconnect()
         self.setVisible(False)
 
     def show(self, status):
@@ -370,6 +369,12 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         startRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
         endRect = QRect(self._basePos, r.size())
 
+        #disconnect prior signals
+        try:
+            self.animation.finished.disconnect()
+        except TypeError:
+            pass
+
         #start animation and auto-hide timer
         self.animation.stop()
         self.animation.setStartValue(startRect)
@@ -386,6 +391,12 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         r = self.rect()
         startRect = QRect(self._basePos, r.size())
         endRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
+
+        #disconnect prior signals
+        try:
+            self.animation.finished.disconnect()
+        except TypeError:
+            pass
 
         #start animation
         self.timer.stop()
