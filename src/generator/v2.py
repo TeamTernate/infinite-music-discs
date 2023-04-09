@@ -36,7 +36,7 @@ class GeneratorV2(VirtualGenerator):
         #write datapack
         #use chdir to move around directory structure and reduce file paths
         try:
-            self.write_framework(entry_list, datapack_name, pack_format)
+            self.write_dp_framework(entry_list, datapack_name, pack_format)
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'tags', 'functions'))
             self.write_func_tags(datapack_name)
@@ -86,7 +86,7 @@ class GeneratorV2(VirtualGenerator):
         return Status.SUCCESS
 
     # generate directory structure and framework files
-    def write_framework(self, entry_list: DiscListContents, datapack_name, pack_format):
+    def write_dp_framework(self, entry_list: DiscListContents, datapack_name, pack_format):
 
         #build datapack directory tree
         shutil.rmtree(datapack_name, ignore_errors=True)
@@ -474,38 +474,10 @@ class GeneratorV2(VirtualGenerator):
         #capture base dir
         base_dir = os.getcwd()
 
+        #write resourcepack
+        #use chdir to move around directory structure and reduce file paths
         try:
-            #build resourcepack directory tree
-            shutil.rmtree(resourcepack_name, ignore_errors=True)
-            os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
-            os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
-            os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
-
-            #write 'pack.mcmeta'
-            with open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
-                pack.write(json.dumps({
-                    'pack':{
-                        'pack_format':pack_format,
-                        'description':(Constants.RESOURCEPACK_DESC % len(entry_list.internal_names))
-                    }
-                }, indent=4))
-
-            #write 'sounds.json'
-            with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w', encoding='utf-8') as sounds:
-                json_dict = {}
-
-                for name in entry_list.internal_names:
-                    sound = {
-                        'sounds':[{
-                            'name':f'records/{name}',
-                            'stream':True
-                        }]
-                    }
-
-                    json_dict[f'music_disc.{name}'] = sound
-
-                sounds.write(json.dumps(json_dict, indent=4))
-
+            self.write_rp_framework(entry_list, resourcepack_name, pack_format)
 
             #generate item models
             os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
@@ -574,6 +546,39 @@ class GeneratorV2(VirtualGenerator):
             self.tmp_path = None
 
         return Status.SUCCESS
+
+    # generate directory structure and framework files
+    def write_rp_framework(self, entry_list: DiscListContents, resourcepack_name, pack_format):
+        #build resourcepack directory tree
+        shutil.rmtree(resourcepack_name, ignore_errors=True)
+        os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
+        os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
+        os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
+
+        #write 'pack.mcmeta'
+        with open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
+            pack.write(json.dumps({
+                'pack':{
+                    'pack_format':pack_format,
+                    'description':(Constants.RESOURCEPACK_DESC % len(entry_list.internal_names))
+                }
+            }, indent=4))
+
+        #write 'sounds.json'
+        with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w', encoding='utf-8') as sounds:
+            json_dict = {}
+
+            for name in entry_list.internal_names:
+                sound = {
+                    'sounds':[{
+                        'name':f'records/{name}',
+                        'stream':True
+                    }]
+                }
+
+                json_dict[f'music_disc.{name}'] = sound
+
+            sounds.write(json.dumps(json_dict, indent=4))
 
 
 
