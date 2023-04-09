@@ -19,7 +19,6 @@ from src.generator.base import VirtualGenerator
 
 class GeneratorV2(VirtualGenerator):
 
-    #TODO: break by section into smaller functions
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
 
         #read settings
@@ -75,7 +74,9 @@ class GeneratorV2(VirtualGenerator):
             print("Warning: No pack.png found. Your datapack will not have an icon.")
 
         #move pack to .zip, if selected
-        if 'zip' in user_settings and user_settings['zip']:
+        use_zip = user_settings.get('zip', False)
+
+        if use_zip:
             zip_status = self.zip_pack(datapack_name)
 
             if(zip_status != Status.SUCCESS):
@@ -592,7 +593,7 @@ class GeneratorV2(VirtualGenerator):
                     for file in files:
                         rp_zip.write(os.path.join(root, file), os.path.join(root_zip, file))
 
-            #remove resourcepack folder
+            #remove pack folder
             if os.path.exists(pack_name_zip):
                 shutil.rmtree(pack_name, ignore_errors=True)
 
