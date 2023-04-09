@@ -49,19 +49,8 @@ class GeneratorV2(VirtualGenerator):
             self.write_global_funcs(datapack_name, dp_version_str)
             self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(datapack_name)
+            self.write_player_tick_funcs(datapack_name)
 
-            # generate player related every-tick functions
-            #write 'register_players_tick.mcfunction'
-            with open('register_players_tick.mcfunction', 'w', encoding='utf-8') as reg_players_tick:
-                reg_players_tick.write(f'execute as @a[tag=!imd_has_id] run function {datapack_name}:register_player\n')
-
-            #TODO: different global id per-datapack?
-            #write 'register_player.mcfunction'
-            with open('register_player.mcfunction', 'w', encoding='utf-8') as reg_player:
-                reg_player.writelines([
-                    'execute store result score @s imd_player_id run scoreboard players add #imd_id_global imd_player_id 1\n',
-                    'tag @s[scores={imd_player_id=1..}] add imd_has_id'
-                ])
 
 
             # generate files with lines for every disc
@@ -447,6 +436,20 @@ class GeneratorV2(VirtualGenerator):
                 f'function {datapack_name}:stop\n'
             ])
 
+    # generate player related every-tick functions
+    def write_player_tick_funcs(self, datapack_name):
+
+        #write 'register_players_tick.mcfunction'
+        with open('register_players_tick.mcfunction', 'w', encoding='utf-8') as reg_players_tick:
+            reg_players_tick.write(f'execute as @a[tag=!imd_has_id] run function {datapack_name}:register_player\n')
+
+        #TODO: different global id per-datapack?
+        #write 'register_player.mcfunction'
+        with open('register_player.mcfunction', 'w', encoding='utf-8') as reg_player:
+            reg_player.writelines([
+                'execute store result score @s imd_player_id run scoreboard players add #imd_id_global imd_player_id 1\n',
+                'tag @s[scores={imd_player_id=1..}] add imd_has_id'
+            ])
 
 
     def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
