@@ -19,7 +19,6 @@ from src.generator.base import VirtualGenerator
 
 class GeneratorV2(VirtualGenerator):
 
-    #TODO: break into smaller functions so it's easier to understand behavior?
     #TODO: break by section into smaller functions
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
 
@@ -35,42 +34,21 @@ class GeneratorV2(VirtualGenerator):
         #capture base dir
         base_dir = os.getcwd()
 
+        #write datapack
+        #use chdir to move around directory structure and reduce file paths
         try:
-            #generate directory structure and framework files
             self.write_framework(entry_list, datapack_name, pack_format)
 
-            #generate minecraft function tags
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'tags', 'functions'))
             self.write_func_tags(entry_list, datapack_name)
 
-            # generate advancements
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'advancements'))
             self.write_advancements(entry_list, datapack_name)
 
-
-            #generate global functions
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
+            self.write_global_funcs(entry_list, datapack_name, dp_version_str)
+            #self.write_jukebox_funcs(self, entry_list, datapack_name)
 
-            #write 'setup_load.mcfunction'
-            with open('setup_load.mcfunction', 'w', encoding='utf-8') as setup_load:
-                setup_load.writelines([
-                    'scoreboard objectives add imd_player_id dummy\n',
-                    'scoreboard objectives add imd_disc_id dummy\n',
-                    'scoreboard objectives add imd_rc_steps dummy\n',
-                    'scoreboard objectives add imd_play_time dummy\n',
-                    'scoreboard objectives add imd_stop_11_time dummy\n',
-                    '\n',
-                    f'advancement revoke @a only {datapack_name}:placed_disc\n',
-                    f'advancement revoke @a only {datapack_name}:placed_jukebox\n',
-                    f'tellraw @a {{"text":"Infinite Music Discs {dp_version_str} by link2_thepast","color":"gold"}}\n'
-                ])
-
-            #write 'watchdog_reset_tickcount.mcfunction'
-            with open('watchdog_reset_tickcount.mcfunction', 'w', encoding='utf-8') as wd_reset_tickcount:
-                wd_reset_tickcount.writelines([
-                    'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
-                    f'schedule function {datapack_name}:watchdog_reset_tickcount 10s replace\n'
-                ])
 
 
             #generate 'jukebox register' functions
@@ -439,6 +417,31 @@ class GeneratorV2(VirtualGenerator):
                     'function':f'{datapack_name}:on_placed_jukebox'
                 }
             }, indent=4))
+
+    #generate global functions
+    def write_global_funcs(self, entry_list: DiscListContents, datapack_name, dp_version_str):
+
+        #write 'setup_load.mcfunction'
+        with open('setup_load.mcfunction', 'w', encoding='utf-8') as setup_load:
+            setup_load.writelines([
+                'scoreboard objectives add imd_player_id dummy\n',
+                'scoreboard objectives add imd_disc_id dummy\n',
+                'scoreboard objectives add imd_rc_steps dummy\n',
+                'scoreboard objectives add imd_play_time dummy\n',
+                'scoreboard objectives add imd_stop_11_time dummy\n',
+                '\n',
+                f'advancement revoke @a only {datapack_name}:placed_disc\n',
+                f'advancement revoke @a only {datapack_name}:placed_jukebox\n',
+                f'tellraw @a {{"text":"Infinite Music Discs {dp_version_str} by link2_thepast","color":"gold"}}\n'
+            ])
+
+        #write 'watchdog_reset_tickcount.mcfunction'
+        with open('watchdog_reset_tickcount.mcfunction', 'w', encoding='utf-8') as wd_reset_tickcount:
+            wd_reset_tickcount.writelines([
+                'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
+                f'schedule function {datapack_name}:watchdog_reset_tickcount 10s replace\n'
+            ])
+
 
 
     def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
