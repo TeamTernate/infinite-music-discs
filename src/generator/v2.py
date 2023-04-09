@@ -36,86 +36,16 @@ class GeneratorV2(VirtualGenerator):
         base_dir = os.getcwd()
 
         try:
-            # generate basic framework files
-            #build datapack directory tree
-            shutil.rmtree(datapack_name, ignore_errors=True)
-            os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
-            os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
-            os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
-            os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'advancements'))
-
-            #write 'pack.mcmeta'
-            with open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
-                pack.write(json.dumps({
-                    'pack': {
-                        'pack_format': pack_format,
-                        'description': (Constants.DATAPACK_DESC % len(entry_list.internal_names))
-                    }
-                }, indent=4))
-
+            #generate directory structure and framework files
+            self.write_framework(entry_list, datapack_name, pack_format)
 
             #generate minecraft function tags
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'tags', 'functions'))
-
-            #write 'load.json'
-            with open('load.json', 'w', encoding='utf-8') as load:
-                load.write(json.dumps({
-                    'values':[ f'{datapack_name}:setup_load' ]
-                }, indent=4))
-
-            #write 'tick.json'
-            with open('tick.json', 'w', encoding='utf-8') as tick:
-                tick.write(json.dumps({
-                    'values':[
-                        f'{datapack_name}:register_players_tick',
-                        f'{datapack_name}:jukebox_event_tick'
-                    ]
-                }, indent=4))
-
+            self.write_func_tags(entry_list, datapack_name)
 
             # generate advancements
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'advancements'))
-
-            #write 'placed_disc.json'
-            with open('placed_disc.json', 'w', encoding='utf-8') as placed_disc:
-                placed_disc.write(json.dumps({
-                    'criteria':{
-                        'placed_music_disc':{
-                            'trigger':'minecraft:item_used_on_block',
-                            'conditions':{
-                                'location':{
-                                    'block':{
-                                        'blocks':[ 'minecraft:jukebox' ],
-                                        'state':{ 'has_record':'true' }
-                                    }
-                                },
-                                'item':{'tag': 'minecraft:music_discs'}
-                            }
-                        }
-                    },
-                    'rewards':{
-                        'function':f'{datapack_name}:on_placed_disc'
-                    }
-                }, indent=4))
-
-            #write 'placed_jukebox.json'
-            with open('placed_jukebox.json', 'w', encoding='utf-8') as placed_jukebox:
-                placed_jukebox.write(json.dumps({
-                    'criteria':{
-                        'placed_jukebox':{
-                            'trigger':'minecraft:placed_block',
-                            'conditions':{
-                                'block':'minecraft:jukebox',
-                                'item':{
-                                    'items':[ 'minecraft:jukebox' ]
-                                }
-                            }
-                        }
-                    },
-                    'rewards':{
-                        'function':f'{datapack_name}:on_placed_jukebox'
-                    }
-                }, indent=4))
+            self.write_advancements(entry_list, datapack_name)
 
 
             #generate global functions
@@ -429,6 +359,86 @@ class GeneratorV2(VirtualGenerator):
 
         return Status.SUCCESS
 
+    # generate directory structure and framework files
+    def write_framework(self, entry_list: DiscListContents, datapack_name, pack_format):
+
+        #build datapack directory tree
+        shutil.rmtree(datapack_name, ignore_errors=True)
+        os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
+        os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
+        os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
+        os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'advancements'))
+
+        #write 'pack.mcmeta'
+        with open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
+            pack.write(json.dumps({
+                'pack': {
+                    'pack_format': pack_format,
+                    'description': (Constants.DATAPACK_DESC % len(entry_list.internal_names))
+                }
+            }, indent=4))
+
+    #generate minecraft function tags
+    def write_func_tags(self, entry_list: DiscListContents, datapack_name):
+
+        #write 'load.json'
+        with open('load.json', 'w', encoding='utf-8') as load:
+            load.write(json.dumps({
+                'values':[ f'{datapack_name}:setup_load' ]
+            }, indent=4))
+
+        #write 'tick.json'
+        with open('tick.json', 'w', encoding='utf-8') as tick:
+            tick.write(json.dumps({
+                'values':[
+                    f'{datapack_name}:register_players_tick',
+                    f'{datapack_name}:jukebox_event_tick'
+                ]
+            }, indent=4))
+
+    #generate advancements
+    def write_advancements(self, entry_list: DiscListContents, datapack_name):
+
+        #write 'placed_disc.json'
+        with open('placed_disc.json', 'w', encoding='utf-8') as placed_disc:
+            placed_disc.write(json.dumps({
+                'criteria':{
+                    'placed_music_disc':{
+                        'trigger':'minecraft:item_used_on_block',
+                        'conditions':{
+                            'location':{
+                                'block':{
+                                    'blocks':[ 'minecraft:jukebox' ],
+                                    'state':{ 'has_record':'true' }
+                                }
+                            },
+                            'item':{'tag': 'minecraft:music_discs'}
+                        }
+                    }
+                },
+                'rewards':{
+                    'function':f'{datapack_name}:on_placed_disc'
+                }
+            }, indent=4))
+
+        #write 'placed_jukebox.json'
+        with open('placed_jukebox.json', 'w', encoding='utf-8') as placed_jukebox:
+            placed_jukebox.write(json.dumps({
+                'criteria':{
+                    'placed_jukebox':{
+                        'trigger':'minecraft:placed_block',
+                        'conditions':{
+                            'block':'minecraft:jukebox',
+                            'item':{
+                                'items':[ 'minecraft:jukebox' ]
+                            }
+                        }
+                    }
+                },
+                'rewards':{
+                    'function':f'{datapack_name}:on_placed_jukebox'
+                }
+            }, indent=4))
 
 
     def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
