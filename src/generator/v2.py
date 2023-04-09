@@ -482,13 +482,8 @@ class GeneratorV2(VirtualGenerator):
             os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
             self.write_item_models(self, entry_list, offset)
 
-            #generate assets
             os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft'))
-
-            #copy sound and texture files
-            for i, entry in enumerate(entry_list.entries):
-                shutil.copyfile(entry.track_file, os.path.join('sounds', 'records', f'{entry.internal_name}.ogg'))
-                shutil.copyfile(entry.texture_file, os.path.join('textures', 'item', f'music_disc_{entry.internal_name}.png'))
+            self.copy_assets(entry_list)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
@@ -582,6 +577,15 @@ class GeneratorV2(VirtualGenerator):
                     'parent':'item/generated',
                     'textures':{'layer0': f'item/music_disc_{name}'}
                 }, indent=4))
+
+    # generate assets dir
+    def copy_assets(self, entry_list: DiscListContents):
+
+        #copy sound and texture files
+        for i, entry in enumerate(entry_list.entries):
+            shutil.copyfile(entry.track_file, os.path.join('sounds', 'records', f'{entry.internal_name}.ogg'))
+            shutil.copyfile(entry.texture_file, os.path.join('textures', 'item', f'music_disc_{entry.internal_name}.png'))
+
 
 
     def zip_pack(self, pack_name):
