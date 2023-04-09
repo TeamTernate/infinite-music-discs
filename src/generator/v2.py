@@ -46,6 +46,7 @@ class GeneratorV2(VirtualGenerator):
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
             self.write_global_funcs(datapack_name, dp_version_str)
+            self.write_help_func()
             self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(datapack_name)
             self.write_player_tick_funcs(datapack_name)
@@ -189,6 +190,12 @@ class GeneratorV2(VirtualGenerator):
                 'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
                 f'schedule function {datapack_name}:watchdog_reset_tickcount 10s replace\n'
             ])
+
+    #generate help function to explain the datapack
+    #TODO: write contents in definitions.py and import to here
+    #   help function should be referenced when /reload ing the datapack
+    def write_help_func(self):
+        pass
 
     # generate 'jukebox registration' functions
     # every jukebox must be registered with the datapack to detect
