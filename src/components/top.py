@@ -315,7 +315,10 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
 
         self._parent = parent
         self._widget = relativeWidget
+
         self._basePos = QPoint(0,0)
+        self._showRect = self.rect()
+        self._hideRect = self.rect()
 
         self.sticky = False
 
@@ -324,10 +327,15 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.setAutoFillBackground(True)
         self.setVisible(False)
 
-        #slide in/out animation
-        self.animation = QtCore.QPropertyAnimation(self, b"geometry")
-        self.animation.setDuration(300)
-        self.animation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+        #slide in/out animations
+        self.showAnimation = QtCore.QPropertyAnimation(self, b"geometry")
+        self.showAnimation.setDuration(Constants.STATUS_MESSAGE_ANIM_TIME_MS)
+        self.showAnimation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+
+        self.hideAnimation = QtCore.QPropertyAnimation(self, b"geometry")
+        self.hideAnimation.setDuration(Constants.STATUS_MESSAGE_ANIM_TIME_MS)
+        self.hideAnimation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+        self.hideAnimation.finished.connect(self.unsetVisible)
 
         #automatic hide timer
         self.timer = QtCore.QTimer(self)
@@ -340,6 +348,7 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.hide()
 
     #widget is not part of a layout, so position has to be updated manually
+    #set animation start/end pos after widget gets its proper position
     def setBasePos(self):
         r = self.rect()
         w_pos = self._widget.mapToParent( QPoint(0,0) )
@@ -355,6 +364,7 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
 
     def show(self, status):
         #use status to decide text and bg color
+        #resize widget to fit text
         self.setText(StatusMessageDict.get(status, 'Unknown error.'))
         self.adjustSize()
 
@@ -364,22 +374,21 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.setProperty(StyleProperties.ERROR, (status != Status.SUCCESS) )
         self.repolish(self)
 
-        #set start and end points
+        #update start and end points now that widget has resized
         r = self.rect()
-        startRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
-        endRect = QRect(self._basePos, r.size())
+        self._showRect = QRect(self._basePos, r.size())
+        self._hideRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
 
-        #disconnect prior signals
-        try:
-            self.animation.finished.disconnect()
-        except TypeError:
-            pass
+        self.showAnimation.setStartValue(self._hideRect)
+        self.showAnimation.setEndValue(self._showRect)
 
-        #start animation and auto-hide timer
-        self.animation.stop()
-        self.animation.setStartValue(startRect)
-        self.animation.setEndValue(endRect)
-        self.animation.start()
+        self.hideAnimation.setStartValue(self._showRect)
+        self.hideAnimation.setEndValue(self._hideRect)
+
+        #start animation and the auto-hide timer
+        self.showAnimation.stop()
+        self.hideAnimation.stop()
+        self.showAnimation.start()
 
         if not self.sticky:
             self.timer.start()
@@ -387,24 +396,12 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.setVisible(True)
 
     def hide(self):
-        #set start and end points
-        r = self.rect()
-        startRect = QRect(self._basePos, r.size())
-        endRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
-
-        #disconnect prior signals
-        try:
-            self.animation.finished.disconnect()
-        except TypeError:
-            pass
-
-        #start animation
+        #start animation and stop the auto-hide timer
+        #widget is hiding, no need to trigger hide again
         self.timer.stop()
-        self.animation.stop()
-        self.animation.finished.connect(self.unsetVisible)
-        self.animation.setStartValue(startRect)
-        self.animation.setEndValue(endRect)
-        self.animation.start()
+        self.showAnimation.stop()
+        self.hideAnimation.stop()
+        self.hideAnimation.start()
 
 
 
