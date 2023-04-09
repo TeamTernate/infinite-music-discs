@@ -331,10 +331,14 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.showAnimation = QtCore.QPropertyAnimation(self, b"geometry")
         self.showAnimation.setDuration(Constants.STATUS_MESSAGE_ANIM_TIME_MS)
         self.showAnimation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+        self.showAnimation.setStartValue(self._hideRect)
+        self.showAnimation.setEndValue(self._showRect)
 
         self.hideAnimation = QtCore.QPropertyAnimation(self, b"geometry")
         self.hideAnimation.setDuration(Constants.STATUS_MESSAGE_ANIM_TIME_MS)
         self.hideAnimation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+        self.hideAnimation.setStartValue(self._showRect)
+        self.hideAnimation.setEndValue(self._hideRect)
         self.hideAnimation.finished.connect(self.unsetVisible)
 
         #automatic hide timer
