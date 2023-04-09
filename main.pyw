@@ -14,6 +14,8 @@
 
 #TODO: can you generate disc textures automatically using armor trims?
 
+#TODO: status bar is hidden instead of sticking if pack generation is too fast
+
 import sys
 import ctypes
 import platform

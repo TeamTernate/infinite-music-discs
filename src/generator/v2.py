@@ -40,13 +40,13 @@ class GeneratorV2(VirtualGenerator):
             self.write_framework(entry_list, datapack_name, pack_format)
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'tags', 'functions'))
-            self.write_func_tags(entry_list, datapack_name)
+            self.write_func_tags(datapack_name)
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'advancements'))
-            self.write_advancements(entry_list, datapack_name)
+            self.write_advancements(datapack_name)
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
-            self.write_global_funcs(entry_list, datapack_name, dp_version_str)
+            self.write_global_funcs(datapack_name, dp_version_str)
             self.write_funcs_to_register_jukebox(datapack_name)
 
 
@@ -314,7 +314,7 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
     #generate minecraft function tags
-    def write_func_tags(self, entry_list: DiscListContents, datapack_name):
+    def write_func_tags(self, datapack_name):
 
         #write 'load.json'
         with open('load.json', 'w', encoding='utf-8') as load:
@@ -332,7 +332,7 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
     #generate advancements
-    def write_advancements(self, entry_list: DiscListContents, datapack_name):
+    def write_advancements(self, datapack_name):
 
         #write 'placed_disc.json'
         with open('placed_disc.json', 'w', encoding='utf-8') as placed_disc:
@@ -376,7 +376,7 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
     #generate global functions
-    def write_global_funcs(self, entry_list: DiscListContents, datapack_name, dp_version_str):
+    def write_global_funcs(self, datapack_name, dp_version_str):
 
         #write 'setup_load.mcfunction'
         with open('setup_load.mcfunction', 'w', encoding='utf-8') as setup_load:
