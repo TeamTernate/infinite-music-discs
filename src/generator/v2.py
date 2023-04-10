@@ -19,7 +19,7 @@ from src.generator.base import VirtualGenerator
 
 class GeneratorV2(VirtualGenerator):
 
-    def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
+    def generate_datapack(self, entry_list: DiscListContents, user_settings: dict = {}):
 
         #read settings
         pack_format = user_settings.get('version').get('dp', Constants.DEFAULT_PACK_FORMAT)
@@ -87,7 +87,7 @@ class GeneratorV2(VirtualGenerator):
         return Status.SUCCESS
 
     # generate directory structure and framework files
-    def write_dp_framework(self, entry_list: DiscListContents, datapack_name, pack_format):
+    def write_dp_framework(self, entry_list: DiscListContents, datapack_name: str, pack_format: int):
 
         #build datapack directory tree
         shutil.rmtree(datapack_name, ignore_errors=True)
@@ -106,7 +106,7 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
     # generate minecraft function tags
-    def write_func_tags(self, datapack_name):
+    def write_func_tags(self, datapack_name: str):
 
         #write 'load.json'
         with open('load.json', 'w', encoding='utf-8') as load:
@@ -124,7 +124,7 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
     # generate advancements
-    def write_advancements(self, datapack_name):
+    def write_advancements(self, datapack_name: str):
 
         #write 'placed_disc.json'
         with open('placed_disc.json', 'w', encoding='utf-8') as placed_disc:
@@ -168,7 +168,7 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
     # generate global functions
-    def write_global_funcs(self, datapack_name, dp_version_str):
+    def write_global_funcs(self, datapack_name: str, dp_version_str: str):
 
         #write 'setup_load.mcfunction'
         with open('setup_load.mcfunction', 'w', encoding='utf-8') as setup_load:
@@ -200,7 +200,7 @@ class GeneratorV2(VirtualGenerator):
     # generate 'jukebox registration' functions
     # every jukebox must be registered with the datapack to detect
     #    discs inserted/removed with hoppers
-    def write_funcs_to_register_jukebox(self, datapack_name):
+    def write_funcs_to_register_jukebox(self, datapack_name: str):
 
         #write 'on_placed_disc.mcfunction'
         with open('on_placed_disc.mcfunction', 'w', encoding='utf-8') as on_placed_disc:
@@ -245,7 +245,7 @@ class GeneratorV2(VirtualGenerator):
     # generate jukebox related every-tick functions
     # not all functions run every tick; some are simply called by
     #    functions that run every tick
-    def write_jukebox_tick_funcs(self, datapack_name):
+    def write_jukebox_tick_funcs(self, datapack_name: str):
 
         #write 'jukebox_event_tick.mcfunction'
         with open('jukebox_event_tick.mcfunction', 'w', encoding='utf-8') as jb_event_tick:
@@ -328,7 +328,7 @@ class GeneratorV2(VirtualGenerator):
             ])
 
     # generate player related every-tick functions
-    def write_player_tick_funcs(self, datapack_name):
+    def write_player_tick_funcs(self, datapack_name: str):
 
         #write 'register_players_tick.mcfunction'
         with open('register_players_tick.mcfunction', 'w', encoding='utf-8') as reg_players_tick:
@@ -344,7 +344,7 @@ class GeneratorV2(VirtualGenerator):
 
     # generate files with lines for every disc
     # used to select which disc-specific function to run
-    def write_funcs_entry_per_disc(self, entry_list: DiscListContents, datapack_name, pack_format, offset):
+    def write_funcs_entry_per_disc(self, entry_list: DiscListContents, datapack_name: str, pack_format: int, offset: int):
 
         #write 'play.mcfunction'
         with open('play.mcfunction', 'w', encoding='utf-8') as play:
@@ -386,7 +386,7 @@ class GeneratorV2(VirtualGenerator):
                 give_all.write(f'execute at @s run function {datapack_name}:give_{name}\n')
 
     # generate creeper loottable
-    def write_creeper_loottable(self, entry_list: DiscListContents, pack_format, offset):
+    def write_creeper_loottable(self, entry_list: DiscListContents, pack_format: int, offset: int):
 
         #write 'creeper.json'
         with open(os.path.join('creeper.json'), 'w', encoding='utf-8') as creeper:
@@ -436,7 +436,7 @@ class GeneratorV2(VirtualGenerator):
 
     # generate per-disc functions
     # each disc gets a copy of these functions
-    def write_per_disc_funcs(self, entry_list: DiscListContents, datapack_name, offset):
+    def write_per_disc_funcs(self, entry_list: DiscListContents, datapack_name: str, offset: int):
         for i, entry in enumerate(entry_list.entries):
             #make directory for this disc's functions
             os.makedirs(entry.internal_name)
@@ -469,7 +469,7 @@ class GeneratorV2(VirtualGenerator):
 
 
 
-    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
+    def generate_resourcepack(self, entry_list: DiscListContents, user_settings: dict = {}, cleanup_tmp: bool = True):
 
         #read settings
         pack_format = user_settings.get('version').get('rp', Constants.DEFAULT_PACK_FORMAT)
@@ -526,7 +526,7 @@ class GeneratorV2(VirtualGenerator):
         return Status.SUCCESS
 
     # generate directory structure and framework files
-    def write_rp_framework(self, entry_list: DiscListContents, resourcepack_name, pack_format):
+    def write_rp_framework(self, entry_list: DiscListContents, resourcepack_name: str, pack_format: int):
 
         #build resourcepack directory tree
         shutil.rmtree(resourcepack_name, ignore_errors=True)
@@ -560,7 +560,7 @@ class GeneratorV2(VirtualGenerator):
             sounds.write(json.dumps(json_dict, indent=4))
 
     # generate item models
-    def write_item_models(self, entry_list:DiscListContents, offset):
+    def write_item_models(self, entry_list: DiscListContents, offset: int):
 
         #write 'music_disc_11.json'
         with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
@@ -597,7 +597,7 @@ class GeneratorV2(VirtualGenerator):
 
 
 
-    def zip_pack(self, pack_name):
+    def zip_pack(self, pack_name: str):
         pack_name_zip = pack_name + Constants.ZIP_SUFFIX
 
         try:
