@@ -24,7 +24,7 @@ class ItemSlot(Enum):
     HORSE_CHEST = "horse.chest"
     HORSE_ARMOR = "horse.armor"
 
-    def get_value_by_pack_format(self, pack_format, slot_id: int = None):
+    def get_value_by_pack_format(self, pack_format: int, slot_id: int = None):
         if slot_id is None:
             return self.value
         else:
@@ -47,7 +47,7 @@ class ReplaceItemCommand:
     change_version = 7
 
     # If in the future new changes are made to the command, add the new structure here.
-    def command_by_pack_format(self, pack_format):
+    def command_by_pack_format(self, pack_format: int):
         if pack_format >= self.change_version:
             if self.target_entity != "block":
                 return "item replace entity " \
@@ -82,3 +82,5 @@ class ReplaceItemCommand:
                        + " " \
                        + self.item \
                        + (" " + str(self.count) if self.count is not None else "")
+
+
