@@ -3,6 +3,8 @@
 #Infinite Music Discs top-level GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+from typing import Any
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -88,7 +90,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         self._label.setObjectName('GenLabel')
         self._progress.setObjectName('GenProgress')
 
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
         return QSize(350, 66)
 
     def mousePressEvent(self, event):
@@ -209,7 +211,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
     #apply setProperty() to this widget and all children
     #properties are used to select different CSS styles
-    def setPropertyComplete(self, prop, value):
+    def setPropertyComplete(self, prop: StyleProperties, value: Any):
         self.setProperty(prop, value)
         self._label.setProperty(prop, value)
         self._progress.setProperty(prop, value)
@@ -254,7 +256,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
         style = self.style()
         style.drawControl(style.CE_TabBarTabLabel, tab, qp, self)
 
-    def tabChanged(self, index):
+    def tabChanged(self, index: int):
         #clear focused widget from previous tab
         focusWidget = QtWidgets.QApplication.focusWidget()
 
@@ -265,7 +267,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
         if self.animations:
             self.animations[index].start()
 
-    def tabInserted(self, index):
+    def tabInserted(self, index: int):
         super().tabInserted(index)
 
         baseRect = self.tabRect(index)
@@ -283,7 +285,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
             self._first = False
             anim.start()
 
-    def tabRemoved(self, index):
+    def tabRemoved(self, index: int):
         super().tabRemoved(index)
 
         anim = self.animations.pop(index)
@@ -291,7 +293,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
         anim.deleteLater()
 
     #calculate underline QRect coordinates from tab QRect coordinates
-    def getUnderlineRect(self, tabRect, hasWidth=True):
+    def getUnderlineRect(self, tabRect: QRect, hasWidth=True) -> QRect:
         ulRect = tabRect
         ulRect.setTop(tabRect.bottom() - self.UL_HEIGHT)
 
@@ -310,7 +312,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
 #semi-transparent popup to display errors during pack generation
 class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
-    def __init__(self, text, relativeWidget, parent = None):
+    def __init__(self, text: str, relativeWidget: QtWidgets.QWidget, parent = None):
         super().__init__(text=text, parent=parent)
 
         self._parent = parent
@@ -366,7 +368,7 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
     def unsetVisible(self):
         self.setVisible(False)
 
-    def show(self, status):
+    def show(self, status: Status):
         #use status to decide text and bg color
         #resize widget to fit text
         self.setText(StatusMessageDict.get(status, 'Unknown error.'))
@@ -537,7 +539,7 @@ class GeneratePackWorker(QtCore.QObject):
         self._generator = generator_top.get_generator(generator_data.settings)
         self._data = generator_data
 
-    def emit_status_bad(self):
+    def emit_status_bad(self) -> bool:
         bad = (self._data.status != Status.SUCCESS)
 
         if(bad):
