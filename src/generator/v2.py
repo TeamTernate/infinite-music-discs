@@ -19,7 +19,7 @@ from src.generator.base import VirtualGenerator
 
 class GeneratorV2(VirtualGenerator):
 
-    def generate_datapack(self, entry_list: DiscListContents, user_settings: dict = {}):
+    def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
 
         #read settings
         pack_format = user_settings.get('version').get('dp', Constants.DEFAULT_PACK_FORMAT)
@@ -469,7 +469,7 @@ class GeneratorV2(VirtualGenerator):
 
 
 
-    def generate_resourcepack(self, entry_list: DiscListContents, user_settings: dict = {}, cleanup_tmp: bool = True):
+    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp: bool = True):
 
         #read settings
         pack_format = user_settings.get('version').get('rp', Constants.DEFAULT_PACK_FORMAT)

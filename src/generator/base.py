@@ -15,7 +15,7 @@ from src.definitions import Status, GeneratorContents, DiscListEntryContents
 
 
 class VirtualGenerator():
-    def __init__(self, version_major, version_minor):
+    def __init__(self, version_major: int, version_minor: int):
         self.tmp_path = None
 
         self._version_major = version_major
