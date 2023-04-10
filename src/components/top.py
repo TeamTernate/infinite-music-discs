@@ -93,25 +93,25 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
     def sizeHint(self) -> QSize:
         return QSize(350, 66)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         event.accept()
         self.setPropertyComplete(StyleProperties.PRESSED, True)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QtGui.QMouseEvent):
         event.accept()
         self.setPropertyComplete(StyleProperties.PRESSED, False)
         self.generate.emit()
 
-    def enterEvent(self, event):
+    def enterEvent(self, event: QtGui.QEnterEvent):
         event.accept()
         self.setPropertyComplete(StyleProperties.HOVER, True)
 
-    def leaveEvent(self, event):
+    def leaveEvent(self, event: QtCore.QEvent):
         event.accept()
         self.setPropertyComplete(StyleProperties.PRESSED, False)
         self.setPropertyComplete(StyleProperties.HOVER, False)
 
-    def changeEvent(self, event):
+    def changeEvent(self, event: QtCore.QEvent):
         event.accept()
 
         if event.type() == QtCore.QEvent.EnabledChange:
@@ -125,7 +125,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
                 #do entry logic
                 pass
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QtGui.QPaintEvent):
         super().paintEvent(event)
 
         #setup painter
@@ -237,7 +237,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
         self.currentChanged.connect(self.tabChanged)
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QtGui.QPaintEvent):
         super().paintEvent(event)
 
         selected = self.currentIndex()
@@ -349,7 +349,7 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         event.accept()
         self.hide()
 
@@ -484,7 +484,7 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
         btnFrame.raise_()
         self._status.raise_()
 
-    def showEvent(self, event):
+    def showEvent(self, event: QtGui.QShowEvent):
         super().showEvent(event)
 
         #setup status display bar, now that widget coordinates are determined
