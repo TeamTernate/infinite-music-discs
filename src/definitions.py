@@ -110,13 +110,13 @@ class Helpers():
         except AttributeError:
             return './'
 
-    def natural_keys(text):
+    def natural_keys(text: str):
         return [ Helpers.atoi(c) for c in re.split(r'(\d+)', text) ]
 
-    def atoi(text):
+    def atoi(text: str):
         return int(text) if text.isdigit() else text
 
-    def to_internal_name(title):
+    def to_internal_name(title: str):
         ascii_title = unidecode.unidecode(title)                                            #transliterate unicode letters to ascii
         numname_title = ''.join([ DigitNameDict.get(i, i) for i in ascii_title.lower() ])   #convert upper to lower-case, convert numbers to words
         internal_name = ''.join([ i for i in numname_title if i.isalpha() ])                #strip non-alphabetic characters
