@@ -99,6 +99,11 @@ class FileExt():
     OGG = 'ogg'
     TXT = 'txt'
 
+class SupportedFormats():
+    TEXT = [ FileExt.TXT ]
+    IMAGE = [ FileExt.PNG ]
+    AUDIO = [ FileExt.MP3, FileExt.WAV, FileExt.OGG ]
+
 class Helpers():
     def data_path():
         #if exe, locate temp directory

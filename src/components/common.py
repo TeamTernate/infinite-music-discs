@@ -11,7 +11,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 
-from src.definitions import Assets, Constants, ButtonType, Helpers, FileExt, StyleProperties
+from src.definitions import Assets, Constants, ButtonType, Helpers, FileExt, SupportedFormats, StyleProperties
 
 
 
@@ -179,7 +179,7 @@ class QDragDropLineEdit(QDragDropMixin, QRepolishMixin, QtWidgets.QLineEdit, QSe
             return list(line.replace('\n', '') for line in uf)
 
     def supportsFileType(self, ext: FileExt) -> bool:
-        return ( ext in [ FileExt.TXT ] )
+        return ( ext in SupportedFormats.TEXT )
 
 
 
@@ -246,10 +246,10 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
     }
 
     SupportedFiletypesDict = {
-        ButtonType.IMAGE:       [ FileExt.PNG ],
-        ButtonType.PACKPNG:     [ FileExt.PNG ],
-        ButtonType.TRACK:       [ FileExt.MP3, FileExt.WAV, FileExt.OGG ],
-        ButtonType.NEW_TRACK:   [ FileExt.MP3, FileExt.WAV, FileExt.OGG ]
+        ButtonType.IMAGE:       SupportedFormats.IMAGE,
+        ButtonType.PACKPNG:     SupportedFormats.IMAGE,
+        ButtonType.TRACK:       SupportedFormats.AUDIO,
+        ButtonType.NEW_TRACK:   SupportedFormats.AUDIO
     }
 
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
@@ -303,7 +303,7 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
     def setImage(self, file: str):
         f = QtCore.QFileInfo(file).suffix()
 
-        if(f == FileExt.PNG):
+        if f in SupportedFormats.IMAGE:
             imgPath = self._file
         else:
             defaultIcon = self.DefaultIconDict.get(self._type, '')

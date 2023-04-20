@@ -8,7 +8,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 
-from src.definitions import Assets, Constants, ButtonType, FileExt, Helpers, StyleProperties, DiscListEntryContents, DiscListContents
+from src.definitions import Assets, Constants, ButtonType, SupportedFormats, Helpers, StyleProperties, DiscListEntryContents, DiscListContents
 from src.components.common import QSetsNameFromType, QFocusLineEdit, DragDropButton, MultiDragDropButton
 
 
@@ -448,7 +448,7 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
         for file in fTrackList:
             f = QtCore.QFileInfo(file).suffix()
 
-            if f == FileExt.PNG:
+            if f in SupportedFormats.IMAGE:
                 entry_contents = DiscListEntryContents(texture_file=file)
             else:
                 entry_contents = DiscListEntryContents(track_file=file)
