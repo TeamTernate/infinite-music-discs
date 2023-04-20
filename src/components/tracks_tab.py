@@ -2,6 +2,7 @@
 #
 #Infinite Music Discs tracks-tab-specific GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
+from typing import List
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -16,7 +17,7 @@ from src.components.common import QSetsNameFromType, QFocusLineEdit, DragDropBut
 #child of QLabel with size hint specified
 #prevents tracks with long subtitles from exceeding window width
 class QSubtitleLabel(QtWidgets.QLabel):
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
         return QSize(10, 10)
 
 
@@ -26,7 +27,7 @@ class DeleteButton(QtWidgets.QPushButton, QSetsNameFromType):
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
         return QSize(25, 25)
 
     def clearHoverState(self):
@@ -67,20 +68,20 @@ class ArrowButton(QtWidgets.QPushButton, QSetsNameFromType):
 
         self.setLayout(layout)
 
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
         return QSize(25, 25)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         event.accept()
 
         index = self._parent.getIndex()
         self.pressed.emit(index)
 
-    def setImage(self, btnType, disabled):
+    def setImage(self, btnType: ButtonType, disabled: bool):
         img = self.ImageFromButtonTypeDict[ (btnType, disabled) ]
         self._img.setPixmap(QtGui.QPixmap(img))
 
-    def setDisabled(self, disabled):
+    def setDisabled(self, disabled: bool):
         super().setDisabled(disabled)
         self.setImage(self._type, disabled)
 
@@ -104,7 +105,7 @@ class NewDiscButton(DragDropButton, QSetsNameFromType):
 
         self.setLayout(layout)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         super().mousePressEvent(event)
 
         #new disc button only accepts music files on click
@@ -119,18 +120,18 @@ class NewDiscButton(DragDropButton, QSetsNameFromType):
         #return file list directly, signal is of type list
         self.fileChanged.emit( f[0] )
 
-    def dragEnterEvent(self, event):
+    def dragEnterEvent(self, event: QtGui.QDragEnterEvent):
         super().dragEnterEvent(event)
         if not event.isAccepted():
             return
 
         self.highlightStyling()
 
-    def dragLeaveEvent(self, event):
+    def dragLeaveEvent(self, event: QtGui.QDragLeaveEvent):
         super().dragLeaveEvent(event)
         self.resetStyling()
 
-    def dropEvent(self, event):
+    def dropEvent(self, event: QtGui.QDropEvent):
         super().dropEvent(event)
         if not event.isAccepted():
             return
@@ -162,10 +163,10 @@ class VirtualDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):
         sizePolicy.setHeightForWidth(True)
         self.setSizePolicy(sizePolicy)
 
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
         return QSize(350, 87)
 
-    def heightForWidth(self, width):
+    def heightForWidth(self, width: int) -> int:
         return width * 0.375
 
 
@@ -273,11 +274,11 @@ class DiscListEntry(VirtualDiscListEntry):
         self._btnUpArrow.setObjectName('ArrowUp')
         self._btnDownArrow.setObjectName('ArrowDown')
 
-    def leaveEvent(self, event):
+    def leaveEvent(self, event: QtCore.QEvent):
         super().leaveEvent(event)
         self._btnDelete.clearHoverState()
 
-    def listReorderEvent(self, count):
+    def listReorderEvent(self, count: int):
         index = self.getIndex()
         self._btnUpArrow.setDisabled( index <= 0 )
         self._btnDownArrow.setDisabled( index >= count-1 )
@@ -285,26 +286,26 @@ class DiscListEntry(VirtualDiscListEntry):
     def deleteSelf(self):
         self._parent.removeDiscEntry(self.getIndex())
 
-    def getIndex(self):
+    def getIndex(self) -> int:
         return self._parent.getDiscEntryIndex(self)
 
-    def getEntry(self):
+    def getEntry(self) -> DiscListEntryContents:
         return DiscListEntryContents(texture_file   = self._btnIcon.getFile(),
                                      track_file     = self._btnTrack.getFile(),
                                      title          = self._leTitle.text(),
                                      internal_name  = self._lblIName.text())
 
-    def setEntry(self, entry_contents):
+    def setEntry(self, entry_contents: DiscListEntryContents):
         self._btnIcon.setFile(entry_contents.texture_file)
         self._btnTrack.setFile(entry_contents.track_file)
 
         self.setTitle([ entry_contents.track_file ])
 
-    def setTitle(self, fFileList):
+    def setTitle(self, fFileList: List[str]):
         title = QtCore.QFileInfo(fFileList[0]).completeBaseName()
         self._leTitle.setText(title)
 
-    def setSubtitle(self, title):
+    def setSubtitle(self, title: str):
         self._lblIName.setText( Helpers.to_internal_name(title) )
 
 
@@ -384,7 +385,7 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
         widget.setObjectName('DiscListChildWidget')
         scrollArea.setObjectName('DiscListScrollArea')
 
-    def discMoveUpEvent(self, index):
+    def discMoveUpEvent(self, index: int):
         if(index == 0):
             pass
         
@@ -396,7 +397,7 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
         #trigger reorder event
         self.reordered.emit(self.getNumDiscEntries())
 
-    def discMoveDownEvent(self, index):
+    def discMoveDownEvent(self, index: int):
         if(index == self.getNumDiscEntries()):
             pass
 
@@ -409,7 +410,7 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
         self.reordered.emit(self.getNumDiscEntries())
 
     #get all stored track data
-    def getDiscEntries(self):
+    def getDiscEntries(self) -> DiscListContents:
         entry_list = DiscListContents()
 
         for i in range(self._childLayout.count()):
@@ -420,14 +421,15 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
 
         return entry_list
 
-    def getNumDiscEntries(self):
+    def getNumDiscEntries(self) -> int:
+        #layout has DiscListEntries + stretch + NewDiscEntry
         return self._childLayout.count()-2
-    
-    def getDiscEntryIndex(self, entry):
+
+    def getDiscEntryIndex(self, entry: DiscListEntry) -> int:
         return self._childLayout.indexOf(entry)
 
     #insert a new track object into the list of tracks
-    def addDiscEntry(self, entry_contents):
+    def addDiscEntry(self, entry_contents: DiscListEntryContents):
         #add new entry
         tmpEntry = DiscListEntry(self)
         tmpEntry.setEntry(entry_contents)
@@ -444,7 +446,7 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
         self.reordered.emit(self.getNumDiscEntries())
 
     #add multiple track objects to the list of tracks
-    def addDiscEntries(self, fTrackList):
+    def addDiscEntries(self, fTrackList: List[str]):
         for file in fTrackList:
             f = QtCore.QFileInfo(file).suffix()
 
@@ -456,7 +458,7 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
             self.addDiscEntry(entry_contents)
 
     #add remaining track objects after a multi drag-drop 
-    def addExcessEntries(self, initIndex, fTrackList):
+    def addExcessEntries(self, initIndex: int, fTrackList: List[str]):
         numTracks = len(fTrackList)
         numEntries = self.getNumDiscEntries()
         
@@ -466,7 +468,7 @@ class DiscList(QtWidgets.QWidget, QSetsNameFromType):
         if(remainingTracks > 0):
             self.addDiscEntries(fTrackList[remainingIndex:])
 
-    def removeDiscEntry(self, index):
+    def removeDiscEntry(self, index: int):
         w = self._childLayout.itemAt(index).widget()
         self._childLayout.removeWidget(w)
         w.deleteLater()
