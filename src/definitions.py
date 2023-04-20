@@ -105,7 +105,7 @@ class SupportedFormats():
     AUDIO = [ FileExt.MP3, FileExt.WAV, FileExt.OGG ]
 
 class Helpers():
-    def data_path():
+    def data_path() -> str:
         #if exe, locate temp directory
         try:
             #PyQt uses '/' separator, regardless of operating system
@@ -121,7 +121,7 @@ class Helpers():
     def atoi(text: str):
         return int(text) if text.isdigit() else text
 
-    def to_internal_name(title: str):
+    def to_internal_name(title: str) -> str:
         ascii_title = unidecode.unidecode(title)                                            #transliterate unicode letters to ascii
         numname_title = ''.join([ DigitNameDict.get(i, i) for i in ascii_title.lower() ])   #convert upper to lower-case, convert numbers to words
         internal_name = ''.join([ i for i in numname_title if i.isalpha() ])                #strip non-alphabetic characters
