@@ -10,8 +10,6 @@
 
 #TODO: add ffmpeg speed <-> quality double-sided slider?
 
-#TODO: consider type-annotating all functions, to clarify in/out types
-
 #TODO: can you generate disc textures automatically using armor trims?
 
 #TODO: rename mix_mono setting to something useful also default it to on
