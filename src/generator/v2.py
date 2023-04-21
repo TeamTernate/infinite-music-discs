@@ -10,7 +10,7 @@ import json
 import shutil
 import zipfile
 
-from src.definitions import Constants, Status, DiscListContents
+from src.definitions import Constants, Helpers, Status, DiscListContents
 from src.commands import ReplaceItemCommand, ItemSlot
 
 from src.generator.base import VirtualGenerator
@@ -50,7 +50,12 @@ class GeneratorV2(VirtualGenerator):
             self.write_help_func()
             self.write_funcs_to_register_jukebox(datapack_name)
 
+
+            os.chdir(base_dir)
             self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
+            os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
+
+
             self.write_player_tick_funcs(datapack_name)
             self.write_funcs_entry_per_disc(entry_list, datapack_name, pack_format, offset)
 
@@ -294,8 +299,9 @@ class GeneratorV2(VirtualGenerator):
     # not all functions run every tick; some are simply called by
     #    functions that run every tick
     def write_jukebox_tick_funcs(self, base_dir: str, datapack_name: str, locals: dict):
+        ref_base = os.path.abspath(Helpers.data_path())
 
-        ref_dir = os.path.join(base_dir, 'reference', 'data', 'reference', 'functions')
+        ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
         dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'jukebox_event_tick.mcfunction'
