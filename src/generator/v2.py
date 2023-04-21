@@ -31,6 +31,7 @@ class GeneratorV2(VirtualGenerator):
         dp_version_str = f'v{self._version_major}.{self._version_minor}'
 
         #capture base dir
+        #TODO: use Helpers to be exe compatible
         base_dir = os.getcwd()
 
         #write datapack
@@ -48,7 +49,8 @@ class GeneratorV2(VirtualGenerator):
             self.write_global_funcs(datapack_name, dp_version_str)
             self.write_help_func()
             self.write_funcs_to_register_jukebox(datapack_name)
-            self.write_jukebox_tick_funcs(datapack_name)
+
+            self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
             self.write_player_tick_funcs(datapack_name)
             self.write_funcs_entry_per_disc(entry_list, datapack_name, pack_format, offset)
 
@@ -291,87 +293,58 @@ class GeneratorV2(VirtualGenerator):
     # generate jukebox related every-tick functions
     # not all functions run every tick; some are simply called by
     #    functions that run every tick
-    def write_jukebox_tick_funcs(self, datapack_name: str):
+    def write_jukebox_tick_funcs(self, base_dir: str, datapack_name: str, locals: dict):
+
+        ref_dir = os.path.join(base_dir, 'reference', 'data', 'reference', 'functions')
+        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'jukebox_event_tick.mcfunction'
-        with open('jukebox_event_tick.mcfunction', 'w', encoding='utf-8') as jb_event_tick:
-            jb_event_tick.writelines([
-                f'execute as @e[type=marker,tag=imd_jukebox_marker] at @s unless block ~ ~ ~ minecraft:jukebox run function {datapack_name}:destroy_jukebox_marker\n',
-                f'execute as @e[type=marker,tag=imd_jukebox_marker] at @s if block ~ ~ ~ minecraft:jukebox run function {datapack_name}:jukebox_check_playing\n',
-                f'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run function {datapack_name}:jukebox_tick_timers\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_event_tick.mcfunction'),
+                           os.path.join(dst_dir, 'jukebox_event_tick.mcfunction'),
+                           locals)
 
         #write 'destroy_jukebox_marker.mcfunction'
-        with open('destroy_jukebox_marker.mcfunction', 'w', encoding='utf-8') as destroy_jb_marker:
-            destroy_jb_marker.writelines([
-                f'function {datapack_name}:stop\n',
-                'kill @s\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'destroy_jukebox_marker.mcfunction'),
+                           os.path.join(dst_dir, 'destroy_jukebox_marker.mcfunction'),
+                           locals)
 
         #write 'jukebox_tick_timers.mcfunction'
-        with open('jukebox_tick_timers.mcfunction', 'w', encoding='utf-8') as jb_tick_timers:
-            jb_tick_timers.writelines([
-                'execute as @s[scores={imd_play_time=1..}] run scoreboard players remove @s imd_play_time 1\n',
-                'execute as @s[scores={imd_stop_11_time=1..}] run scoreboard players remove @s imd_stop_11_time 1\n',
-                'execute as @s[scores={imd_play_time=0}] run data merge block ~ ~ ~ {RecordStartTick:-999999L}\n',
-                f'execute as @s[scores={{imd_stop_11_time=0}},tag=!imd_stopped_11] run function {datapack_name}:stop_11\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_tick_timers.mcfunction'),
+                           os.path.join(dst_dir, 'jukebox_tick_timers.mcfunction'),
+                           locals)
 
         #TODO: in multiplayer is marker tagged multiple times, once per player?
         #write 'stop_11.mcfunction'
-        with open('stop_11.mcfunction', 'w', encoding='utf-8') as stop_11:
-            stop_11.writelines([
-                'execute store result score @s imd_player_id run data get entity @s data.Listeners_11[0]\n',
-                'data remove entity @s data.Listeners_11[0]\n',
-                'execute as @a if score @s imd_player_id = @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_player_id run stopsound @s record minecraft:music_disc.11\n',
-                f'execute if data entity @s data.Listeners_11[0] run function {datapack_name}:stop_11\n',
-                'execute unless data entity @s data.Listeners_11[0] run tag @s add imd_stopped_11\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'stop_11.mcfunction'),
+                           os.path.join(dst_dir, 'stop_11.mcfunction'),
+                           locals)
 
         #write 'jukebox_check_playing.mcfunction'
-        with open('jukebox_check_playing.mcfunction', 'w', encoding='utf-8') as jb_check_playing:
-            jb_check_playing.writelines([
-                f'execute as @s[tag=!imd_is_playing] if block ~ ~ ~ minecraft:jukebox{{IsPlaying:1b}} run function {datapack_name}:jukebox_on_play\n',
-                f'execute as @s[tag=imd_is_playing] unless block ~ ~ ~ minecraft:jukebox{{IsPlaying:1b}} run function {datapack_name}:jukebox_on_stop\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_check_playing.mcfunction'),
+                           os.path.join(dst_dir, 'jukebox_check_playing.mcfunction'),
+                           locals)
 
         #TODO: technically should check if custommodeldata is within acceptable range
         #write 'jukebox_on_play.mcfunction'
-        with open('jukebox_on_play.mcfunction', 'w', encoding='utf-8') as jb_on_play:
-            jb_on_play.writelines([
-                'tag @s add imd_is_playing\n',
-                'execute if data block ~ ~ ~ RecordItem.tag.CustomModelData run tag @s add imd_has_custom_disc\n',
-                f'execute as @s[tag=imd_has_custom_disc] run function {datapack_name}:pre_play\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_on_play.mcfunction'),
+                           os.path.join(dst_dir, 'jukebox_on_play.mcfunction'),
+                           locals)
 
         #write 'pre_play.mcfunction'
-        with open('pre_play.mcfunction', 'w', encoding='utf-8') as pre_play:
-            pre_play.writelines([
-                'execute store result score @s imd_disc_id run data get block ~ ~ ~ RecordItem.tag.CustomModelData\n',
-                f'function {datapack_name}:play_duration\n',
-                'scoreboard players set @s imd_stop_11_time 2\n',
-                f'function {datapack_name}:watchdog_reset_tickcount\n',
-                f'execute as @a[distance=..64] run function {datapack_name}:register_jukebox_listener\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'pre_play.mcfunction'),
+                           os.path.join(dst_dir, 'pre_play.mcfunction'),
+                           locals)
 
         #write 'register_jukebox_listener.mcfunction'
         #TODO: 2 lists is sloppy, try to optimize
-        with open('register_jukebox_listener.mcfunction', 'w', encoding='utf-8') as reg_jukebox_listener:
-            reg_jukebox_listener.writelines([
-                f'execute store result storage {datapack_name}:global tmp.Player int 1.0 run scoreboard players get @s imd_player_id\n',
-                f'data modify entity @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] data.Listeners append from storage {datapack_name}:global tmp.Player\n',
-                f'data modify entity @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] data.Listeners_11 append from storage {datapack_name}:global tmp.Player\n',
-                f'function {datapack_name}:play\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'register_jukebox_listener.mcfunction'),
+                           os.path.join(dst_dir, 'register_jukebox_listener.mcfunction'),
+                           locals)
 
         #write 'jukebox_on_stop.mcfunction'
-        with open('jukebox_on_stop.mcfunction', 'w', encoding='utf-8') as jb_on_stop:
-            jb_on_stop.writelines([
-                'tag @s remove imd_is_playing\n',
-                'tag @s remove imd_has_custom_disc\n',
-                'tag @s remove imd_stopped_11\n',
-                f'function {datapack_name}:stop\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_on_stop.mcfunction'),
+                           os.path.join(dst_dir, 'jukebox_on_stop.mcfunction'),
+                           locals)
 
     # generate player related every-tick functions
     def write_player_tick_funcs(self, datapack_name: str):
@@ -671,5 +644,17 @@ class GeneratorV2(VirtualGenerator):
             return Status.BAD_ZIP
         
         return Status.SUCCESS
+
+    def copy_with_fmt(self, f_src: str, f_dst: str, fmt_dict):
+        with open(f_src, 'r', encoding='utf-8') as src:
+            with open(f_dst, 'w', encoding='utf-8') as dst:
+                for line in src.readlines():
+                    #line_fmt = line.replace('{', '{{')
+                    #line_fmt = line_fmt.replace('}', '}}')
+                    #line_fmt = line_fmt.replace('%(', '{')
+                    #line_fmt = line_fmt.replace(')%', '}')
+
+                    line_fmt = line.format(**fmt_dict)
+                    dst.write(line_fmt)
 
 

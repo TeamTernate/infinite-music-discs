@@ -16,6 +16,8 @@
 
 #TODO: move generator v2 files to a reference directory instead of hardcoded
 
+#TODO: look for mcmeta before rmtree - might be another folder with contents
+
 import sys
 import ctypes
 import platform
