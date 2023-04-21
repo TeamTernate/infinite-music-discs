@@ -45,12 +45,9 @@ class GeneratorV2(VirtualGenerator):
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'advancements'))
             self.write_advancements(datapack_name)
 
-            os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
-            self.write_global_funcs(datapack_name, dp_version_str)
-            self.write_help_func()
-
 
             os.chdir(base_dir)
+            self.write_global_funcs(base_dir, datapack_name, locals())
             self.write_funcs_to_register_jukebox(base_dir, datapack_name, locals())
             self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
@@ -175,80 +172,28 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
     # generate global functions
-    def write_global_funcs(self, datapack_name: str, dp_version_str: str):
+    def write_global_funcs(self, base_dir: str, datapack_name: str, locals: dict):
+
+        ref_base = os.path.abspath(Helpers.data_path())
+
+        ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
+        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'setup_load.mcfunction'
-        with open('setup_load.mcfunction', 'w', encoding='utf-8') as setup_load:
-            setup_load.writelines([
-                'scoreboard objectives add imd_player_id dummy\n',
-                'scoreboard objectives add imd_disc_id dummy\n',
-                'scoreboard objectives add imd_rc_steps dummy\n',
-                'scoreboard objectives add imd_play_time dummy\n',
-                'scoreboard objectives add imd_stop_11_time dummy\n',
-                '\n',
-                f'advancement revoke @a only {datapack_name}:placed_disc\n',
-                f'advancement revoke @a only {datapack_name}:placed_jukebox\n',
-                f'tellraw @a {{"text":"Infinite Music Discs {dp_version_str} by link2_thepast","color":"gold"}}\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'setup_load.mcfunction'),
+                           os.path.join(dst_dir, 'setup_load.mcfunction'),
+                           locals)
 
         #write 'watchdog_reset_tickcount.mcfunction'
-        with open('watchdog_reset_tickcount.mcfunction', 'w', encoding='utf-8') as wd_reset_tickcount:
-            wd_reset_tickcount.writelines([
-                'execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_custom_disc] at @s run data merge block ~ ~ ~ {TickCount:0L}\n',
-                f'schedule function {datapack_name}:watchdog_reset_tickcount 10s replace\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'watchdog_reset_tickcount.mcfunction'),
+                           os.path.join(dst_dir, 'watchdog_reset_tickcount.mcfunction'),
+                           locals)
 
-    #generate help function to explain the datapack
-    #TODO: write contents in a file and read in
-    #   help function should be referenced when /reload ing the datapack
-    def write_help_func(self):
-        with open('help.mcfunction', 'w', encoding='utf-8') as help:
-            help.writelines([
-                'tellraw @s [{"text":"\\nInfinite Music Discs Help", "color":"yellow", "bold":"true"}]\n',
-
-                ('tellraw @s [{"text":"\\n[", "color":"gold"}, '
-                 '{"text":"?", "color":"green", "bold":"true"}, '
-                 '{"text":"] A datapack & resourcepack that work together to add new music discs to Minecraft. Use ", "color":"gold"}, '
-                 '{"text":"the desktop app", "clickEvent":{"action":"open_url", "value":"https://github.com/TeamTernate/infinite-music-discs"}, "color":"aqua", "underlined":"true"}, '
-                 '{"text":" to generate your own packs and add your own music. Follow the project on ", "color":"gold"}, '
-                 '{"text":"CurseForge", "clickEvent":{"action":"open_url", "value":"https://www.curseforge.com/minecraft/customization/infinite-music-discs"}, "color":"aqua", "underlined":"true"}, '
-                 '{"text":" for update notifications!", "color":"gold"}]\n'),
-
-                ('tellraw @s [{"text":"\\n[", "color":"gold"}, '
-                 '{"text":"!", "color":"red", "bold":"true"}, '
-                 '{"text":"]", "color":"gold"}, '
-                 '{"text":" Install both the datapack and resourcepack or Infinite Music Discs will not work! The datapack goes in your world\'s datapack folder, and the resourcepack goes in your resourcepacks folder.", "color":"red"}]\n'),
-
-                ('tellraw @s [{"text":"\\n[", "color":"gold"}, '
-                 '{"text":"i", "color":"aqua", "bold":"true"}, '
-                 '{"text":"] To obtain custom discs in survival, get a skeleton to kill a creeper. The creeper will drop a music disc, and there\'s a chance it will be one of your custom music discs. '
-                 'All discs (including the vanilla discs) have an equal chance to drop. The more discs your pack adds, the harder it will be to get any particular disc. You might consider building a music disc farm.", "color":"gold"}]\n'),
-
-                ('tellraw @s [{"text":"\\n[", "color":"gold"}, '
-                 '{"text":"i", "color":"aqua", "bold":"true"}, '
-                 '{"text":"] Give yourself discs in creative with these commands:", "color":"gold"}]\n'),
-
-                ('tellraw @s [{"text":" - ", "color":"gold"}, '
-                 '{"text":"/function infinite_music_discs_dp:give_all_discs", "color":"yellow"}]\n'),
-
-                ('tellraw @s [{"text":" - ", "color":"gold"}, '
-                 '{"text":"/function infinite_music_discs_dp:give_<disc name>", "color":"yellow"}]\n'),
-
-                ('tellraw @s [{"text":"\\n[", "color":"gold"}, '
-                 '{"text":"i", "color":"aqua", "bold":"true"}, '
-                 '{"text":"] Hoppers and droppers can play custom music discs just like vanilla discs. If discs are not playing, try breaking and replacing the jukebox.", "color":"gold"}]\n'),
-
-                ('tellraw @s [{"text":"\\n[", "color":"gold"}, '
-                 '{"text":"i", "color":"aqua", "bold":"true"}, '
-                 '{"text":"] Is your music playing \'inside your head\' instead of from the jukebox? Try checking the \\"Mix stereo tracks to mono\\" setting when you generate your pack. '
-                 'Most music is stereo, and Minecraft plays stereo sounds globally instead of attaching them to a spot in the world.", "color":"gold"}]\n'),
-
-                ('tellraw @s [{"text":"\\n[", "color":"gold"}, '
-                 '{"text":"i", "color":"aqua", "bold":"true"}, '
-                 '{"text":"] Still having problems? Use ", "color":"gold"}, '
-                 '{"text":"the issue tracker", "clickEvent":{"action":"open_url", "value":"https://github.com/TeamTernate/infinite-music-discs/issues"}, "color":"aqua", "underlined":"true"}, '
-                 '{"text":" to report bugs or ask for help.", "color":"gold"}]\n')
-            ])
+        #write 'help.mcfunction'
+        #users can run help function to see an FAQ + links to help resources
+        self.copy_with_fmt(os.path.join(ref_dir, 'help.mcfunction'),
+                           os.path.join(dst_dir, 'help.mcfunction'),
+                           locals)
 
     # generate 'jukebox registration' functions
     # every jukebox must be registered with the datapack to detect
@@ -294,6 +239,7 @@ class GeneratorV2(VirtualGenerator):
     # not all functions run every tick; some are simply called by
     #    functions that run every tick
     def write_jukebox_tick_funcs(self, base_dir: str, datapack_name: str, locals: dict):
+
         ref_base = os.path.abspath(Helpers.data_path())
 
         ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
