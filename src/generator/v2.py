@@ -48,10 +48,10 @@ class GeneratorV2(VirtualGenerator):
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
             self.write_global_funcs(datapack_name, dp_version_str)
             self.write_help_func()
-            self.write_funcs_to_register_jukebox(datapack_name)
 
 
             os.chdir(base_dir)
+            self.write_funcs_to_register_jukebox(base_dir, datapack_name, locals())
             self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
 
@@ -253,47 +253,42 @@ class GeneratorV2(VirtualGenerator):
     # generate 'jukebox registration' functions
     # every jukebox must be registered with the datapack to detect
     #    discs inserted/removed with hoppers
-    def write_funcs_to_register_jukebox(self, datapack_name: str):
+    def write_funcs_to_register_jukebox(self, base_dir: str, datapack_name: str, locals: dict):
+
+        ref_base = os.path.abspath(Helpers.data_path())
+
+        ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
+        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'on_placed_disc.mcfunction'
-        with open('on_placed_disc.mcfunction', 'w', encoding='utf-8') as on_placed_disc:
-            on_placed_disc.writelines([
-                f'advancement revoke @s only {datapack_name}:placed_disc\n',
-                f'execute as @s run function {datapack_name}:raycast_start\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'on_placed_disc.mcfunction'),
+                           os.path.join(dst_dir, 'on_placed_disc.mcfunction'),
+                           locals)
 
         #write 'on_placed_jukebox.mcfunction'
-        with open('on_placed_jukebox.mcfunction', 'w', encoding='utf-8') as on_placed_jukebox:
-            on_placed_jukebox.writelines([
-                f'advancement revoke @s only {datapack_name}:placed_jukebox\n',
-                f'execute as @s run function {datapack_name}:raycast_start\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'on_placed_jukebox.mcfunction'),
+                           os.path.join(dst_dir, 'on_placed_jukebox.mcfunction'),
+                           locals)
 
         #write 'raycast_start.mcfunction'
-        with open('raycast_start.mcfunction', 'w', encoding='utf-8') as rc_start:
-            rc_start.writelines([
-                'scoreboard players set @s imd_rc_steps 1000\n',
-                f'execute at @s anchored eyes positioned ^ ^ ^ run function {datapack_name}:raycast_step\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'raycast_start.mcfunction'),
+                           os.path.join(dst_dir, 'raycast_start.mcfunction'),
+                           locals)
 
         #write 'raycast_step.mcfunction'
-        with open('raycast_step.mcfunction', 'w', encoding='utf-8') as rc_step:
-            rc_step.writelines([
-                f'execute if block ~ ~ ~ minecraft:jukebox run function {datapack_name}:raycast_hit\n',
-                'scoreboard players remove @s imd_rc_steps 1\n',
-                f'execute if score @s imd_rc_steps matches 1.. positioned ^ ^ ^0.005 run function {datapack_name}:raycast_step\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'raycast_step.mcfunction'),
+                           os.path.join(dst_dir, 'raycast_step.mcfunction'),
+                           locals)
 
         #write 'raycast_hit.mcfunction'
-        with open('raycast_hit.mcfunction', 'w', encoding='utf-8') as rc_hit:
-            rc_hit.writelines([
-                'scoreboard players set @s imd_rc_steps 1\n',
-                f'execute align xyz positioned ~0.5 ~0.5 ~0.5 unless entity @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] run function {datapack_name}:register_jukebox_marker\n'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'raycast_hit.mcfunction'),
+                           os.path.join(dst_dir, 'raycast_hit.mcfunction'),
+                           locals)
 
         #write 'register_jukebox_marker.mcfunction'
-        with open('register_jukebox_marker.mcfunction', 'w', encoding='utf-8') as reg_jukebox_marker:
-            reg_jukebox_marker.write('summon marker ~ ~ ~ {Tags:["imd_jukebox_marker"]}\n')
+        self.copy_with_fmt(os.path.join(ref_dir, 'register_jukebox_marker.mcfunction'),
+                           os.path.join(dst_dir, 'register_jukebox_marker.mcfunction'),
+                           locals)
 
     # generate jukebox related every-tick functions
     # not all functions run every tick; some are simply called by
