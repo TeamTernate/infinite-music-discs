@@ -28,10 +28,10 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
+        #used to format setup_load.mcfunction
         dp_version_str = f'v{self._version_major}.{self._version_minor}'
 
         #capture base dir
-        #TODO: use Helpers to be exe compatible
         base_dir = os.getcwd()
 
         #write datapack
@@ -50,10 +50,10 @@ class GeneratorV2(VirtualGenerator):
             self.write_global_funcs(base_dir, datapack_name, locals())
             self.write_funcs_to_register_jukebox(base_dir, datapack_name, locals())
             self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
+            self.write_player_tick_funcs(base_dir, datapack_name, locals())
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
 
 
-            self.write_player_tick_funcs(datapack_name)
             self.write_funcs_entry_per_disc(entry_list, datapack_name, pack_format, offset)
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
@@ -294,19 +294,23 @@ class GeneratorV2(VirtualGenerator):
                            locals)
 
     # generate player related every-tick functions
-    def write_player_tick_funcs(self, datapack_name: str):
+    def write_player_tick_funcs(self, base_dir: str, datapack_name: str, locals: dict):
+
+        ref_base = os.path.abspath(Helpers.data_path())
+
+        ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
+        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'register_players_tick.mcfunction'
-        with open('register_players_tick.mcfunction', 'w', encoding='utf-8') as reg_players_tick:
-            reg_players_tick.write(f'execute as @a[tag=!imd_has_id] run function {datapack_name}:register_player\n')
+        self.copy_with_fmt(os.path.join(ref_dir, 'register_players_tick.mcfunction'),
+                           os.path.join(dst_dir, 'register_players_tick.mcfunction'),
+                           locals)
 
         #TODO: different global id per-datapack?
         #write 'register_player.mcfunction'
-        with open('register_player.mcfunction', 'w', encoding='utf-8') as reg_player:
-            reg_player.writelines([
-                'execute store result score @s imd_player_id run scoreboard players add #imd_id_global imd_player_id 1\n',
-                'tag @s[scores={imd_player_id=1..}] add imd_has_id'
-            ])
+        self.copy_with_fmt(os.path.join(ref_dir, 'register_player.mcfunction'),
+                           os.path.join(dst_dir, 'register_player.mcfunction'),
+                           locals)
 
     # generate files with lines for every disc
     # used to select which disc-specific function to run
