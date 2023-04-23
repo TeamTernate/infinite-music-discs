@@ -440,10 +440,10 @@ class GeneratorV2(VirtualGenerator):
                                locals())
 
             #write 'give_*_disc.mcfunction' files
-            j = i + offset + 1
-
-            with open(os.path.join(dst_dir, f'give_{entry.internal_name}.mcfunction'), 'w', encoding='utf-8') as give:
-                give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, entry.title))
+            entry_index = i + offset + 1
+            self.copy_with_fmt(os.path.join(ref_dir, 'give_disc.mcfunction'),
+                               os.path.join(dst_dir, f'give_{entry.internal_name}.mcfunction'),
+                               locals())
 
 
 
