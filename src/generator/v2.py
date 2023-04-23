@@ -184,18 +184,18 @@ class GeneratorV2(VirtualGenerator):
         dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'setup_load.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'setup_load.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'setup_load.mcfunction'),
                            os.path.join(dst_dir, 'setup_load.mcfunction'),
                            locals())
 
         #write 'watchdog_reset_tickcount.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'watchdog_reset_tickcount.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'watchdog_reset_tickcount.mcfunction'),
                            os.path.join(dst_dir, 'watchdog_reset_tickcount.mcfunction'),
                            locals())
 
         #write 'help.mcfunction'
         #users can run help function to see an FAQ + links to help resources
-        self.copy_with_fmt(os.path.join(ref_dir, 'help.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'help.mcfunction'),
                            os.path.join(dst_dir, 'help.mcfunction'),
                            locals())
 
@@ -211,32 +211,32 @@ class GeneratorV2(VirtualGenerator):
         dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'on_placed_disc.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'on_placed_disc.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'on_placed_disc.mcfunction'),
                            os.path.join(dst_dir, 'on_placed_disc.mcfunction'),
                            locals())
 
         #write 'on_placed_jukebox.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'on_placed_jukebox.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'on_placed_jukebox.mcfunction'),
                            os.path.join(dst_dir, 'on_placed_jukebox.mcfunction'),
                            locals())
 
         #write 'raycast_start.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'raycast_start.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'raycast_start.mcfunction'),
                            os.path.join(dst_dir, 'raycast_start.mcfunction'),
                            locals())
 
         #write 'raycast_step.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'raycast_step.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'raycast_step.mcfunction'),
                            os.path.join(dst_dir, 'raycast_step.mcfunction'),
                            locals())
 
         #write 'raycast_hit.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'raycast_hit.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'raycast_hit.mcfunction'),
                            os.path.join(dst_dir, 'raycast_hit.mcfunction'),
                            locals())
 
         #write 'register_jukebox_marker.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'register_jukebox_marker.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'register_jukebox_marker.mcfunction'),
                            os.path.join(dst_dir, 'register_jukebox_marker.mcfunction'),
                            locals())
 
@@ -252,50 +252,50 @@ class GeneratorV2(VirtualGenerator):
         dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'jukebox_event_tick.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_event_tick.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'jukebox_event_tick.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_event_tick.mcfunction'),
                            locals())
 
         #write 'destroy_jukebox_marker.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'destroy_jukebox_marker.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'destroy_jukebox_marker.mcfunction'),
                            os.path.join(dst_dir, 'destroy_jukebox_marker.mcfunction'),
                            locals())
 
         #write 'jukebox_tick_timers.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_tick_timers.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'jukebox_tick_timers.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_tick_timers.mcfunction'),
                            locals())
 
         #TODO: in multiplayer is marker tagged multiple times, once per player?
         #write 'stop_11.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'stop_11.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'stop_11.mcfunction'),
                            os.path.join(dst_dir, 'stop_11.mcfunction'),
                            locals())
 
         #write 'jukebox_check_playing.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_check_playing.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'jukebox_check_playing.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_check_playing.mcfunction'),
                            locals())
 
         #TODO: technically should check if custommodeldata is within acceptable range
         #write 'jukebox_on_play.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_on_play.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'jukebox_on_play.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_on_play.mcfunction'),
                            locals())
 
         #write 'pre_play.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'pre_play.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'pre_play.mcfunction'),
                            os.path.join(dst_dir, 'pre_play.mcfunction'),
                            locals())
 
         #write 'register_jukebox_listener.mcfunction'
         #TODO: 2 lists is sloppy, try to optimize
-        self.copy_with_fmt(os.path.join(ref_dir, 'register_jukebox_listener.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'register_jukebox_listener.mcfunction'),
                            os.path.join(dst_dir, 'register_jukebox_listener.mcfunction'),
                            locals())
 
         #write 'jukebox_on_stop.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_on_stop.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'jukebox_on_stop.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_on_stop.mcfunction'),
                            locals())
 
@@ -309,13 +309,13 @@ class GeneratorV2(VirtualGenerator):
         dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'register_players_tick.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'register_players_tick.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'register_players_tick.mcfunction'),
                            os.path.join(dst_dir, 'register_players_tick.mcfunction'),
                            locals())
 
         #TODO: different global id per-datapack?
         #write 'register_player.mcfunction'
-        self.copy_with_fmt(os.path.join(ref_dir, 'register_player.mcfunction'),
+        self.copy_func_with_fmt(os.path.join(ref_dir, 'register_player.mcfunction'),
                            os.path.join(dst_dir, 'register_player.mcfunction'),
                            locals())
 
@@ -330,19 +330,19 @@ class GeneratorV2(VirtualGenerator):
         dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'play.mcfunction'
-        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'play.mcfunction'),
+        self.copy_lines_to_func_with_fmt(os.path.join(ref_dir, 'play.mcfunction'),
                                       os.path.join(dst_dir, 'play.mcfunction'),
                                       entry_list,
                                       locals())
 
         #write 'play_duration.mcfunction'
-        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'play_duration.mcfunction'),
+        self.copy_lines_to_func_with_fmt(os.path.join(ref_dir, 'play_duration.mcfunction'),
                                       os.path.join(dst_dir, 'play_duration.mcfunction'),
                                       entry_list,
                                       locals())
 
         #write 'stop.mcfunction'
-        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'stop.mcfunction'),
+        self.copy_lines_to_func_with_fmt(os.path.join(ref_dir, 'stop.mcfunction'),
                                       os.path.join(dst_dir, 'stop.mcfunction'),
                                       entry_list,
                                       locals())
@@ -350,13 +350,13 @@ class GeneratorV2(VirtualGenerator):
         #write 'set_disc_track.mcfunction'
         #note that v2 generator doesn't use ReplaceItemCommand for pre-1.17 compatibility
         #  since v2 datapack is not compatible with pre-1.19.4 versions anyway
-        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'set_disc_track.mcfunction'),
+        self.copy_lines_to_func_with_fmt(os.path.join(ref_dir, 'set_disc_track.mcfunction'),
                                       os.path.join(dst_dir, 'set_disc_track.mcfunction'),
                                       entry_list,
                                       locals())
 
         #write 'give_all_discs.mcfunction'
-        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'give_all_discs.mcfunction'),
+        self.copy_lines_to_func_with_fmt(os.path.join(ref_dir, 'give_all_discs.mcfunction'),
                                       os.path.join(dst_dir, 'give_all_discs.mcfunction'),
                                       entry_list,
                                       locals())
@@ -425,22 +425,22 @@ class GeneratorV2(VirtualGenerator):
             os.makedirs(os.path.join(dst_dir, entry.internal_name))
 
             #write '*/play.mcfunction' files
-            self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'play.mcfunction'),
+            self.copy_func_with_fmt(os.path.join(ref_dir, 'disc', 'play.mcfunction'),
                                os.path.join(dst_dir, entry.internal_name, 'play.mcfunction'),
                                locals())
 
             #write '*/play_duration.mcfunction' files
-            self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'play_duration.mcfunction'),
+            self.copy_func_with_fmt(os.path.join(ref_dir, 'disc', 'play_duration.mcfunction'),
                                os.path.join(dst_dir, entry.internal_name, 'play_duration.mcfunction'),
                                locals())
 
             #write '*/stop.mcfunction' files
-            self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'stop.mcfunction'),
+            self.copy_func_with_fmt(os.path.join(ref_dir, 'disc', 'stop.mcfunction'),
                                os.path.join(dst_dir, entry.internal_name, 'stop.mcfunction'),
                                locals())
 
             #write 'give_*_disc.mcfunction' files
-            self.copy_with_fmt(os.path.join(ref_dir, 'give_disc.mcfunction'),
+            self.copy_func_with_fmt(os.path.join(ref_dir, 'give_disc.mcfunction'),
                                os.path.join(dst_dir, f'give_{entry.internal_name}.mcfunction'),
                                locals())
 
@@ -607,7 +607,7 @@ class GeneratorV2(VirtualGenerator):
     #   string formatting to every line
     # if called with fmt_dict=locals(), it will effectively format each line of
     #   f_src like an f-string, with all the variables in the caller's scope
-    def copy_with_fmt(self, f_src: str, f_dst: str, fmt_dict):
+    def copy_func_with_fmt(self, f_src: str, f_dst: str, fmt_dict):
         with open(f_src, 'r', encoding='utf-8') as src:
             with open(f_dst, 'w', encoding='utf-8') as dst:
 
@@ -625,7 +625,7 @@ class GeneratorV2(VirtualGenerator):
     #   f_src like an f-string, with all the variables in the caller's scope.
     #   "entry" is explicitly included in the formatting since it didn't exist
     #   in the caller's scope
-    def copy_multi_line_with_fmt(self, f_src: str, f_dst: str, entry_list: DiscListContents, fmt_dict):
+    def copy_lines_to_func_with_fmt(self, f_src: str, f_dst: str, entry_list: DiscListContents, fmt_dict):
         with open(f_src, 'r', encoding='utf-8') as src:
             with open(f_dst, 'w', encoding='utf-8') as dst:
 
