@@ -299,23 +299,24 @@ class GeneratorV2(VirtualGenerator):
                            locals())
 
     # generate player related every-tick functions
-    def write_player_tick_funcs(self, base_dir: str, datapack_name: str, locals: dict):
+    def write_player_tick_funcs(self, datapack_name: str):
 
         ref_base = os.path.abspath(Helpers.data_path())
+        dst_base = os.getcwd()
 
         ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
-        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
+        dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'register_players_tick.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'register_players_tick.mcfunction'),
                            os.path.join(dst_dir, 'register_players_tick.mcfunction'),
-                           locals)
+                           locals())
 
         #TODO: different global id per-datapack?
         #write 'register_player.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'register_player.mcfunction'),
                            os.path.join(dst_dir, 'register_player.mcfunction'),
-                           locals)
+                           locals())
 
     # generate files with lines for every disc
     # used to select which disc-specific function to run
