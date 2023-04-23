@@ -49,7 +49,7 @@ class GeneratorV2(VirtualGenerator):
 
 
             os.chdir(base_dir)
-            self.write_global_funcs(base_dir, datapack_name, locals())
+            self.write_global_funcs(datapack_name, dp_version_str)
             self.write_funcs_to_register_jukebox(base_dir, datapack_name, locals())
             self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
             self.write_player_tick_funcs(base_dir, datapack_name, locals())
@@ -91,6 +91,8 @@ class GeneratorV2(VirtualGenerator):
         return Status.SUCCESS
 
     # generate directory structure and framework files
+    #TODO: move inside dp immediately so there's no risk of breaking external stuff
+    #TODO: don't delete if mcmeta is not inside datapack_name
     def write_dp_framework(self, entry_list: DiscListContents, datapack_name: str, pack_format: int):
 
         #build datapack directory tree
@@ -172,28 +174,29 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
     # generate global functions
-    def write_global_funcs(self, base_dir: str, datapack_name: str, locals: dict):
+    def write_global_funcs(self, datapack_name: str, dp_version_str: str):
 
         ref_base = os.path.abspath(Helpers.data_path())
+        dst_base = os.getcwd()
 
         ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
-        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
+        dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'setup_load.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'setup_load.mcfunction'),
                            os.path.join(dst_dir, 'setup_load.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'watchdog_reset_tickcount.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'watchdog_reset_tickcount.mcfunction'),
                            os.path.join(dst_dir, 'watchdog_reset_tickcount.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'help.mcfunction'
         #users can run help function to see an FAQ + links to help resources
         self.copy_with_fmt(os.path.join(ref_dir, 'help.mcfunction'),
                            os.path.join(dst_dir, 'help.mcfunction'),
-                           locals)
+                           locals())
 
     # generate 'jukebox registration' functions
     # every jukebox must be registered with the datapack to detect
