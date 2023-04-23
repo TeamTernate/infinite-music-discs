@@ -56,7 +56,7 @@ class GeneratorV2(VirtualGenerator):
             self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(datapack_name)
             self.write_player_tick_funcs(datapack_name)
-            self.write_per_disc_funcs(entry_list, datapack_name, offset)
+            self.write_per_disc_funcs(entry_list, datapack_name)
 
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
@@ -415,7 +415,7 @@ class GeneratorV2(VirtualGenerator):
 
     # generate per-disc functions
     # each disc gets a copy of these functions
-    def write_per_disc_funcs(self, entry_list: DiscListContents, datapack_name: str, offset: int):
+    def write_per_disc_funcs(self, entry_list: DiscListContents, datapack_name: str):
 
         ref_base = os.path.abspath(Helpers.data_path())
         dst_base = os.getcwd()
@@ -423,7 +423,7 @@ class GeneratorV2(VirtualGenerator):
         ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
         dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
-        for i, entry in enumerate(entry_list.entries):
+        for entry in entry_list.entries:
             #make directory for this disc's functions
             os.makedirs(os.path.join(dst_dir, entry.internal_name))
 
