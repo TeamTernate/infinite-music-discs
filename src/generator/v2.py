@@ -51,7 +51,7 @@ class GeneratorV2(VirtualGenerator):
             os.chdir(base_dir)
             self.write_global_funcs(datapack_name, dp_version_str)
             self.write_funcs_to_register_jukebox(datapack_name)
-            self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
+            self.write_jukebox_tick_funcs(datapack_name)
             self.write_player_tick_funcs(base_dir, datapack_name, locals())
             self.write_per_disc_funcs(entry_list, base_dir, datapack_name, offset, locals())
 
@@ -242,60 +242,61 @@ class GeneratorV2(VirtualGenerator):
     # generate jukebox related every-tick functions
     # not all functions run every tick; some are simply called by
     #    functions that run every tick
-    def write_jukebox_tick_funcs(self, base_dir: str, datapack_name: str, locals: dict):
+    def write_jukebox_tick_funcs(self, datapack_name: str):
 
         ref_base = os.path.abspath(Helpers.data_path())
+        dst_base = os.getcwd()
 
         ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
-        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
+        dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'jukebox_event_tick.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_event_tick.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_event_tick.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'destroy_jukebox_marker.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'destroy_jukebox_marker.mcfunction'),
                            os.path.join(dst_dir, 'destroy_jukebox_marker.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'jukebox_tick_timers.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_tick_timers.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_tick_timers.mcfunction'),
-                           locals)
+                           locals())
 
         #TODO: in multiplayer is marker tagged multiple times, once per player?
         #write 'stop_11.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'stop_11.mcfunction'),
                            os.path.join(dst_dir, 'stop_11.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'jukebox_check_playing.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_check_playing.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_check_playing.mcfunction'),
-                           locals)
+                           locals())
 
         #TODO: technically should check if custommodeldata is within acceptable range
         #write 'jukebox_on_play.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_on_play.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_on_play.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'pre_play.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'pre_play.mcfunction'),
                            os.path.join(dst_dir, 'pre_play.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'register_jukebox_listener.mcfunction'
         #TODO: 2 lists is sloppy, try to optimize
         self.copy_with_fmt(os.path.join(ref_dir, 'register_jukebox_listener.mcfunction'),
                            os.path.join(dst_dir, 'register_jukebox_listener.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'jukebox_on_stop.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'jukebox_on_stop.mcfunction'),
                            os.path.join(dst_dir, 'jukebox_on_stop.mcfunction'),
-                           locals)
+                           locals())
 
     # generate player related every-tick functions
     def write_player_tick_funcs(self, base_dir: str, datapack_name: str, locals: dict):
