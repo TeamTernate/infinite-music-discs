@@ -19,6 +19,9 @@ from src.generator.base import VirtualGenerator
 
 class GeneratorV2(VirtualGenerator):
 
+    #TODO: what happens when command syntax changes? Can't be backwards compatible
+    #  and copy from reference files... different sets of reference files?
+    #  command-to-string generation engine? too complex to maintain?
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
 
         #read settings
@@ -31,9 +34,6 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
-        #used to format setup_load.mcfunction
-        #passing 'locals()' to subfunctions makes it possible to format the template
-        #  strings without explicitly passing every variable
         dp_version_str = f'v{self._version_major}.{self._version_minor}'
 
         #capture base dir
@@ -56,11 +56,9 @@ class GeneratorV2(VirtualGenerator):
             self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(datapack_name)
             self.write_player_tick_funcs(datapack_name)
+            self.write_funcs_entry_per_disc(entry_list, datapack_name)
             self.write_per_disc_funcs(entry_list, datapack_name)
 
-
-            os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
-            self.write_funcs_entry_per_disc(entry_list, datapack_name, pack_format, offset)
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
             self.write_creeper_loottable(entry_list, pack_format, offset)
@@ -323,46 +321,45 @@ class GeneratorV2(VirtualGenerator):
 
     # generate files with lines for every disc
     # used to select which disc-specific function to run
-    def write_funcs_entry_per_disc(self, entry_list: DiscListContents, datapack_name: str, pack_format: int, offset: int):
+    def write_funcs_entry_per_disc(self, entry_list: DiscListContents, datapack_name: str):
+
+        ref_base = os.path.abspath(Helpers.data_path())
+        dst_base = os.getcwd()
+
+        ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
+        dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'play.mcfunction'
-        with open('play.mcfunction', 'w', encoding='utf-8') as play:
-            for i, name in enumerate(entry_list.internal_names):
-                j = i + offset + 1
-
-                play.write(f'execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_disc_id matches {j} run function {datapack_name}:{name}/play\n')
+        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'play.mcfunction'),
+                                      os.path.join(dst_dir, 'play.mcfunction'),
+                                      entry_list,
+                                      locals())
 
         #write 'play_duration.mcfunction'
-        with open('play_duration.mcfunction', 'w', encoding='utf-8') as play_duration:
-            for i, name in enumerate(entry_list.internal_names):
-                j = i + offset + 1
-
-                play_duration.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/play_duration\n')
+        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'play_duration.mcfunction'),
+                                      os.path.join(dst_dir, 'play_duration.mcfunction'),
+                                      entry_list,
+                                      locals())
 
         #write 'stop.mcfunction'
-        with open('stop.mcfunction', 'w', encoding='utf-8') as stop:
-            for i, name in enumerate(entry_list.internal_names):
-                j = i + offset + 1
-
-                stop.write(f'execute if score @s imd_disc_id matches {j} run function {datapack_name}:{name}/stop\n')
+        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'stop.mcfunction'),
+                                      os.path.join(dst_dir, 'stop.mcfunction'),
+                                      entry_list,
+                                      locals())
 
         #write 'set_disc_track.mcfunction'
-        with open('set_disc_track.mcfunction', 'w', encoding='utf-8') as set_disc_track:
-            for i, track in enumerate(entry_list.titles):
-                j = i + offset + 1
-
-                # Create command, and add command as string to the rest of the command.
-                item_cmd = ReplaceItemCommand(target_entity="@s", slot=ItemSlot.WEAPON_MAINHAND, item="minecraft:music_disc_11{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}")
-                cmd_str = 'execute as @s[nbt={SelectedItem:{id:"minecraft:music_disc_11", tag:{CustomModelData:%d}}}] run ' + item_cmd.command_by_pack_format(pack_format) + '\n'
-
-                set_disc_track.write(cmd_str % (j, j, track))
+        #note that v2 generator doesn't use ReplaceItemCommand for pre-1.17 compatibility
+        #  since v2 datapack is not compatible with pre-1.19.4 versions anyway
+        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'set_disc_track.mcfunction'),
+                                      os.path.join(dst_dir, 'set_disc_track.mcfunction'),
+                                      entry_list,
+                                      locals())
 
         #write 'give_all_discs.mcfunction'
-        with open('give_all_discs.mcfunction', 'w', encoding='utf-8') as give_all:
-            for i, name in enumerate(entry_list.internal_names):
-                j = i + offset + 1
-
-                give_all.write(f'execute at @s run function {datapack_name}:give_{name}\n')
+        self.copy_multi_line_with_fmt(os.path.join(ref_dir, 'give_all_discs.mcfunction'),
+                                      os.path.join(dst_dir, 'give_all_discs.mcfunction'),
+                                      entry_list,
+                                      locals())
 
     # generate creeper loottable
     def write_creeper_loottable(self, entry_list: DiscListContents, pack_format: int, offset: int):
