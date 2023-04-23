@@ -56,8 +56,8 @@ class GeneratorV2(VirtualGenerator):
             self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(datapack_name)
             self.write_player_tick_funcs(datapack_name)
-            self.write_funcs_entry_per_disc(entry_list, datapack_name)
-            self.write_per_disc_funcs(entry_list, datapack_name)
+            self.write_funcs_entry_per_disc(datapack_name, entry_list)
+            self.write_per_disc_funcs(datapack_name, entry_list)
 
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
@@ -321,7 +321,7 @@ class GeneratorV2(VirtualGenerator):
 
     # generate files with lines for every disc
     # used to select which disc-specific function to run
-    def write_funcs_entry_per_disc(self, entry_list: DiscListContents, datapack_name: str):
+    def write_funcs_entry_per_disc(self, datapack_name: str, entry_list: DiscListContents):
 
         ref_base = os.path.abspath(Helpers.data_path())
         dst_base = os.getcwd()
@@ -412,7 +412,7 @@ class GeneratorV2(VirtualGenerator):
 
     # generate per-disc functions
     # each disc gets a copy of these functions
-    def write_per_disc_funcs(self, entry_list: DiscListContents, datapack_name: str):
+    def write_per_disc_funcs(self, datapack_name: str, entry_list: DiscListContents):
 
         ref_base = os.path.abspath(Helpers.data_path())
         dst_base = os.getcwd()
