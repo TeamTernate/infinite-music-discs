@@ -50,7 +50,7 @@ class GeneratorV2(VirtualGenerator):
 
             os.chdir(base_dir)
             self.write_global_funcs(datapack_name, dp_version_str)
-            self.write_funcs_to_register_jukebox(base_dir, datapack_name, locals())
+            self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
             self.write_player_tick_funcs(base_dir, datapack_name, locals())
             self.write_per_disc_funcs(entry_list, base_dir, datapack_name, offset, locals())
@@ -201,42 +201,43 @@ class GeneratorV2(VirtualGenerator):
     # generate 'jukebox registration' functions
     # every jukebox must be registered with the datapack to detect
     #    discs inserted/removed with hoppers
-    def write_funcs_to_register_jukebox(self, base_dir: str, datapack_name: str, locals: dict):
+    def write_funcs_to_register_jukebox(self, datapack_name: str):
 
         ref_base = os.path.abspath(Helpers.data_path())
+        dst_base = os.getcwd()
 
         ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
-        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
+        dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         #write 'on_placed_disc.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'on_placed_disc.mcfunction'),
                            os.path.join(dst_dir, 'on_placed_disc.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'on_placed_jukebox.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'on_placed_jukebox.mcfunction'),
                            os.path.join(dst_dir, 'on_placed_jukebox.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'raycast_start.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'raycast_start.mcfunction'),
                            os.path.join(dst_dir, 'raycast_start.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'raycast_step.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'raycast_step.mcfunction'),
                            os.path.join(dst_dir, 'raycast_step.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'raycast_hit.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'raycast_hit.mcfunction'),
                            os.path.join(dst_dir, 'raycast_hit.mcfunction'),
-                           locals)
+                           locals())
 
         #write 'register_jukebox_marker.mcfunction'
         self.copy_with_fmt(os.path.join(ref_dir, 'register_jukebox_marker.mcfunction'),
                            os.path.join(dst_dir, 'register_jukebox_marker.mcfunction'),
-                           locals)
+                           locals())
 
     # generate jukebox related every-tick functions
     # not all functions run every tick; some are simply called by
