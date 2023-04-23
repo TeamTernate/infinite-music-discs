@@ -52,8 +52,8 @@ class GeneratorV2(VirtualGenerator):
             self.write_global_funcs(datapack_name, dp_version_str)
             self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(datapack_name)
-            self.write_player_tick_funcs(base_dir, datapack_name, locals())
-            self.write_per_disc_funcs(entry_list, base_dir, datapack_name, offset, locals())
+            self.write_player_tick_funcs(datapack_name)
+            self.write_per_disc_funcs(entry_list, datapack_name, offset)
 
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
@@ -412,12 +412,13 @@ class GeneratorV2(VirtualGenerator):
 
     # generate per-disc functions
     # each disc gets a copy of these functions
-    def write_per_disc_funcs(self, entry_list: DiscListContents, base_dir: str, datapack_name: str, offset: int, locals_dict: dict):
+    def write_per_disc_funcs(self, entry_list: DiscListContents, datapack_name: str, offset: int):
 
         ref_base = os.path.abspath(Helpers.data_path())
+        dst_base = os.getcwd()
 
         ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
-        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
+        dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'functions')
 
         for i, entry in enumerate(entry_list.entries):
             #make directory for this disc's functions
@@ -426,17 +427,17 @@ class GeneratorV2(VirtualGenerator):
             #write '*/play.mcfunction' files
             self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'play.mcfunction'),
                                os.path.join(dst_dir, entry.internal_name, 'play.mcfunction'),
-                               {**locals_dict, **locals()})
+                               locals())
 
             #write '*/play_duration.mcfunction' files
             self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'play_duration.mcfunction'),
                                os.path.join(dst_dir, entry.internal_name, 'play_duration.mcfunction'),
-                               {**locals_dict, **locals()})
+                               locals())
 
             #write '*/stop.mcfunction' files
             self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'stop.mcfunction'),
                                os.path.join(dst_dir, entry.internal_name, 'stop.mcfunction'),
-                               {**locals_dict, **locals()})
+                               locals())
 
             #write 'give_*_disc.mcfunction' files
             j = i + offset + 1
