@@ -640,4 +640,29 @@ class GeneratorV2(VirtualGenerator):
                         line_fmt = line.format(**fmt_dict, entry=entry)
                         dst.write(line_fmt)
 
+    # recursively apply string formatting to any string-type
+    #   value in the given json dict
+    def fmt_json(self, json: dict, fmt_dict):
+        for k in json:
+
+            if type(json[k]) == str:
+                json[k] = json[k].format(**fmt_dict)
+
+            elif type(json[k]) == dict:
+                json[k] = self.fmt_json(json[k], fmt_dict)
+
+        return json
+
+    # helper function that copies the contents of f_src into f_dst, while applying
+    #   string formatting to every string-type value in the given json file
+    # if called with fmt_dict=locals(), it will effectively format each line of
+    #   f_src like an f-string, with all the variables in the caller's scope
+    def copy_json_with_fmt(self, f_src: str, f_dst: str, fmt_dict):
+        with open(f_src, 'r', encoding='utf-8') as src:
+            with open(f_dst, 'w', encoding='utf-8') as dst:
+
+                src_fmt = json.load(src)
+                src_fmt = self.fmt_json(src_fmt, fmt_dict)
+                dst.write(json.dumps(src_fmt, indent=4))
+
 
