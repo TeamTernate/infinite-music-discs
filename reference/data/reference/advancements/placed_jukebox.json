@@ -1,0 +1,18 @@
+{
+    "criteria": {
+        "placed_jukebox": {
+            "trigger": "minecraft:placed_block",
+            "conditions": {
+                "block": "minecraft:jukebox",
+                "item": {
+                    "items": [
+                        "minecraft:jukebox"
+                    ]
+                }
+            }
+        }
+    },
+    "rewards": {
+        "function": "{datapack_name}:on_placed_jukebox"
+    }
+}

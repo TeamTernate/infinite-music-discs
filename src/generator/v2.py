@@ -47,11 +47,9 @@ class GeneratorV2(VirtualGenerator):
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'tags', 'functions'))
             self.write_func_tags(datapack_name)
 
-            os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'advancements'))
+            os.chdir(base_dir)
             self.write_advancements(datapack_name)
 
-
-            os.chdir(base_dir)
             self.write_global_funcs(datapack_name, dp_version_str)
             self.write_funcs_to_register_jukebox(datapack_name)
             self.write_jukebox_tick_funcs(datapack_name)
@@ -133,46 +131,21 @@ class GeneratorV2(VirtualGenerator):
     # generate advancements
     def write_advancements(self, datapack_name: str):
 
+        ref_base = os.path.abspath(Helpers.data_path())
+        dst_base = os.getcwd()
+
+        ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'advancements')
+        dst_dir = os.path.join(dst_base, datapack_name, 'data', datapack_name, 'advancements')
+
         #write 'placed_disc.json'
-        with open('placed_disc.json', 'w', encoding='utf-8') as placed_disc:
-            placed_disc.write(json.dumps({
-                'criteria':{
-                    'placed_music_disc':{
-                        'trigger':'minecraft:item_used_on_block',
-                        'conditions':{
-                            'location':{
-                                'block':{
-                                    'blocks':[ 'minecraft:jukebox' ],
-                                    'state':{ 'has_record':'true' }
-                                }
-                            },
-                            'item':{'tag': 'minecraft:music_discs'}
-                        }
-                    }
-                },
-                'rewards':{
-                    'function':f'{datapack_name}:on_placed_disc'
-                }
-            }, indent=4))
+        self.copy_json_with_fmt(os.path.join(ref_dir, 'placed_disc.json'),
+                                os.path.join(dst_dir, 'placed_disc.json'),
+                                locals())
 
         #write 'placed_jukebox.json'
-        with open('placed_jukebox.json', 'w', encoding='utf-8') as placed_jukebox:
-            placed_jukebox.write(json.dumps({
-                'criteria':{
-                    'placed_jukebox':{
-                        'trigger':'minecraft:placed_block',
-                        'conditions':{
-                            'block':'minecraft:jukebox',
-                            'item':{
-                                'items':[ 'minecraft:jukebox' ]
-                            }
-                        }
-                    }
-                },
-                'rewards':{
-                    'function':f'{datapack_name}:on_placed_jukebox'
-                }
-            }, indent=4))
+        self.copy_json_with_fmt(os.path.join(ref_dir, 'placed_jukebox.json'),
+                                os.path.join(dst_dir, 'placed_jukebox.json'),
+                                locals())
 
     # generate global functions
     def write_global_funcs(self, datapack_name: str, dp_version_str: str):
