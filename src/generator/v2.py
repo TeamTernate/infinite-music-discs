@@ -620,9 +620,13 @@ class GeneratorV2(VirtualGenerator):
 
     def copy_multi_line_with_fmt(self, f_src: str, f_dst: str, entry_list: DiscListContents, fmt_dict):
         with open(f_src, 'r', encoding='utf-8') as src:
-            with open(f_dst, 'a', encoding='utf-8') as dst:
-                for line in src.readlines():
-                    line_fmt = line.format(**fmt_dict)
-                    dst.write(line_fmt)
+            with open(f_dst, 'w', encoding='utf-8') as dst:
+
+                for entry in entry_list.entries:
+                    src.seek(0)
+                    for line in src.readlines():
+
+                        line_fmt = line.format(**fmt_dict, entry=entry)
+                        dst.write(line_fmt)
 
 
