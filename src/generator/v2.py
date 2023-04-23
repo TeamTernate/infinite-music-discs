@@ -25,6 +25,9 @@ class GeneratorV2(VirtualGenerator):
         pack_format = user_settings.get('version').get('dp', Constants.DEFAULT_PACK_FORMAT)
         offset = user_settings.get('offset', 0)
 
+        for i,entry in enumerate(entry_list.entries):
+            entry.custom_model_data = i + offset + 1
+
         datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
@@ -440,7 +443,6 @@ class GeneratorV2(VirtualGenerator):
                                locals())
 
             #write 'give_*_disc.mcfunction' files
-            entry_index = i + offset + 1
             self.copy_with_fmt(os.path.join(ref_dir, 'give_disc.mcfunction'),
                                os.path.join(dst_dir, f'give_{entry.internal_name}.mcfunction'),
                                locals())

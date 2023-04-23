@@ -261,11 +261,12 @@ DatapackVersionDict = {
 #dataclasses to collect DiscList contents for pack generation
 @dataclass
 class DiscListEntryContents:
-    texture_file:   str = ""
-    track_file:     str = ""
-    title:          str = ""
-    internal_name:  str = ""
-    length:         int = 0
+    texture_file:       str = ""
+    track_file:         str = ""
+    title:              str = ""
+    internal_name:      str = ""
+    length:             int = 0
+    custom_model_data:  int = 0
 
 #TODO: use iter and next so you don't have to iterate over entries?
 @dataclass
