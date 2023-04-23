@@ -29,6 +29,8 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
         #used to format setup_load.mcfunction
+        #passing 'locals()' to subfunctions makes it possible to format the template
+        #  strings without explicitly passing every variable
         dp_version_str = f'v{self._version_major}.{self._version_minor}'
 
         #capture base dir
@@ -51,16 +53,14 @@ class GeneratorV2(VirtualGenerator):
             self.write_funcs_to_register_jukebox(base_dir, datapack_name, locals())
             self.write_jukebox_tick_funcs(base_dir, datapack_name, locals())
             self.write_player_tick_funcs(base_dir, datapack_name, locals())
+            self.write_per_disc_funcs(entry_list, base_dir, datapack_name, offset, locals())
+
+
             os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
-
-
             self.write_funcs_entry_per_disc(entry_list, datapack_name, pack_format, offset)
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
             self.write_creeper_loottable(entry_list, pack_format, offset)
-
-            os.chdir(os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions'))
-            self.write_per_disc_funcs(entry_list, datapack_name, offset)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
@@ -406,35 +406,36 @@ class GeneratorV2(VirtualGenerator):
 
     # generate per-disc functions
     # each disc gets a copy of these functions
-    def write_per_disc_funcs(self, entry_list: DiscListContents, datapack_name: str, offset: int):
+    def write_per_disc_funcs(self, entry_list: DiscListContents, base_dir: str, datapack_name: str, offset: int, locals_dict: dict):
+
+        ref_base = os.path.abspath(Helpers.data_path())
+
+        ref_dir = os.path.join(ref_base, 'reference', 'data', 'reference', 'functions')
+        dst_dir = os.path.join(base_dir, datapack_name, 'data', datapack_name, 'functions')
+
         for i, entry in enumerate(entry_list.entries):
             #make directory for this disc's functions
-            os.makedirs(entry.internal_name)
+            os.makedirs(os.path.join(dst_dir, entry.internal_name))
 
             #write '*/play.mcfunction' files
-            with open(os.path.join(entry.internal_name, 'play.mcfunction'), 'w', encoding='utf-8') as play:
-                play.writelines([
-                    f'title @s actionbar {{"text":"Now Playing: {entry.title}","color":"green"}}\n',
-                    f'playsound minecraft:music_disc.{entry.internal_name} record @s ~ ~ ~ 4 1\n'
-                ])
+            self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'play.mcfunction'),
+                               os.path.join(dst_dir, entry.internal_name, 'play.mcfunction'),
+                               {**locals_dict, **locals()})
 
             #write '*/play_duration.mcfunction' files
-            with open(os.path.join(entry.internal_name, 'play_duration.mcfunction'), 'w', encoding='utf-8') as play_duration:
-                play_duration.write(f'scoreboard players set @s imd_play_time {entry.length}\n')
+            self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'play_duration.mcfunction'),
+                               os.path.join(dst_dir, entry.internal_name, 'play_duration.mcfunction'),
+                               {**locals_dict, **locals()})
 
             #write '*/stop.mcfunction' files
-            with open(os.path.join(entry.internal_name, 'stop.mcfunction'), 'w', encoding='utf-8') as stop:
-                stop.writelines([
-                    'execute store result score @s imd_player_id run data get entity @s data.Listeners[0]\n',
-                    'data remove entity @s data.Listeners[0]\n',
-                    f'execute as @a if score @s imd_player_id = @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] imd_player_id run stopsound @s record minecraft:music_disc.{entry.internal_name}\n',
-                    f'execute if data entity @s data.Listeners[0] run function {datapack_name}:{entry.internal_name}/stop\n'
-                ])
+            self.copy_with_fmt(os.path.join(ref_dir, 'disc', 'stop.mcfunction'),
+                               os.path.join(dst_dir, entry.internal_name, 'stop.mcfunction'),
+                               {**locals_dict, **locals()})
 
             #write 'give_*_disc.mcfunction' files
             j = i + offset + 1
 
-            with open(f'give_{entry.internal_name}.mcfunction', 'w', encoding='utf-8') as give:
+            with open(os.path.join(dst_dir, f'give_{entry.internal_name}.mcfunction'), 'w', encoding='utf-8') as give:
                 give.write('execute at @s run summon item ~ ~ ~ {Item:{id:"minecraft:music_disc_11", Count:1b, tag:{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}}}\n' % (j, entry.title))
 
 
@@ -605,6 +606,13 @@ class GeneratorV2(VirtualGenerator):
                     #line_fmt = line_fmt.replace('%(', '{')
                     #line_fmt = line_fmt.replace(')%', '}')
 
+                    line_fmt = line.format(**fmt_dict)
+                    dst.write(line_fmt)
+
+    def copy_multi_line_with_fmt(self, f_src: str, f_dst: str, entry_list: DiscListContents, fmt_dict):
+        with open(f_src, 'r', encoding='utf-8') as src:
+            with open(f_dst, 'a', encoding='utf-8') as dst:
+                for line in src.readlines():
                     line_fmt = line.format(**fmt_dict)
                     dst.write(line_fmt)
 
