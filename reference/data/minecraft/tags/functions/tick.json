@@ -1,0 +1,6 @@
+{
+    "values": [
+        "{datapack_name}:register_players_tick",
+        "{datapack_name}:jukebox_event_tick"
+    ]
+}

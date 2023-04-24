@@ -4,6 +4,7 @@
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 #
 #Generates datapack v2.0
+from typing import Union
 
 import os
 import json
@@ -44,10 +45,7 @@ class GeneratorV2(VirtualGenerator):
         try:
             self.write_dp_framework(entry_list, datapack_name, pack_format)
 
-            os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'tags', 'functions'))
             self.write_func_tags(datapack_name)
-
-            os.chdir(base_dir)
             self.write_advancements(datapack_name)
 
             self.write_global_funcs(datapack_name, dp_version_str)
@@ -113,20 +111,21 @@ class GeneratorV2(VirtualGenerator):
     # generate minecraft function tags
     def write_func_tags(self, datapack_name: str):
 
+        ref_base = os.path.abspath(Helpers.data_path())
+        dst_base = os.getcwd()
+
+        ref_dir = os.path.join(ref_base, 'reference', 'data', 'minecraft', 'tags', 'functions')
+        dst_dir = os.path.join(dst_base, datapack_name, 'data', 'minecraft', 'tags', 'functions')
+
         #write 'load.json'
-        with open('load.json', 'w', encoding='utf-8') as load:
-            load.write(json.dumps({
-                'values':[ f'{datapack_name}:setup_load' ]
-            }, indent=4))
+        self.copy_json_with_fmt(os.path.join(ref_dir, 'load.json'),
+                                os.path.join(dst_dir, 'load.json'),
+                                locals())
 
         #write 'tick.json'
-        with open('tick.json', 'w', encoding='utf-8') as tick:
-            tick.write(json.dumps({
-                'values':[
-                    f'{datapack_name}:register_players_tick',
-                    f'{datapack_name}:jukebox_event_tick'
-                ]
-            }, indent=4))
+        self.copy_json_with_fmt(os.path.join(ref_dir, 'tick.json'),
+                                os.path.join(dst_dir, 'tick.json'),
+                                locals())
 
     # generate advancements
     def write_advancements(self, datapack_name: str):
@@ -614,14 +613,24 @@ class GeneratorV2(VirtualGenerator):
                         dst.write(line_fmt)
 
     # recursively apply string formatting to any string-type
-    #   value in the given json dict
-    def fmt_json(self, json: dict, fmt_dict):
-        for k in json:
+    #   value in the given json dict or json sub-list
+    def fmt_json(self, json: Union[dict, list], fmt_dict):
+
+        #change iterator depending on type, so that the iterated
+        #  object's contents can always be accessed by json[k]
+        #dict: json[key of element]
+        #list: json[index of element]
+        if type(json) == list:
+            iterator = [i for i in range(len(json))]
+        else:
+            iterator = [k for k in json]
+
+        for k in iterator:
 
             if type(json[k]) == str:
                 json[k] = json[k].format(**fmt_dict)
 
-            elif type(json[k]) == dict:
+            elif type(json[k]) in [dict, list]:
                 json[k] = self.fmt_json(json[k], fmt_dict)
 
         return json
