@@ -440,6 +440,9 @@ class GeneratorV2(VirtualGenerator):
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
         
+        except FileExistsError:
+            return Status.PACK_DIR_IN_USE
+        
         finally:
             os.chdir(base_dir)
 
@@ -473,8 +476,15 @@ class GeneratorV2(VirtualGenerator):
     # generate directory structure and framework files
     def write_rp_framework(self, entry_list: DiscListContents, resourcepack_name: str, pack_format: int):
 
+        #try to remove old resourcepack. If resourcepack folder exists but mcmeta does not,
+        #  then this directory may belong to something else so don't delete
+        if os.path.isdir(resourcepack_name):
+            if not os.path.isfile(os.path.join(resourcepack_name, 'pack.mcmeta')):
+                raise FileExistsError
+            else:
+                shutil.rmtree(resourcepack_name, ignore_errors=True)
+
         #build resourcepack directory tree
-        shutil.rmtree(resourcepack_name, ignore_errors=True)
         os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
         os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
         os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
