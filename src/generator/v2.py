@@ -57,7 +57,7 @@ class GeneratorV2(VirtualGenerator):
 
 
             os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
-            self.write_creeper_loottable(entry_list, pack_format, offset)
+            self.write_creeper_loottable(entry_list)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
@@ -334,53 +334,49 @@ class GeneratorV2(VirtualGenerator):
                                       locals())
 
     # generate creeper loottable
-    def write_creeper_loottable(self, entry_list: DiscListContents, pack_format: int, offset: int):
+    def write_creeper_loottable(self, entry_list: DiscListContents):
+
+        creeper_mdentries = []
+        creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':'minecraft:creeper_drop_music_discs', 'expand':True})
+
+        for entry in entry_list.entries:
+            creeper_mdentries.append({
+                'type':'minecraft:item',
+                'weight':1,
+                'name':'minecraft:music_disc_11',
+                'functions':[{
+                    'function':'minecraft:set_nbt',
+                    'tag':f'{{CustomModelData:{entry.custom_model_data}, HideFlags:32, display:{{Lore:[\"\\\"\\\\u00a77{entry.title}\\\"\"]}}}}'
+                }]
+            })
+
+        creeper_normentries = [{
+            'type':'minecraft:item',
+            'functions':[{
+                    'function':'minecraft:set_count',
+                    'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}
+                }, {
+                    'function':'minecraft:looting_enchant',
+                    'count':{'min':0.0, 'max':1.0}
+                }],
+            'name':'minecraft:gunpowder'
+        }]
+
+        creeper_json = {
+            'type':'minecraft:entity',
+            'pools':[
+                {'rolls':1, 'entries':creeper_normentries},
+                {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{
+                    'condition':'minecraft:entity_properties',
+                    'predicate':{'type':'#minecraft:skeletons'},
+                    'entity':'killer'
+                }]
+            }]
+        }
 
         #write 'creeper.json'
         with open(os.path.join('creeper.json'), 'w', encoding='utf-8') as creeper:
-
-            discs_tag = 'minecraft:creeper_drop_music_discs'
-            if pack_format < 6:
-                discs_tag = 'minecraft:music_discs'
-
-            creeper_mdentries = []
-            creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':discs_tag, 'expand':True})
-            for i, track in enumerate(entry_list.titles):
-                j = i + offset + 1
-
-                creeper_mdentries.append({
-                    'type':'minecraft:item',
-                    'weight':1,
-                    'name':'minecraft:music_disc_11',
-                    'functions':[{
-                        'function':'minecraft:set_nbt',
-                        'tag':'{CustomModelData:%d, HideFlags:32, display:{Lore:[\"\\\"\\\\u00a77%s\\\"\"]}}' % (j, track)
-                    }]
-                })
-
-            creeper_normentries = [{
-                'type':'minecraft:item',
-                'functions':[{
-                        'function':'minecraft:set_count',
-                        'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}
-                    }, {
-                        'function':'minecraft:looting_enchant',
-                        'count':{'min':0.0, 'max':1.0}
-                    }],
-                'name':'minecraft:gunpowder'
-            }]
-
-            creeper.write(json.dumps({
-                'type':'minecraft:entity',
-                'pools':[
-                    {'rolls':1, 'entries':creeper_normentries},
-                    {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{
-                        'condition':'minecraft:entity_properties',
-                        'predicate':{'type':'#minecraft:skeletons'},
-                        'entity':'killer'
-                    }]
-                }]
-            }, indent=4))
+            creeper.write(json.dumps(creeper_json, indent=4))
 
     # generate per-disc functions
     # each disc gets a copy of these functions
