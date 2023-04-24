@@ -91,6 +91,7 @@ class Status(Enum):
     FFMPEG_CONVERT_FAIL = 16
     DUP_INTERNAL_NAME = 17
     BAD_OGG_META = 18
+    PACK_DIR_IN_USE = 19
 
 class FileExt():
     PNG = 'png'
@@ -192,7 +193,8 @@ StatusMessageDict = {
     Status.BAD_UNICODE_CHAR:        "Couldn't use track name. Try removing uncommon characters.",
     Status.FFMPEG_CONVERT_FAIL:     "FFmpeg failed while converting a track to '.ogg' format.",
     Status.DUP_INTERNAL_NAME:       "Some tracks have the same name. Try removing duplicate tracks.",
-    Status.BAD_OGG_META:            "Failed to detect ogg file length while converting."
+    Status.BAD_OGG_META:            "Failed to detect ogg file length while converting.",
+    Status.PACK_DIR_IN_USE:         "Couldn't remove pack folder. Is something else using it?"
 }
 
 #dictionary to associate Status : sticky state
@@ -215,7 +217,8 @@ StatusStickyDict = {
     Status.BAD_UNICODE_CHAR:        True,
     Status.FFMPEG_CONVERT_FAIL:     True,
     Status.DUP_INTERNAL_NAME:       True,
-    Status.BAD_OGG_META:            True
+    Status.BAD_OGG_META:            True,
+    Status.PACK_DIR_IN_USE:         True
 }
 
 #dictionary to associate digit : digit name

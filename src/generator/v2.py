@@ -12,8 +12,6 @@ import shutil
 import zipfile
 
 from src.definitions import Constants, Helpers, Status, DiscListContents
-from src.commands import ReplaceItemCommand, ItemSlot
-
 from src.generator.base import VirtualGenerator
 
 
@@ -55,6 +53,9 @@ class GeneratorV2(VirtualGenerator):
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
 
+        except FileExistsError:
+            return Status.PACK_DIR_IN_USE
+
         #copy pack.png
         try:
             if 'pack' in user_settings:
@@ -79,11 +80,17 @@ class GeneratorV2(VirtualGenerator):
 
     # generate directory structure and framework files
     #TODO: move inside dp immediately so there's no risk of breaking external stuff
-    #TODO: don't delete if mcmeta is not inside datapack_name
     def write_dp_framework(self, entry_list: DiscListContents, datapack_name: str, pack_format: int):
 
+        #try to remove old datapack. If datapack folder exists but mcmeta does not,
+        #  then this directory may belong to something else so don't delete
+        if os.path.isdir(datapack_name):
+            if not os.path.isfile(os.path.join(datapack_name, 'pack.mcmeta')):
+                raise FileExistsError
+            else:
+                shutil.rmtree(datapack_name, ignore_errors=True)
+
         #build datapack directory tree
-        shutil.rmtree(datapack_name, ignore_errors=True)
         os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
         os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
         os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
