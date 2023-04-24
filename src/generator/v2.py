@@ -37,11 +37,7 @@ class GeneratorV2(VirtualGenerator):
 
         dp_version_str = f'v{self._version_major}.{self._version_minor}'
 
-        #capture base dir
-        base_dir = os.getcwd()
-
         #write datapack
-        #use chdir to move around directory structure and reduce file paths
         try:
             self.write_dp_framework(entry_list, datapack_name, pack_format)
 
@@ -53,17 +49,11 @@ class GeneratorV2(VirtualGenerator):
             self.write_jukebox_tick_funcs(datapack_name)
             self.write_player_tick_funcs(datapack_name)
             self.write_funcs_entry_per_disc(datapack_name, entry_list)
+            self.write_creeper_loottable(datapack_name, entry_list)
             self.write_per_disc_funcs(datapack_name, entry_list)
-
-
-            os.chdir(os.path.join(base_dir, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
-            self.write_creeper_loottable(entry_list)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
-
-        finally:
-            os.chdir(base_dir)
 
         #copy pack.png
         try:
@@ -334,7 +324,10 @@ class GeneratorV2(VirtualGenerator):
                                       locals())
 
     # generate creeper loottable
-    def write_creeper_loottable(self, entry_list: DiscListContents):
+    def write_creeper_loottable(self, datapack_name: str, entry_list: DiscListContents):
+
+        dp_base = os.getcwd()
+        dp_dir = os.path.join(dp_base, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities')
 
         creeper_mdentries = []
         creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':'minecraft:creeper_drop_music_discs', 'expand':True})
@@ -375,7 +368,7 @@ class GeneratorV2(VirtualGenerator):
         }
 
         #write 'creeper.json'
-        with open(os.path.join('creeper.json'), 'w', encoding='utf-8') as creeper:
+        with open(os.path.join(dp_dir, 'creeper.json'), 'w', encoding='utf-8') as creeper:
             creeper.write(json.dumps(creeper_json, indent=4))
 
     # generate per-disc functions
