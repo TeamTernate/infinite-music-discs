@@ -4,7 +4,7 @@
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 #
 #Generates datapack v2.0
-from typing import Union
+from typing import Union, TextIO
 
 import os
 import json
@@ -640,6 +640,48 @@ class GeneratorV2(VirtualGenerator):
                 json[k] = self.fmt_json(json[k], fmt_dict)
 
         return json
+
+    # apply string formatting to each element of the given
+    #   list and combine them into a single path string.
+    # use ** to expand fmt_dict into kwargs and use *
+    #   to splat fmt_path into multiple strings for
+    #   os.path.join
+    def fmt_path(self, path: list, fmt_dict) -> str:
+        fmt_path = [p.format(**fmt_dict) for p in path]
+        return os.path.join(*fmt_path)
+
+
+
+    def write_single(self, src: dict, fmt_dict):
+        fmt_dict.update(locals())
+        f_dst = self.fmt_path(src['path'], fmt_dict)
+
+        with open(f_dst, 'w', encoding='utf-8') as dst:
+            self.write_pack_file(src, dst, fmt_dict)
+
+    def write_copy(self, src: dict, entry_list: DiscListContents, fmt_dict):
+        for entry in entry_list.entries:
+            fmt_dict.update(locals())
+            f_dst = self.fmt_path(src['path'], fmt_dict)
+
+            with open(f_dst, 'w', encoding='utf-8') as dst:
+                self.write_pack_file(src, dst, fmt_dict)
+
+    def write_copy_within(self, src: dict, entry_list: DiscListContents, fmt_dict):
+        f_dst = self.fmt_path(src['path'], fmt_dict)
+
+        with open(f_dst, 'w', encoding='utf-8') as dst:
+            for entry in entry_list.entries:
+                fmt_dict.update(locals())
+
+                self.write_pack_file(src, dst, fmt_dict)
+
+    def write_pack_file(self, src: dict, dst: TextIO, fmt_dict):
+        if type(src['contents']) == str:
+            dst.writelines(src['contents'].lstrip().format(**fmt_dict))
+
+        elif type(src['contents']) == dict:
+            json.dump(self.fmt_json(src['contents'], fmt_dict), dst, indent=4)
 
     # helper function that copies the contents of f_src into f_dst, while applying
     #   string formatting to every string-type value in the given json file
