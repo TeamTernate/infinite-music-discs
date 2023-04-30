@@ -14,6 +14,8 @@
 
 #TODO: rename mix_mono setting to something useful also default it to on
 
+#TODO: update datapack pack_format again
+
 import sys
 import ctypes
 import platform
