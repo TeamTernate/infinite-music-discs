@@ -28,7 +28,6 @@ pyinstaller_cmd = [
     '--noconfirm',
     '--version-file', 'build/version.rc.tmp',
     '--add-data', f'data/*{os.pathsep}data',
-    '--add-data', f'reference/data/reference/functions/*{os.pathsep}reference/data/reference/functions',
     '--name', 'imd-gui',
     '--icon', 'data/jukebox_256.ico',
     '--distpath', 'bin',
