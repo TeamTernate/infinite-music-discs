@@ -465,6 +465,8 @@ execute if data entity @s data.Listeners[0] run function {datapack_name}:{entry.
 # iterable list of files
 #TODO: possible to get rid of this so you can just add objects directly to this module?
 file_list = [
+    pack_mcmeta,
+    creeper_json,
     placed_disc,
     placed_jukebox,
     load,

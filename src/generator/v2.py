@@ -49,22 +49,21 @@ class GeneratorV2(VirtualGenerator):
                     shutil.rmtree(datapack_name, ignore_errors=True)
 
             #TODO: move inside dp immediately so there's no risk of breaking external stuff
-            #write 'pack.mcmeta'
+
+            #prepare 'pack.mcmeta' before writing
             #reach into dict and set pack_format manually, since there's no str.format()
             #  equivalent for integers
             dp_pack_mcmeta['contents']['pack']['pack_format'] = pack_format
-            self.write_single(dp_pack_mcmeta, locals())
 
-            #write 'creeper.json'
-            #generate music disc entries, then reach into dict and add them to the drop
-            #  pool manually
+            #prepare 'creeper.json' before writing
+            #generate JSON for music disc entries, then reach into dict and add them
+            #  to the drop pool manually
             for entry in entry_list.entries:
                 creeper_music_entries.append(self.fmt_json(creeper_music_entry_custom, locals()))
 
             creeper_json['contents']['pools'][1]['entries'] = creeper_music_entries
-            self.write_single(creeper_json, locals())
 
-            #write other datapack files
+            #write datapack files
             for dp_file in dp_file_list:
                 if dp_file['repeat'] == 'single':
                     self.write_single(dp_file, locals())
