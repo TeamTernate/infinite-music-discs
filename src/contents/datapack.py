@@ -57,6 +57,30 @@ placed_jukebox = {
 }
 }
 
+# function tags
+load = {
+    'path': ['{datapack_name}', 'data', 'minecraft', 'tags', 'functions', 'load.json'],
+    'repeat': 'single',
+    'contents': \
+{
+    "values": [
+        "{datapack_name}:setup_load"
+    ]
+}
+}
+
+tick = {
+    'path': ['{datapack_name}', 'data', 'minecraft', 'tags', 'functions', 'tick.json'],
+    'repeat': 'single',
+    'contents': \
+{
+    "values": [
+        "{datapack_name}:register_players_tick",
+        "{datapack_name}:jukebox_event_tick"
+    ]
+}
+}
+
 # top-level functions
 destroy_jukebox_marker = {
     'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'destroy_jukebox_marker.mcfunction'],
@@ -378,6 +402,8 @@ execute if data entity @s data.Listeners[0] run function {datapack_name}:{entry.
 file_list = [
     placed_disc,
     placed_jukebox,
+    load,
+    tick,
     destroy_jukebox_marker,
     give_all_discs,
     give_disc,
