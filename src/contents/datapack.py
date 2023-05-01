@@ -169,7 +169,7 @@ give_disc = {
     'repeat': 'copy',
     'contents': \
 """
-execute at @s run summon item ~ ~ ~ {{Item:{{id:"minecraft:music_disc_11", Count:1b, tag:{{CustomModelData:{entry.custom_model_data}, HideFlags:32, display:{{Lore:["\"\\u00a77{entry.title}\""]}}}}}}}}
+execute at @s run summon item ~ ~ ~ {{Item:{{id:"minecraft:music_disc_11", Count:1b, tag:{{CustomModelData:{entry.custom_model_data}, HideFlags:32, display:{{Lore:["\\"\\\\u00a77{entry.title}\\""]}}}}}}}}
 """
 }
 
@@ -287,7 +287,7 @@ execute if score @s imd_disc_id matches {entry.custom_model_data} run function {
 
 pre_play = {
     'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'pre_play.mcfunction'],
-    'repeat': 'copy_within',
+    'repeat': 'single',
     'contents': \
 """
 execute store result score @s imd_disc_id run data get block ~ ~ ~ RecordItem.tag.CustomModelData
@@ -376,7 +376,7 @@ set_disc_track = {
     'repeat': 'copy_within',
     'contents': \
 """
-execute as @s[nbt={{SelectedItem:{{id:"minecraft:music_disc_11", tag:{{CustomModelData:{entry.custom_model_data}}}}}}}] run item replace entity @s weapon.mainhand with minecraft:music_disc_11{{CustomModelData:{entry.custom_model_data}, HideFlags:32, display:{{Lore:["\"\\u00a77{entry.title}\""]}}}}
+execute as @s[nbt={{SelectedItem:{{id:"minecraft:music_disc_11", tag:{{CustomModelData:{entry.custom_model_data}}}}}}}] run item replace entity @s weapon.mainhand with minecraft:music_disc_11{{CustomModelData:{entry.custom_model_data}, HideFlags:32, display:{{Lore:["\\"\\\\u00a77{entry.title}\\""]}}}}
 """
 }
 
@@ -394,7 +394,7 @@ scoreboard objectives add imd_stop_11_time dummy
 advancement revoke @a only {datapack_name}:placed_disc
 advancement revoke @a only {datapack_name}:placed_jukebox
 tellraw @a [{{"text":"Infinite Music Discs {dp_version_str} by link2_thepast", "color":"gold"}}]
-tellraw @a [{{"text":"Type ", "color":"gold"}}, {{"text":"/{datapack_name}:help", "color":"yellow"}}, {{"text":" for help", "color":"gold"}}]
+tellraw @a [{{"text":"Type ", "color":"gold"}}, {{"text":"/function {datapack_name}:help", "color":"yellow"}}, {{"text":" for help", "color":"gold"}}]
 """
 }
 
