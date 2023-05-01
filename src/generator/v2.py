@@ -352,26 +352,28 @@ class GeneratorV2(VirtualGenerator):
 
     # recursively apply string formatting to any string-type
     #   value in the given json dict or json sub-list
-    def fmt_json(self, json: Union[dict, list], fmt_dict):
+    def fmt_json(self, obj: Union[dict, list], fmt_dict):
 
         #change iterator depending on type, so that the iterated
-        #  object's contents can always be accessed by json[k]
-        #dict: json[key of element]
-        #list: json[index of element]
-        if type(json) == list:
-            iterator = [i for i in range(len(json))]
+        #  object's contents can always be accessed by obj[k]
+        #dict: obj[key of element]
+        #list: obj[index of element]
+        if type(obj) == list:
+            iterator = [i for i in range(len(obj))]
+            fmt_obj = list(obj)
         else:
-            iterator = [k for k in json]
+            iterator = [k for k in obj]
+            fmt_obj = dict(obj)
 
         for k in iterator:
 
-            if type(json[k]) == str:
-                json[k] = json[k].format(**fmt_dict)
+            if type(obj[k]) == str:
+                fmt_obj[k] = obj[k].format(**fmt_dict)
 
-            elif type(json[k]) in [dict, list]:
-                json[k] = self.fmt_json(json[k], fmt_dict)
+            elif type(obj[k]) in [dict, list]:
+                fmt_obj[k] = self.fmt_json(obj[k], fmt_dict)
 
-        return json
+        return fmt_obj
 
     # apply string formatting to each element of the given
     #   list and combine them into a single path string.
@@ -422,10 +424,22 @@ class GeneratorV2(VirtualGenerator):
 
     def write_pack_file(self, src: dict, dst: TextIO, fmt_dict):
         if type(src['contents']) == str:
-            dst.writelines(src['contents'].lstrip().format(**fmt_dict))
+            self.write_text_file(src, dst, fmt_dict)
 
         elif type(src['contents']) == dict:
+            self.write_json_file(src, dst, fmt_dict)
+
+    def write_text_file(self, src: dict, dst: TextIO, fmt_dict):
+        if src.get('format_contents', True):
+            dst.writelines(src['contents'].lstrip().format(**fmt_dict))
+        else:
+            dst.writelines(src['contents'].lstrip())
+
+    def write_json_file(self, src: dict, dst: TextIO, fmt_dict):
+        if src.get('format_contents', True):
             json.dump(self.fmt_json(src['contents'], fmt_dict), dst, indent=4)
+        else:
+            json.dump(src['contents'], dst, indent=4)
 
     # helper function that copies the contents of f_src into f_dst, while applying
     #   string formatting to every string-type value in the given json file
