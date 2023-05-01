@@ -7,6 +7,19 @@
 #  to make generation easy. Datapack generator will try to create a
 #  file from every object in file_list
 
+# pack.mcmeta
+pack_mcmeta = {
+    'path': ['{datapack_name}', 'pack.mcmeta'],
+    'repeat': 'single',
+    'contents': \
+{
+    "pack": {
+        "pack_format": -1,
+        "description": "Adds {dp_num_discs} custom music discs"
+    }
+}
+}
+
 # advancements
 placed_disc = {
     'path': ['{datapack_name}', 'data', '{datapack_name}', 'advancements', 'placed_disc.json'],
@@ -306,6 +319,8 @@ execute as @a[tag=!imd_has_id] run function {datapack_name}:register_player
 """
 }
 
+#note that v2 generator doesn't use ReplaceItemCommand for pre-1.17 compatibility
+#  since v2 datapack is not compatible with pre-1.19.4 versions anyway
 set_disc_track = {
     'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'set_disc_track.mcfunction'],
     'repeat': 'copy_within',

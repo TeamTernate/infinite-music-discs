@@ -11,6 +11,7 @@ import json
 import shutil
 import zipfile
 
+from src.contents.datapack import pack_mcmeta as dp_pack_mcmeta
 from src.contents.datapack import file_list as dp_file_list
 from src.definitions import Constants, Helpers, Status, DiscListContents
 from src.generator.base import VirtualGenerator
@@ -35,11 +36,25 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
         dp_version_str = f'v{self._version_major}.{self._version_minor}'
+        dp_num_discs = len(entry_list.entries)
 
         #write datapack
         try:
-            self.write_dp_framework(entry_list, datapack_name, pack_format)
+            #try to remove old datapack. If datapack folder exists but mcmeta does not,
+            #  then this directory may belong to something else so don't delete
+            if os.path.isdir(datapack_name):
+                if not os.path.isfile(os.path.join(datapack_name, 'pack.mcmeta')):
+                    raise FileExistsError
+                else:
+                    shutil.rmtree(datapack_name, ignore_errors=True)
 
+            #write 'pack.mcmeta'
+            #reach into dict and set pack_format manually, since there's no str.format()
+            #  equivalent for integers
+            dp_pack_mcmeta['contents']['pack']['pack_format'] = pack_format
+            self.write_single(dp_pack_mcmeta, locals())
+
+            #write other datapack files
             for dp_file in dp_file_list:
                 if dp_file['repeat'] == 'single':
                     self.write_single(dp_file, locals())
@@ -48,6 +63,7 @@ class GeneratorV2(VirtualGenerator):
                 elif dp_file['repeat'] == 'copy_within':
                     self.write_copy_within(dp_file, entry_list, locals())
 
+            #write 'creeper.json'
             self.write_creeper_loottable(datapack_name, entry_list)
 
         except UnicodeEncodeError:
@@ -110,6 +126,7 @@ class GeneratorV2(VirtualGenerator):
 
         dp_base = os.getcwd()
         dp_dir = os.path.join(dp_base, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities')
+        os.makedirs(dp_dir)
 
         creeper_mdentries = []
         creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':'minecraft:creeper_drop_music_discs', 'expand':True})
@@ -384,9 +401,9 @@ class GeneratorV2(VirtualGenerator):
 
     # apply string formatting to each element of the given
     #   list and combine them into a single path string.
-    # use ** to expand fmt_dict into kwargs and use *
-    #   to splat fmt_path into multiple strings for
-    #   os.path.join
+    # use ** to expand fmt_dict into kwargs for formatting
+    #   and use * to splat fmt_path into multiple strings
+    #   for os.path.join
     def fmt_path(self, path: list, fmt_dict) -> str:
         fmt_path = [p.format(**fmt_dict) for p in path]
         return os.path.join(*fmt_path)
