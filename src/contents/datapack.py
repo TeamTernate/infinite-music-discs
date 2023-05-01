@@ -20,6 +20,56 @@ pack_mcmeta = {
 }
 }
 
+# creeper loot table
+creeper_music_entries = [
+    {'type':'minecraft:tag', 'weight':1, 'name':'minecraft:creeper_drop_music_discs', 'expand':True}
+]
+
+creeper_music_entry_custom = {
+    'type':'minecraft:item',
+    'weight':1,
+    'name':'minecraft:music_disc_11',
+    'functions':[{
+        'function':'minecraft:set_nbt',
+        'tag':'{{CustomModelData:{entry.custom_model_data}, HideFlags:32, display:{{Lore:[\"\\\"\\\\u00a77{entry.title}\\\"\"]}}}}'
+    }]
+}
+
+creeper_normal_entries = [
+    {
+        'type':'minecraft:item',
+        'functions':[{
+                'function':'minecraft:set_count',
+                'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}
+            }, {
+                'function':'minecraft:looting_enchant',
+                'count':{'min':0.0, 'max':1.0}
+            }],
+        'name':'minecraft:gunpowder'
+    }
+]
+
+# creeper.json doesn't recursively format strings, since any string
+#   formatting would have been done when the music disc loot table
+#   entries were generated
+creeper_json = {
+    'path': ['{datapack_name}', 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'],
+    'repeat': 'single',
+    'format_contents': False,
+    'contents': \
+{
+    'type':'minecraft:entity',
+    'pools':[
+        {'rolls':1, 'entries':creeper_normal_entries},
+        {'rolls':1, 'entries':creeper_music_entries, 'conditions':[{
+            'condition':'minecraft:entity_properties',
+            'predicate':{'type':'#minecraft:skeletons'},
+            'entity':'killer'
+        }]
+    }]
+}
+}
+
 # advancements
 placed_disc = {
     'path': ['{datapack_name}', 'data', '{datapack_name}', 'advancements', 'placed_disc.json'],

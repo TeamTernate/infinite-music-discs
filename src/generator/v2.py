@@ -12,6 +12,7 @@ import shutil
 import zipfile
 
 from src.contents.datapack import pack_mcmeta as dp_pack_mcmeta
+from src.contents.datapack import creeper_music_entries, creeper_music_entry_custom, creeper_json
 from src.contents.datapack import file_list as dp_file_list
 from src.definitions import Constants, Helpers, Status, DiscListContents
 from src.generator.base import VirtualGenerator
@@ -20,9 +21,6 @@ from src.generator.base import VirtualGenerator
 
 class GeneratorV2(VirtualGenerator):
 
-    #TODO: what happens when command syntax changes? Can't be backwards compatible
-    #  and copy from reference files... different sets of reference files?
-    #  command-to-string generation engine? too complex to maintain?
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
 
         #read settings
@@ -55,6 +53,15 @@ class GeneratorV2(VirtualGenerator):
             dp_pack_mcmeta['contents']['pack']['pack_format'] = pack_format
             self.write_single(dp_pack_mcmeta, locals())
 
+            #write 'creeper.json'
+            #generate music disc entries, then reach into dict and add them to the drop
+            #  pool manually
+            for entry in entry_list.entries:
+                creeper_music_entries.append(self.fmt_json(creeper_music_entry_custom, locals()))
+
+            creeper_json['contents']['pools'][1]['entries'] = creeper_music_entries
+            self.write_single(creeper_json, locals())
+
             #write other datapack files
             for dp_file in dp_file_list:
                 if dp_file['repeat'] == 'single':
@@ -65,7 +72,7 @@ class GeneratorV2(VirtualGenerator):
                     self.write_copy_within(dp_file, entry_list, locals())
 
             #write 'creeper.json'
-            self.write_creeper_loottable(datapack_name, entry_list)
+            #self.write_creeper_loottable(datapack_name, entry_list)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
