@@ -14,7 +14,7 @@ import zipfile
 from src.contents.datapack import pack_mcmeta as dp_pack_mcmeta
 from src.contents.datapack import creeper_music_entries, creeper_music_entry_custom, creeper_json
 from src.contents.datapack import file_list as dp_file_list
-from src.definitions import Constants, Helpers, Status, DiscListContents
+from src.definitions import Constants, Status, DiscListContents
 from src.generator.base import VirtualGenerator
 
 
@@ -33,6 +33,8 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
+        #following variables are not explicitly used, but are included in locals()
+        #  which gets used to format template strings from contents.datapack
         dp_version_str = f'v{self._version_major}.{self._version_minor}'
         dp_num_discs = len(entry_list.entries)
 
@@ -71,9 +73,6 @@ class GeneratorV2(VirtualGenerator):
                 elif dp_file['repeat'] == 'copy_within':
                     self.write_copy_within(dp_file, entry_list, locals())
 
-            #write 'creeper.json'
-            #self.write_creeper_loottable(datapack_name, entry_list)
-
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
 
@@ -101,55 +100,6 @@ class GeneratorV2(VirtualGenerator):
                 return zip_status
 
         return Status.SUCCESS
-
-    # generate creeper loottable
-    def write_creeper_loottable(self, datapack_name: str, entry_list: DiscListContents):
-
-        dp_base = os.getcwd()
-        dp_dir = os.path.join(dp_base, datapack_name, 'data', 'minecraft', 'loot_tables', 'entities')
-        os.makedirs(dp_dir)
-
-        creeper_mdentries = []
-        creeper_mdentries.append({'type':'minecraft:tag', 'weight':1, 'name':'minecraft:creeper_drop_music_discs', 'expand':True})
-
-        for entry in entry_list.entries:
-            creeper_mdentries.append({
-                'type':'minecraft:item',
-                'weight':1,
-                'name':'minecraft:music_disc_11',
-                'functions':[{
-                    'function':'minecraft:set_nbt',
-                    'tag':f'{{CustomModelData:{entry.custom_model_data}, HideFlags:32, display:{{Lore:[\"\\\"\\\\u00a77{entry.title}\\\"\"]}}}}'
-                }]
-            })
-
-        creeper_normentries = [{
-            'type':'minecraft:item',
-            'functions':[{
-                    'function':'minecraft:set_count',
-                    'count':{'min':0.0, 'max':2.0, 'type':'minecraft:uniform'}
-                }, {
-                    'function':'minecraft:looting_enchant',
-                    'count':{'min':0.0, 'max':1.0}
-                }],
-            'name':'minecraft:gunpowder'
-        }]
-
-        creeper_json = {
-            'type':'minecraft:entity',
-            'pools':[
-                {'rolls':1, 'entries':creeper_normentries},
-                {'rolls':1, 'entries':creeper_mdentries, 'conditions':[{
-                    'condition':'minecraft:entity_properties',
-                    'predicate':{'type':'#minecraft:skeletons'},
-                    'entity':'killer'
-                }]
-            }]
-        }
-
-        #write 'creeper.json'
-        with open(os.path.join(dp_dir, 'creeper.json'), 'w', encoding='utf-8') as creeper:
-            creeper.write(json.dumps(creeper_json, indent=4))
 
 
 
