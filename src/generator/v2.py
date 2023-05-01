@@ -320,43 +320,6 @@ class GeneratorV2(VirtualGenerator):
         
         return Status.SUCCESS
 
-    # helper function that copies the contents of f_src into f_dst, while applying
-    #   string formatting to every line
-    # if called with fmt_dict=locals(), it will effectively format each line of
-    #   f_src like an f-string, with all the variables in the caller's scope
-    def copy_func_with_fmt(self, f_src: str, f_dst: str, fmt_dict):
-        with open(f_src, 'r', encoding='utf-8') as src:
-            with open(f_dst, 'w', encoding='utf-8') as dst:
-
-                for line in src.readlines():
-
-                    #decompose fmt_dict into its key-value pairs so
-                    #  it can be used for string formatting
-                    line_fmt = line.format(**fmt_dict)
-                    dst.write(line_fmt)
-
-    # helper function that copes the contents of f_src into f_dst once per
-    #   disc. Also applies string formatting to every line
-    #
-    # if called with fmt_dict=locals(), it will effectively format each line of
-    #   f_src like an f-string, with all the variables in the caller's scope.
-    #   "entry" is explicitly included in the formatting since it didn't exist
-    #   in the caller's scope
-    def copy_lines_to_func_with_fmt(self, f_src: str, f_dst: str, entry_list: DiscListContents, fmt_dict):
-        with open(f_src, 'r', encoding='utf-8') as src:
-            with open(f_dst, 'w', encoding='utf-8') as dst:
-
-                #return to the top of f_src with every disc to reread the same contents
-                #more efficient than reopening the file every time
-                for entry in entry_list.entries:
-                    src.seek(0)
-                    for line in src.readlines():
-
-                        #decompose fmt_dict into its key-value pairs so
-                        #  it can be used for string formatting
-                        line_fmt = line.format(**fmt_dict, entry=entry)
-                        dst.write(line_fmt)
-
     # recursively apply string formatting to any string-type
     #   value in the given json dict or json sub-list
     def fmt_json(self, obj: Union[dict, list], fmt_dict):
@@ -447,17 +410,5 @@ class GeneratorV2(VirtualGenerator):
             json.dump(self.fmt_json(src['contents'], fmt_dict), dst, indent=4)
         else:
             json.dump(src['contents'], dst, indent=4)
-
-    # helper function that copies the contents of f_src into f_dst, while applying
-    #   string formatting to every string-type value in the given json file
-    # if called with fmt_dict=locals(), it will effectively format each line of
-    #   f_src like an f-string, with all the variables in the caller's scope
-    def copy_json_with_fmt(self, f_src: str, f_dst: str, fmt_dict):
-        with open(f_src, 'r', encoding='utf-8') as src:
-            with open(f_dst, 'w', encoding='utf-8') as dst:
-
-                src_fmt = json.load(src)
-                src_fmt = self.fmt_json(src_fmt, fmt_dict)
-                dst.write(json.dumps(src_fmt, indent=4))
 
 
