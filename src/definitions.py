@@ -91,6 +91,7 @@ class Status(Enum):
     FFMPEG_CONVERT_FAIL = 16
     DUP_INTERNAL_NAME = 17
     BAD_OGG_META = 18
+    PACK_DIR_IN_USE = 19
 
 class FileExt():
     PNG = 'png'
@@ -192,7 +193,8 @@ StatusMessageDict = {
     Status.BAD_UNICODE_CHAR:        "Couldn't use track name. Try removing uncommon characters.",
     Status.FFMPEG_CONVERT_FAIL:     "FFmpeg failed while converting a track to '.ogg' format.",
     Status.DUP_INTERNAL_NAME:       "Some tracks have the same name. Try removing duplicate tracks.",
-    Status.BAD_OGG_META:            "Failed to detect ogg file length while converting."
+    Status.BAD_OGG_META:            "Failed to detect ogg file length while converting.",
+    Status.PACK_DIR_IN_USE:         "Couldn't remove pack folder. Is something else using it?"
 }
 
 #dictionary to associate Status : sticky state
@@ -215,7 +217,8 @@ StatusStickyDict = {
     Status.BAD_UNICODE_CHAR:        True,
     Status.FFMPEG_CONVERT_FAIL:     True,
     Status.DUP_INTERNAL_NAME:       True,
-    Status.BAD_OGG_META:            True
+    Status.BAD_OGG_META:            True,
+    Status.PACK_DIR_IN_USE:         True
 }
 
 #dictionary to associate digit : digit name
@@ -234,7 +237,7 @@ DigitNameDict = {
 
 #dictionary to associate game version : pack format version
 PackFormatsDict = {
-    '1.20':             {'dp':13, 'rp':14},
+    '1.20':             {'dp':14, 'rp':15},
     '1.19.4':           {'dp':12, 'rp':13},
     '1.19.3':           {'dp':10, 'rp':12},
     '1.19 - 1.19.2':    {'dp':10, 'rp':9},
@@ -261,11 +264,12 @@ DatapackVersionDict = {
 #dataclasses to collect DiscList contents for pack generation
 @dataclass
 class DiscListEntryContents:
-    texture_file:   str = ""
-    track_file:     str = ""
-    title:          str = ""
-    internal_name:  str = ""
-    length:         int = 0
+    texture_file:       str = ""
+    track_file:         str = ""
+    title:              str = ""
+    internal_name:      str = ""
+    length:             int = 0
+    custom_model_data:  int = 0
 
 #TODO: use iter and next so you don't have to iterate over entries?
 @dataclass

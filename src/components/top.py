@@ -609,6 +609,7 @@ class GeneratePackWorker(QtCore.QObject):
         #finish up
         print("Successfully generated datapack and resourcepack!")
 
+        #TODO: don't emit if status ZIP was emitted? don't overwrite error message?
         self.status.emit(self._data.status)
         self.finished.emit()
 

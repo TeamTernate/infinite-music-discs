@@ -47,21 +47,13 @@ class QPosIntLineEdit(QSettingLineEdit):
             return self._min
 
     def capBottom(self):
-        try:
-            i_text = int(self.text())
-            i_text = max(i_text, self._min)
-        except ValueError:
-            i_text = self._min
-
+        i_text = self.text_int(self.text())
+        i_text = max(i_text, self._min)
         self.setText(str(i_text))
 
     def capTop(self):
-        try:
-            i_text = int(self.text())
-            i_text = min(i_text, self._max)
-        except ValueError:
-            i_text = self._min
-
+        i_text = self.text_int(self.text())
+        i_text = min(i_text, self._max)
         self.setText(str(i_text))
 
 

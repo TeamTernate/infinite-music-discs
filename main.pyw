@@ -14,8 +14,6 @@
 
 #TODO: rename mix_mono setting to something useful also default it to on
 
-#TODO: move generator v2 files to a reference directory instead of hardcoded
-
 import sys
 import ctypes
 import platform
