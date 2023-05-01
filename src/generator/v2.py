@@ -11,6 +11,7 @@ import json
 import shutil
 import zipfile
 
+from src.contents.datapack import file_list as dp_file_list
 from src.definitions import Constants, Helpers, Status, DiscListContents
 from src.generator.base import VirtualGenerator
 
@@ -39,16 +40,24 @@ class GeneratorV2(VirtualGenerator):
         try:
             self.write_dp_framework(entry_list, datapack_name, pack_format)
 
-            self.write_func_tags(datapack_name)
-            self.write_advancements(datapack_name)
+            for dp_file in dp_file_list:
+                if dp_file['repeat'] == 'single':
+                    self.write_single(dp_file, locals())
+                elif dp_file['repeat'] == 'copy':
+                    self.write_copy(dp_file, entry_list, locals())
+                elif dp_file['repeat'] == 'copy_within':
+                    self.write_copy_within(dp_file, entry_list, locals())
 
-            self.write_global_funcs(datapack_name, dp_version_str)
-            self.write_funcs_to_register_jukebox(datapack_name)
-            self.write_jukebox_tick_funcs(datapack_name)
-            self.write_player_tick_funcs(datapack_name)
-            self.write_funcs_entry_per_disc(datapack_name, entry_list)
-            self.write_creeper_loottable(datapack_name, entry_list)
-            self.write_per_disc_funcs(datapack_name, entry_list)
+            # self.write_func_tags(datapack_name)
+            # self.write_advancements(datapack_name)
+
+            # self.write_global_funcs(datapack_name, dp_version_str)
+            # self.write_funcs_to_register_jukebox(datapack_name)
+            # self.write_jukebox_tick_funcs(datapack_name)
+            # self.write_player_tick_funcs(datapack_name)
+            # self.write_funcs_entry_per_disc(datapack_name, entry_list)
+            # self.write_creeper_loottable(datapack_name, entry_list)
+            # self.write_per_disc_funcs(datapack_name, entry_list)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
@@ -655,6 +664,10 @@ class GeneratorV2(VirtualGenerator):
     def write_single(self, src: dict, fmt_dict):
         fmt_dict.update(locals())
         f_dst = self.fmt_path(src['path'], fmt_dict)
+        d_dst = os.path.dirname(f_dst)
+
+        if not os.path.exists(d_dst):
+            os.makedirs(d_dst)
 
         with open(f_dst, 'w', encoding='utf-8') as dst:
             self.write_pack_file(src, dst, fmt_dict)
@@ -663,12 +676,20 @@ class GeneratorV2(VirtualGenerator):
         for entry in entry_list.entries:
             fmt_dict.update(locals())
             f_dst = self.fmt_path(src['path'], fmt_dict)
+            d_dst = os.path.dirname(f_dst)
+
+            if not os.path.exists(d_dst):
+                os.makedirs(d_dst)
 
             with open(f_dst, 'w', encoding='utf-8') as dst:
                 self.write_pack_file(src, dst, fmt_dict)
 
     def write_copy_within(self, src: dict, entry_list: DiscListContents, fmt_dict):
         f_dst = self.fmt_path(src['path'], fmt_dict)
+        d_dst = os.path.dirname(f_dst)
+
+        if not os.path.exists(d_dst):
+            os.makedirs(d_dst)
 
         with open(f_dst, 'w', encoding='utf-8') as dst:
             for entry in entry_list.entries:
