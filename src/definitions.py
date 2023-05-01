@@ -237,7 +237,7 @@ DigitNameDict = {
 
 #dictionary to associate game version : pack format version
 PackFormatsDict = {
-    '1.20':             {'dp':13, 'rp':14},
+    '1.20':             {'dp':14, 'rp':15},
     '1.19.4':           {'dp':12, 'rp':13},
     '1.19.3':           {'dp':10, 'rp':12},
     '1.19 - 1.19.2':    {'dp':10, 'rp':9},
