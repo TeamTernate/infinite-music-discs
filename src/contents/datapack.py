@@ -3,7 +3,7 @@
 #Infinite Music Discs datapack file contents module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 #
-#Stores the contents of every file in the datapack in a templated form,
+#Stores the contents of every file in the datapack in a templated form
 #  to make generation easy. Datapack generator will try to create a
 #  file from every object in file_list
 

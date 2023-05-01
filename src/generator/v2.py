@@ -48,6 +48,7 @@ class GeneratorV2(VirtualGenerator):
                 else:
                     shutil.rmtree(datapack_name, ignore_errors=True)
 
+            #TODO: move inside dp immediately so there's no risk of breaking external stuff
             #write 'pack.mcmeta'
             #reach into dict and set pack_format manually, since there's no str.format()
             #  equivalent for integers
@@ -93,33 +94,6 @@ class GeneratorV2(VirtualGenerator):
                 return zip_status
 
         return Status.SUCCESS
-
-    # generate directory structure and framework files
-    #TODO: move inside dp immediately so there's no risk of breaking external stuff
-    def write_dp_framework(self, entry_list: DiscListContents, datapack_name: str, pack_format: int):
-
-        #try to remove old datapack. If datapack folder exists but mcmeta does not,
-        #  then this directory may belong to something else so don't delete
-        if os.path.isdir(datapack_name):
-            if not os.path.isfile(os.path.join(datapack_name, 'pack.mcmeta')):
-                raise FileExistsError
-            else:
-                shutil.rmtree(datapack_name, ignore_errors=True)
-
-        #build datapack directory tree
-        os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'tags', 'functions'))
-        os.makedirs(os.path.join(datapack_name, 'data', 'minecraft', 'loot_tables', 'entities'))
-        os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'functions'))
-        os.makedirs(os.path.join(datapack_name, 'data', datapack_name, 'advancements'))
-
-        #write 'pack.mcmeta'
-        with open(os.path.join(datapack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
-            pack.write(json.dumps({
-                'pack': {
-                    'pack_format': pack_format,
-                    'description': (Constants.DATAPACK_DESC % len(entry_list.internal_names))
-                }
-            }, indent=4))
 
     # generate creeper loottable
     def write_creeper_loottable(self, datapack_name: str, entry_list: DiscListContents):
