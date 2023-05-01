@@ -356,6 +356,8 @@ class GeneratorV2(VirtualGenerator):
 
 
 
+    # write a single copy of a file based on a reference
+    #  object from contents.datapack
     def write_single(self, src: dict, fmt_dict):
         fmt_dict.update(locals())
         f_dst = self.fmt_path(src['path'], fmt_dict)
@@ -367,6 +369,8 @@ class GeneratorV2(VirtualGenerator):
         with open(f_dst, 'w', encoding='utf-8') as dst:
             self.write_pack_file(src, dst, fmt_dict)
 
+    # write several copies of a file, one copy per
+    #   entry in entry_list
     def write_copy(self, src: dict, entry_list: DiscListContents, fmt_dict):
         for entry in entry_list.entries:
             fmt_dict.update(locals())
@@ -379,6 +383,8 @@ class GeneratorV2(VirtualGenerator):
             with open(f_dst, 'w', encoding='utf-8') as dst:
                 self.write_pack_file(src, dst, fmt_dict)
 
+    # write the same lines into a file multiple times,
+    #   once per entry in entry_list
     def write_copy_within(self, src: dict, entry_list: DiscListContents, fmt_dict):
         f_dst = self.fmt_path(src['path'], fmt_dict)
         d_dst = os.path.dirname(f_dst)
@@ -392,6 +398,8 @@ class GeneratorV2(VirtualGenerator):
 
                 self.write_pack_file(src, dst, fmt_dict)
 
+    # given a reference dict, detect whether it will
+    #   write a plaintext or JSON file
     def write_pack_file(self, src: dict, dst: TextIO, fmt_dict):
         if type(src['contents']) == str:
             self.write_text_file(src, dst, fmt_dict)
@@ -399,12 +407,17 @@ class GeneratorV2(VirtualGenerator):
         elif type(src['contents']) == dict:
             self.write_json_file(src, dst, fmt_dict)
 
+    # write a plaintext file, optionally formatting
+    #   the given string
     def write_text_file(self, src: dict, dst: TextIO, fmt_dict):
         if src.get('format_contents', True):
             dst.writelines(src['contents'].lstrip().format(**fmt_dict))
         else:
             dst.writelines(src['contents'].lstrip())
 
+    # write a JSON file, optionally applying recursive
+    #   string formatting to every string value in the
+    #   given dict
     def write_json_file(self, src: dict, dst: TextIO, fmt_dict):
         if src.get('format_contents', True):
             json.dump(self.fmt_json(src['contents'], fmt_dict), dst, indent=4)
