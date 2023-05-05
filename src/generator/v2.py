@@ -19,7 +19,7 @@ from src.definitions import Constants, Status, DiscListContents
 from src.generator.base import VirtualGenerator
 
 
-
+#TODO: OSError on app sys.exit() from using context managers?
 class GeneratorV2(VirtualGenerator):
 
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
@@ -180,17 +180,19 @@ class GeneratorV2(VirtualGenerator):
 
         #write 'pack.mcmeta'
         with open(os.path.join('pack.mcmeta'), 'w', encoding='utf-8') as pack:
-            json.dump({
+            pack_mcmeta_json = {
                 'pack':{
                     'pack_format':pack_format,
                     'description':(Constants.RESOURCEPACK_DESC % len(entry_list.internal_names))
                 }
-            }, pack, indent=4)
+            }
+
+            json.dump(pack_mcmeta_json, pack, indent=4)
 
         #write 'sounds.json'
         with self.set_directory(os.path.join('assets', 'minecraft')):
             with open('sounds.json', 'w', encoding='utf-8') as sounds:
-                json_dict = {}
+                sounds_json = {}
 
                 for name in entry_list.internal_names:
                     sound = {
@@ -200,9 +202,9 @@ class GeneratorV2(VirtualGenerator):
                         }]
                     }
 
-                    json_dict[f'music_disc.{name}'] = sound
+                    sounds_json[f'music_disc.{name}'] = sound
 
-                json.dump(json_dict, sounds, indent=4)
+                json.dump(sounds_json, sounds, indent=4)
 
     # generate item models
     def write_item_models(self, entry_list: DiscListContents, resourcepack_name: str):
@@ -212,28 +214,32 @@ class GeneratorV2(VirtualGenerator):
             #write 'music_disc_11.json'
             with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
 
-                json_list = []
+                override_list = []
                 for entry in entry_list.entries:
 
-                    json_list.append({
+                    override_list.append({
                         'predicate': {'custom_model_data': entry.custom_model_data},
                         'model': f'item/music_disc_{entry.internal_name}'
                     })
 
-                json.dump({
+                music_disc_11_json = {
                     'parent': 'item/generated',
                     'textures': {'layer0': 'item/music_disc_11'},
-                    'overrides': json_list
-                }, music_disc_11, indent=4)
+                    'overrides': override_list
+                }
+
+                json.dump(music_disc_11_json, music_disc_11, indent=4)
 
             #write 'music_disc_*.json' files
             for name in entry_list.internal_names:
                 with open(f'music_disc_{name}.json', 'w', encoding='utf-8') as music_disc:
 
-                    json.dump({
+                    music_disc_json = {
                         'parent':'item/generated',
                         'textures':{'layer0': f'item/music_disc_{name}'}
-                    }, music_disc, indent=4)
+                    }
+
+                    json.dump(music_disc_json, music_disc, indent=4)
 
     # generate assets dir
     def copy_assets(self, entry_list: DiscListContents, resourcepack_name: str):
