@@ -16,7 +16,6 @@ from PyQt5.QtGui import QColor
 
 import build.version as version
 
-#TODO: define some datapack strings here so they're in a known location
 
 
 #constants
