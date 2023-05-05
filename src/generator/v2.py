@@ -19,7 +19,7 @@ from src.definitions import Constants, Status, DiscListContents
 from src.generator.base import VirtualGenerator
 
 
-#TODO: OSError on app sys.exit() from using context managers?
+
 class GeneratorV2(VirtualGenerator):
 
     def generate_datapack(self, entry_list: DiscListContents, user_settings={}):
