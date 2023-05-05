@@ -120,9 +120,22 @@ class GeneratorV2(VirtualGenerator):
 
         #write resourcepack
         try:
-            self.write_rp_framework(entry_list, resourcepack_name, pack_format)
-            self.write_item_models(entry_list, resourcepack_name)
-            self.copy_assets(entry_list, resourcepack_name)
+            #try to remove old resourcepack. If resourcepack folder exists but mcmeta does not,
+            #  then this directory may belong to something else so don't delete
+            if os.path.isdir(resourcepack_name):
+                if not os.path.isfile(os.path.join(resourcepack_name, 'pack.mcmeta')):
+                    raise FileExistsError
+                else:
+                    shutil.rmtree(resourcepack_name, ignore_errors=True)
+
+            #create pack directory
+            os.makedirs(resourcepack_name)
+
+            #write resourcepack files to pack directory
+            with self.set_directory(resourcepack_name):
+                self.write_rp_framework(entry_list, resourcepack_name, pack_format)
+                self.write_item_models(entry_list, resourcepack_name)
+                self.copy_assets(entry_list, resourcepack_name)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
@@ -160,21 +173,13 @@ class GeneratorV2(VirtualGenerator):
     # generate directory structure and framework files
     def write_rp_framework(self, entry_list: DiscListContents, resourcepack_name: str, pack_format: int):
 
-        #try to remove old resourcepack. If resourcepack folder exists but mcmeta does not,
-        #  then this directory may belong to something else so don't delete
-        if os.path.isdir(resourcepack_name):
-            if not os.path.isfile(os.path.join(resourcepack_name, 'pack.mcmeta')):
-                raise FileExistsError
-            else:
-                shutil.rmtree(resourcepack_name, ignore_errors=True)
-
         #build resourcepack directory tree
-        os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
-        os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records'))
-        os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
+        os.makedirs(os.path.join('assets', 'minecraft', 'models', 'item'))
+        os.makedirs(os.path.join('assets', 'minecraft', 'sounds', 'records'))
+        os.makedirs(os.path.join('assets', 'minecraft', 'textures', 'item'))
 
         #write 'pack.mcmeta'
-        with open(os.path.join(resourcepack_name, 'pack.mcmeta'),
+        with open(os.path.join('pack.mcmeta'),
                   'w', encoding='utf-8') as pack:
             pack.write(json.dumps({
                 'pack':{
@@ -184,65 +189,63 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
         #write 'sounds.json'
-        with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'),
-                  'w', encoding='utf-8') as sounds:
-            json_dict = {}
+        with self.set_directory(os.path.join('assets', 'minecraft')):
+            with open('sounds.json', 'w', encoding='utf-8') as sounds:
+                json_dict = {}
 
-            for name in entry_list.internal_names:
-                sound = {
-                    'sounds':[{
-                        'name':f'records/{name}',
-                        'stream':True
-                    }]
-                }
+                for name in entry_list.internal_names:
+                    sound = {
+                        'sounds':[{
+                            'name':f'records/{name}',
+                            'stream':True
+                        }]
+                    }
 
-                json_dict[f'music_disc.{name}'] = sound
+                    json_dict[f'music_disc.{name}'] = sound
 
-            sounds.write(json.dumps(json_dict, indent=4))
+                sounds.write(json.dumps(json_dict, indent=4))
 
     # generate item models
     def write_item_models(self, entry_list: DiscListContents, resourcepack_name: str):
 
-        #write 'music_disc_11.json'
-        with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'),
-                  'w', encoding='utf-8') as music_disc_11:
+        with self.set_directory(os.path.join('assets', 'minecraft', 'models', 'item')):
 
-            json_list = []
-            for entry in entry_list.entries:
+            #write 'music_disc_11.json'
+            with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
 
-                json_list.append({
-                    'predicate': {'custom_model_data': entry.custom_model_data},
-                    'model': f'item/music_disc_{entry.internal_name}'
-                })
+                json_list = []
+                for entry in entry_list.entries:
 
-            music_disc_11.write(json.dumps({
-                'parent': 'item/generated',
-                'textures': {'layer0': 'item/music_disc_11'},
-                'overrides': json_list
-            }, indent=4))
+                    json_list.append({
+                        'predicate': {'custom_model_data': entry.custom_model_data},
+                        'model': f'item/music_disc_{entry.internal_name}'
+                    })
 
-        #write 'music_disc_*.json' files
-        for name in entry_list.internal_names:
-            with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', f'music_disc_{name}.json'),
-                      'w', encoding='utf-8') as music_disc:
-
-                music_disc.write(json.dumps({
-                    'parent':'item/generated',
-                    'textures':{'layer0': f'item/music_disc_{name}'}
+                music_disc_11.write(json.dumps({
+                    'parent': 'item/generated',
+                    'textures': {'layer0': 'item/music_disc_11'},
+                    'overrides': json_list
                 }, indent=4))
+
+            #write 'music_disc_*.json' files
+            for name in entry_list.internal_names:
+                with open(f'music_disc_{name}.json', 'w', encoding='utf-8') as music_disc:
+
+                    music_disc.write(json.dumps({
+                        'parent':'item/generated',
+                        'textures':{'layer0': f'item/music_disc_{name}'}
+                    }, indent=4))
 
     # generate assets dir
     def copy_assets(self, entry_list: DiscListContents, resourcepack_name: str):
 
         #copy sound and texture files
         for entry in entry_list.entries:
-            shutil.copyfile(entry.track_file,
-                            os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records',
-                            f'{entry.internal_name}.ogg'))
+            with self.set_directory(os.path.join('assets', 'minecraft', 'sounds', 'records')):
+                shutil.copyfile(entry.track_file, f'{entry.internal_name}.ogg')
 
-            shutil.copyfile(entry.texture_file,
-                            os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item',
-                            f'music_disc_{entry.internal_name}.png'))
+            with self.set_directory(os.path.join('assets', 'minecraft', 'textures', 'item')):
+                shutil.copyfile(entry.texture_file, f'music_disc_{entry.internal_name}.png')
 
 
 
