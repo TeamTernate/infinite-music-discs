@@ -5,11 +5,13 @@
 #
 #Stores the contents of every file in the datapack in a templated form
 #  to make generation easy. Datapack generator will try to create a
-#  file from every object in file_list
+#  file from every object in file_list.
+#
+#Paths are relative to the datapack top-level directory.
 
 # pack.mcmeta
 pack_mcmeta = {
-    'path': ['{datapack_name}', 'pack.mcmeta'],
+    'path': ['pack.mcmeta'],
     'repeat': 'single',
     'contents': \
 {
@@ -58,7 +60,7 @@ creeper_normal_entries = [
 #   formatting would have been done when the music disc loot table
 #   entries were generated
 creeper_json = {
-    'path': ['{datapack_name}', 'data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'],
+    'path': ['data', 'minecraft', 'loot_tables', 'entities', 'creeper.json'],
     'repeat': 'single',
     'format_contents': False,
     'contents': \
@@ -77,7 +79,7 @@ creeper_json = {
 
 # advancements
 placed_disc = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'advancements', 'placed_disc.json'],
+    'path': ['data', '{datapack_name}', 'advancements', 'placed_disc.json'],
     'repeat': 'single',
     'contents': \
 {
@@ -104,7 +106,7 @@ placed_disc = {
 }
 
 placed_jukebox = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'advancements', 'placed_jukebox.json'],
+    'path': ['data', '{datapack_name}', 'advancements', 'placed_jukebox.json'],
     'repeat': 'single',
     'contents': \
 {
@@ -127,7 +129,7 @@ placed_jukebox = {
 
 # function tags
 load = {
-    'path': ['{datapack_name}', 'data', 'minecraft', 'tags', 'functions', 'load.json'],
+    'path': ['data', 'minecraft', 'tags', 'functions', 'load.json'],
     'repeat': 'single',
     'contents': \
 {
@@ -138,7 +140,7 @@ load = {
 }
 
 tick = {
-    'path': ['{datapack_name}', 'data', 'minecraft', 'tags', 'functions', 'tick.json'],
+    'path': ['data', 'minecraft', 'tags', 'functions', 'tick.json'],
     'repeat': 'single',
     'contents': \
 {
@@ -151,7 +153,7 @@ tick = {
 
 # top-level functions
 destroy_jukebox_marker = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'destroy_jukebox_marker.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'destroy_jukebox_marker.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -161,7 +163,7 @@ kill @s
 }
 
 give_all_discs = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'give_all_discs.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'give_all_discs.mcfunction'],
     'repeat': 'copy_within',
     'contents': \
 """
@@ -170,7 +172,7 @@ execute at @s run function {datapack_name}:give_{entry.internal_name}
 }
 
 give_disc = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'give_{entry.internal_name}.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'give_{entry.internal_name}.mcfunction'],
     'repeat': 'copy',
     'contents': \
 """
@@ -179,7 +181,7 @@ execute at @s run summon item ~ ~ ~ {{Item:{{id:"minecraft:music_disc_11", Count
 }
 
 help = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'help.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'help.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -197,7 +199,7 @@ tellraw @s [{{"text":"\n[", "color":"gold"}}, {{"text":"i", "color":"aqua", "bol
 }
 
 jukebox_check_playing = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'jukebox_check_playing.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'jukebox_check_playing.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -207,7 +209,7 @@ execute as @s[tag=imd_is_playing] unless block ~ ~ ~ minecraft:jukebox{{IsPlayin
 }
 
 jukebox_event_tick = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'jukebox_event_tick.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'jukebox_event_tick.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -218,7 +220,7 @@ execute as @e[type=marker,tag=imd_jukebox_marker,tag=imd_is_playing,tag=imd_has_
 }
 
 jukebox_on_play = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'jukebox_on_play.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'jukebox_on_play.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -229,7 +231,7 @@ execute as @s[tag=imd_has_custom_disc] run function {datapack_name}:pre_play
 }
 
 jukebox_on_stop = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'jukebox_on_stop.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'jukebox_on_stop.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -241,7 +243,7 @@ function {datapack_name}:stop
 }
 
 jukebox_tick_timers = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'jukebox_tick_timers.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'jukebox_tick_timers.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -253,7 +255,7 @@ execute as @s[scores={{imd_stop_11_time=0}},tag=!imd_stopped_11] run function {d
 }
 
 on_placed_disc = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'on_placed_disc.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'on_placed_disc.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -263,7 +265,7 @@ execute as @s run function {datapack_name}:raycast_start
 }
 
 on_placed_jukebox = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'on_placed_jukebox.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'on_placed_jukebox.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -273,7 +275,7 @@ execute as @s run function {datapack_name}:raycast_start
 }
 
 play = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'play.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'play.mcfunction'],
     'repeat': 'copy_within', #single, copy_within, copy
     'contents': \
 """
@@ -282,7 +284,7 @@ execute if score @e[type=marker,tag=imd_jukebox_marker,distance=..0.1,limit=1] i
 }
 
 play_duration = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'play_duration.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'play_duration.mcfunction'],
     'repeat': 'copy_within',
     'contents': \
 """
@@ -291,7 +293,7 @@ execute if score @s imd_disc_id matches {entry.custom_model_data} run function {
 }
 
 pre_play = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'pre_play.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'pre_play.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -304,7 +306,7 @@ execute as @a[distance=..64] run function {datapack_name}:register_jukebox_liste
 }
 
 raycast_hit = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'raycast_hit.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'raycast_hit.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -314,7 +316,7 @@ execute align xyz positioned ~0.5 ~0.5 ~0.5 unless entity @e[type=marker,tag=imd
 }
 
 raycast_start = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'raycast_start.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'raycast_start.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -324,7 +326,7 @@ execute at @s anchored eyes positioned ^ ^ ^ run function {datapack_name}:raycas
 }
 
 raycast_step = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'raycast_step.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'raycast_step.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -335,7 +337,7 @@ execute if score @s imd_rc_steps matches 1.. positioned ^ ^ ^0.005 run function 
 }
 
 register_jukebox_listener = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'register_jukebox_listener.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'register_jukebox_listener.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -347,7 +349,7 @@ function {datapack_name}:play
 }
 
 register_jukebox_marker = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'register_jukebox_marker.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'register_jukebox_marker.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -356,7 +358,7 @@ summon marker ~ ~ ~ {{Tags:["imd_jukebox_marker"]}}
 }
 
 register_player = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'register_player.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'register_player.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -366,7 +368,7 @@ tag @s[scores={{imd_player_id=1..}}] add imd_has_id
 }
 
 register_players_tick = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'register_players_tick.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'register_players_tick.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -377,7 +379,7 @@ execute as @a[tag=!imd_has_id] run function {datapack_name}:register_player
 #note that v2 generator doesn't use ReplaceItemCommand for pre-1.17 compatibility
 #  since v2 datapack is not compatible with pre-1.19.4 versions anyway
 set_disc_track = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'set_disc_track.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'set_disc_track.mcfunction'],
     'repeat': 'copy_within',
     'contents': \
 """
@@ -386,7 +388,7 @@ execute as @s[nbt={{SelectedItem:{{id:"minecraft:music_disc_11", tag:{{CustomMod
 }
 
 setup_load = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'setup_load.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'setup_load.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -404,7 +406,7 @@ tellraw @a [{{"text":"Type ", "color":"gold"}}, {{"text":"/function {datapack_na
 }
 
 stop = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'stop.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'stop.mcfunction'],
     'repeat': 'copy_within',
     'contents': \
 """
@@ -413,7 +415,7 @@ execute if score @s imd_disc_id matches {entry.custom_model_data} run function {
 }
 
 stop_11 = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'stop_11.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'stop_11.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -426,7 +428,7 @@ execute unless data entity @s data.Listeners_11[0] run tag @s add imd_stopped_11
 }
 
 watchdog_reset_tickcount = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', 'watchdog_reset_tickcount.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', 'watchdog_reset_tickcount.mcfunction'],
     'repeat': 'single',
     'contents': \
 """
@@ -437,7 +439,7 @@ schedule function {datapack_name}:watchdog_reset_tickcount 10s replace
 
 # per-disc functions
 disc_play = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', '{entry.internal_name}', 'play.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', '{entry.internal_name}', 'play.mcfunction'],
     'repeat': 'copy',
     'contents': \
 """
@@ -447,7 +449,7 @@ playsound minecraft:music_disc.{entry.internal_name} record @s ~ ~ ~ 4 1
 }
 
 disc_play_duration = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', '{entry.internal_name}', 'play_duration.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', '{entry.internal_name}', 'play_duration.mcfunction'],
     'repeat': 'copy',
     'contents': \
 """
@@ -456,7 +458,7 @@ scoreboard players set @s imd_play_time {entry.length}
 }
 
 disc_stop = {
-    'path': ['{datapack_name}', 'data', '{datapack_name}', 'functions', '{entry.internal_name}', 'stop.mcfunction'],
+    'path': ['data', '{datapack_name}', 'functions', '{entry.internal_name}', 'stop.mcfunction'],
     'repeat': 'copy',
     'contents': \
 """
