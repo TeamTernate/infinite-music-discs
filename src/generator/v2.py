@@ -12,8 +12,9 @@ import shutil
 import zipfile
 
 from src.contents.datapack import pack_mcmeta as dp_pack_mcmeta
-from src.contents.datapack import creeper_music_entries, creeper_music_entry_custom, creeper_json
+from src.contents.datapack import creeper_music_entry_base, creeper_music_entry_custom, creeper_json
 from src.contents.datapack import file_list as dp_file_list
+
 from src.definitions import Constants, Status, DiscListContents
 from src.generator.base import VirtualGenerator
 
@@ -58,6 +59,9 @@ class GeneratorV2(VirtualGenerator):
             #prepare 'creeper.json' before writing
             #generate JSON for music disc entries, then reach into dict and add them
             #  to the drop pool manually
+            creeper_music_entries = []
+            creeper_music_entries.append(creeper_music_entry_base)
+
             for entry in entry_list.entries:
                 creeper_music_entries.append(self.fmt_json(creeper_music_entry_custom, locals()))
 
@@ -108,31 +112,23 @@ class GeneratorV2(VirtualGenerator):
         pack_format = user_settings.get('version').get('rp', Constants.DEFAULT_PACK_FORMAT)
         offset = user_settings.get('offset', 0)
 
+        for i,entry in enumerate(entry_list.entries):
+            entry.custom_model_data = i + offset + 1
+
         resourcepack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         resourcepack_name = resourcepack_name + Constants.RESOURCEPACK_SUFFIX
 
-        #capture base dir
-        base_dir = os.getcwd()
-
         #write resourcepack
-        #use chdir to move around directory structure and reduce file paths
         try:
             self.write_rp_framework(entry_list, resourcepack_name, pack_format)
-
-            os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft', 'models', 'item'))
-            self.write_item_models(entry_list, offset)
-
-            os.chdir(os.path.join(base_dir, resourcepack_name, 'assets', 'minecraft'))
-            self.copy_assets(entry_list)
+            self.write_item_models(entry_list, resourcepack_name)
+            self.copy_assets(entry_list, resourcepack_name)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
         
         except FileExistsError:
             return Status.PACK_DIR_IN_USE
-        
-        finally:
-            os.chdir(base_dir)
 
         #copy pack.png
         try:
@@ -178,7 +174,8 @@ class GeneratorV2(VirtualGenerator):
         os.makedirs(os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item'))
 
         #write 'pack.mcmeta'
-        with open(os.path.join(resourcepack_name, 'pack.mcmeta'), 'w', encoding='utf-8') as pack:
+        with open(os.path.join(resourcepack_name, 'pack.mcmeta'),
+                  'w', encoding='utf-8') as pack:
             pack.write(json.dumps({
                 'pack':{
                     'pack_format':pack_format,
@@ -187,7 +184,8 @@ class GeneratorV2(VirtualGenerator):
             }, indent=4))
 
         #write 'sounds.json'
-        with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'), 'w', encoding='utf-8') as sounds:
+        with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds.json'),
+                  'w', encoding='utf-8') as sounds:
             json_dict = {}
 
             for name in entry_list.internal_names:
@@ -203,40 +201,48 @@ class GeneratorV2(VirtualGenerator):
             sounds.write(json.dumps(json_dict, indent=4))
 
     # generate item models
-    def write_item_models(self, entry_list: DiscListContents, offset: int):
+    def write_item_models(self, entry_list: DiscListContents, resourcepack_name: str):
 
         #write 'music_disc_11.json'
-        with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
+        with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', 'music_disc_11.json'),
+                  'w', encoding='utf-8') as music_disc_11:
+
             json_list = []
-            for i, name in enumerate(entry_list.internal_names):
-                j = i + offset + 1
+            for entry in entry_list.entries:
 
                 json_list.append({
-                    'predicate':{'custom_model_data':j},
-                    'model':f'item/music_disc_{name}'
+                    'predicate': {'custom_model_data': entry.custom_model_data},
+                    'model': f'item/music_disc_{entry.internal_name}'
                 })
 
             music_disc_11.write(json.dumps({
-                'parent':'item/generated',
-                'textures':{'layer0': 'item/music_disc_11'},
-                'overrides':json_list
+                'parent': 'item/generated',
+                'textures': {'layer0': 'item/music_disc_11'},
+                'overrides': json_list
             }, indent=4))
 
         #write 'music_disc_*.json' files
         for name in entry_list.internal_names:
-            with open(f'music_disc_{name}.json', 'w', encoding='utf-8') as music_disc:
+            with open(os.path.join(resourcepack_name, 'assets', 'minecraft', 'models', 'item', f'music_disc_{name}.json'),
+                      'w', encoding='utf-8') as music_disc:
+
                 music_disc.write(json.dumps({
                     'parent':'item/generated',
                     'textures':{'layer0': f'item/music_disc_{name}'}
                 }, indent=4))
 
     # generate assets dir
-    def copy_assets(self, entry_list: DiscListContents):
+    def copy_assets(self, entry_list: DiscListContents, resourcepack_name: str):
 
         #copy sound and texture files
         for entry in entry_list.entries:
-            shutil.copyfile(entry.track_file, os.path.join('sounds', 'records', f'{entry.internal_name}.ogg'))
-            shutil.copyfile(entry.texture_file, os.path.join('textures', 'item', f'music_disc_{entry.internal_name}.png'))
+            shutil.copyfile(entry.track_file,
+                            os.path.join(resourcepack_name, 'assets', 'minecraft', 'sounds', 'records',
+                            f'{entry.internal_name}.ogg'))
+
+            shutil.copyfile(entry.texture_file,
+                            os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item',
+                            f'music_disc_{entry.internal_name}.png'))
 
 
 
@@ -269,6 +275,11 @@ class GeneratorV2(VirtualGenerator):
         
         return Status.SUCCESS
 
+    # apply string formatting to the given string
+    # use ** to expand fmt_dict into kwargs for formatting
+    def fmt_str(self, str: str, fmt_dict):
+        return str.format(**fmt_dict)
+
     # recursively apply string formatting to any string-type
     #   value in the given json dict or json sub-list
     def fmt_json(self, obj: Union[dict, list], fmt_dict):
@@ -287,7 +298,7 @@ class GeneratorV2(VirtualGenerator):
         for k in iterator:
 
             if type(obj[k]) == str:
-                fmt_obj[k] = obj[k].format(**fmt_dict)
+                fmt_obj[k] = self.fmt_str(obj[k], fmt_dict)
 
             elif type(obj[k]) in [dict, list]:
                 fmt_obj[k] = self.fmt_json(obj[k], fmt_dict)
@@ -296,11 +307,10 @@ class GeneratorV2(VirtualGenerator):
 
     # apply string formatting to each element of the given
     #   list and combine them into a single path string.
-    # use ** to expand fmt_dict into kwargs for formatting
-    #   and use * to splat fmt_path into multiple strings
+    # use * to splat fmt_path into multiple strings
     #   for os.path.join
     def fmt_path(self, path: list, fmt_dict) -> str:
-        fmt_path = [p.format(**fmt_dict) for p in path]
+        fmt_path = [self.fmt_str(p, fmt_dict) for p in path]
         return os.path.join(*fmt_path)
 
 
@@ -360,7 +370,7 @@ class GeneratorV2(VirtualGenerator):
     #   the given string
     def write_text_file(self, src: dict, dst: TextIO, fmt_dict):
         if src.get('format_contents', True):
-            dst.writelines(src['contents'].lstrip().format(**fmt_dict))
+            dst.writelines(self.fmt_str(src['contents'].lstrip(), fmt_dict))
         else:
             dst.writelines(src['contents'].lstrip())
 

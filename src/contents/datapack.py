@@ -21,9 +21,14 @@ pack_mcmeta = {
 }
 
 # creeper loot table
-creeper_music_entries = [
-    {'type':'minecraft:tag', 'weight':1, 'name':'minecraft:creeper_drop_music_discs', 'expand':True}
-]
+creeper_music_entries = []
+
+creeper_music_entry_base = {
+    'type': 'minecraft:tag',
+    'weight': 1,
+    'name': 'minecraft:creeper_drop_music_discs',
+    'expand': True
+}
 
 creeper_music_entry_custom = {
     'type':'minecraft:item',
