@@ -135,9 +135,9 @@ class GeneratorV2(VirtualGenerator):
 
             #write resourcepack files to pack directory
             with self.set_directory(resourcepack_name):
-                self.write_rp_framework(entry_list, resourcepack_name, pack_format)
-                self.write_item_models(entry_list, resourcepack_name)
-                self.copy_assets(entry_list, resourcepack_name)
+                self.write_rp_framework(entry_list, pack_format)
+                self.write_item_models(entry_list)
+                self.copy_assets(entry_list)
 
         except UnicodeEncodeError:
             return Status.BAD_UNICODE_CHAR
@@ -173,7 +173,7 @@ class GeneratorV2(VirtualGenerator):
         return Status.SUCCESS
 
     # generate directory structure and framework files
-    def write_rp_framework(self, entry_list: DiscListContents, resourcepack_name: str, pack_format: int):
+    def write_rp_framework(self, entry_list: DiscListContents, pack_format: int):
 
         #build resourcepack directory tree
         os.makedirs(os.path.join('assets', 'minecraft', 'models', 'item'))
@@ -209,7 +209,7 @@ class GeneratorV2(VirtualGenerator):
                 json.dump(sounds_json, sounds, indent=4)
 
     # generate item models
-    def write_item_models(self, entry_list: DiscListContents, resourcepack_name: str):
+    def write_item_models(self, entry_list: DiscListContents):
 
         with self.set_directory(os.path.join('assets', 'minecraft', 'models', 'item')):
 
@@ -244,7 +244,7 @@ class GeneratorV2(VirtualGenerator):
                     json.dump(music_disc_json, music_disc, indent=4)
 
     # generate assets dir
-    def copy_assets(self, entry_list: DiscListContents, resourcepack_name: str):
+    def copy_assets(self, entry_list: DiscListContents):
 
         #copy sound and texture files
         for entry in entry_list.entries:
