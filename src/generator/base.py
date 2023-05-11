@@ -16,11 +16,8 @@ from src.definitions import Status, GeneratorContents, DiscListEntryContents
 
 
 class VirtualGenerator():
-    def __init__(self, version_major: int, version_minor: int):
+    def __init__(self):
         self.tmp_path = None
-
-        self._version_major = version_major
-        self._version_minor = version_minor
 
     def validate(self, generator_data: GeneratorContents):
         packpng = generator_data.settings['pack']
