@@ -148,6 +148,7 @@ class GeneratorV2(VirtualGenerator):
     def write_rp_framework(self, entry_list: DiscListContents, pack_format: int):
 
         #build resourcepack directory tree
+        os.makedirs(os.path.join('assets', 'minecraft', 'atlases'))
         os.makedirs(os.path.join('assets', 'minecraft', 'models', 'item'))
         os.makedirs(os.path.join('assets', 'minecraft', 'sounds', 'records'))
         os.makedirs(os.path.join('assets', 'minecraft', 'textures', 'item'))
