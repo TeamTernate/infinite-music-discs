@@ -13,28 +13,29 @@ placed_disc = {
     'repeat': 'single',
     'contents': \
 {
-  "yay": "it works"
-}
-}
-
-placed_jukebox = {
-    'path': ['data', '{datapack_name}', 'advancements', 'placed_jukebox.json'],
-    'repeat': 'single',
-    'contents': \
-{
   "criteria": {
-    "placed_jukebox": {
-      "trigger": "minecraft:placed_block",
+    "placed_music_disc": {
+      "trigger": "minecraft:item_used_on_block",
       "conditions": {
-        "block": "minecraft:jukebox",
+        "location": [
+            {
+                "condition": "minecraft:location_check",
+                "predicate": {
+                    "block": {
+                        "blocks": [ "minecraft:jukebox" ],
+                        "state": { "has_record":"true" }
+                    }
+                }
+            }
+        ],
         "item": {
-          "items": [ "minecraft:jukebox" ]
+          "tag": "minecraft:music_discs"
         }
       }
     }
   },
   "rewards": {
-    "function": "{datapack_name}:on_placed_jukebox"
+    "function": "{datapack_name}:on_placed_disc"
   }
 }
 }
@@ -52,6 +53,5 @@ class DatapackContents_v2p1(DatapackContents_v2p0):
         super().add_contents()
 
         self.placed_disc = placed_disc
-        self.placed_jukebox = placed_jukebox
 
 

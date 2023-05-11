@@ -14,8 +14,6 @@
 
 #TODO: rename mix_mono setting to something useful also default it to on
 
-#TODO: FIXME: update pack_format update advancement code and set v2.0 to be 1.20+ only
-
 import sys
 import ctypes
 import platform
