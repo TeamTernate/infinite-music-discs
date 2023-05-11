@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#Infinite Music Discs datapack v2.0 contents
+#Infinite Music Discs datapack v2.1 contents
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
 from src.contents.datapack.v2p0 import DatapackContents_v2p0
