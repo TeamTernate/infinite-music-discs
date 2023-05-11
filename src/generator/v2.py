@@ -42,15 +42,7 @@ class GeneratorV2(VirtualGenerator):
 
         #write datapack
         try:
-            #try to remove old datapack. If datapack folder exists but mcmeta does not,
-            #  then this directory may belong to something else so don't delete
-            if os.path.isdir(datapack_name):
-                if not os.path.isfile(os.path.join(datapack_name, 'pack.mcmeta')):
-                    raise FileExistsError
-                else:
-                    shutil.rmtree(datapack_name, ignore_errors=True)
-
-            #create pack directory
+            self.delete_pack(datapack_name)
             os.makedirs(datapack_name)
 
             with self.set_directory(datapack_name):
@@ -87,14 +79,7 @@ class GeneratorV2(VirtualGenerator):
             return Status.PACK_DIR_IN_USE
 
         #copy pack.png
-        try:
-            if 'pack' in user_settings:
-                shutil.copyfile(user_settings['pack'], os.path.join(datapack_name, 'pack.png'))
-            else:
-                raise FileNotFoundError
-
-        except (FileNotFoundError, IOError):
-            print("Warning: No pack.png found. Your datapack will not have an icon.")
+        self.copy_pack_png(datapack_name, user_settings)
 
         #move pack to .zip, if selected
         use_zip = user_settings.get('zip', False)
@@ -124,15 +109,7 @@ class GeneratorV2(VirtualGenerator):
 
         #write resourcepack
         try:
-            #try to remove old resourcepack. If resourcepack folder exists but mcmeta does not,
-            #  then this directory may belong to something else so don't delete
-            if os.path.isdir(resourcepack_name):
-                if not os.path.isfile(os.path.join(resourcepack_name, 'pack.mcmeta')):
-                    raise FileExistsError
-                else:
-                    shutil.rmtree(resourcepack_name, ignore_errors=True)
-
-            #create pack directory
+            self.delete_pack(resourcepack_name)
             os.makedirs(resourcepack_name)
 
             #write resourcepack files to pack directory
@@ -148,14 +125,7 @@ class GeneratorV2(VirtualGenerator):
             return Status.PACK_DIR_IN_USE
 
         #copy pack.png
-        try:
-            if 'pack' in user_settings:
-                shutil.copyfile(user_settings['pack'], os.path.join(resourcepack_name, 'pack.png'))
-            else:
-                raise FileNotFoundError
-
-        except (FileNotFoundError, IOError):
-            print("Warning: No pack.png found. Your resourcepack will not have an icon.")
+        self.copy_pack_png(resourcepack_name, user_settings)
 
         #move pack to .zip, if selected
         use_zip = user_settings.get('zip', False)
@@ -257,6 +227,25 @@ class GeneratorV2(VirtualGenerator):
                 shutil.copyfile(entry.texture_file, f'music_disc_{entry.internal_name}.png')
 
 
+
+    def copy_pack_png(self, pack_name: str, user_settings: dict):
+        try:
+            if 'pack' in user_settings:
+                shutil.copyfile(user_settings['pack'], os.path.join(pack_name, 'pack.png'))
+            else:
+                raise FileNotFoundError
+
+        except (FileNotFoundError, IOError):
+            print("Warning: No pack.png found. Your datapack/resourcepack will not have an icon.")
+
+    def delete_pack(self, pack_name):
+        #try to remove old pack. If pack folder exists but mcmeta does not,
+        #  then this directory may belong to something else so don't delete
+        if os.path.isdir(pack_name):
+            if not os.path.isfile(os.path.join(pack_name, 'pack.mcmeta')):
+                raise FileExistsError
+            else:
+                shutil.rmtree(pack_name, ignore_errors=True)
 
     def zip_pack(self, pack_name: str):
         pack_name_zip = pack_name + Constants.ZIP_SUFFIX
