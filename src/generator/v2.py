@@ -11,9 +11,7 @@ import json
 import shutil
 import zipfile
 
-from src.contents.datapack import pack_mcmeta as dp_pack_mcmeta
-from src.contents.datapack import creeper_music_entry_base, creeper_music_entry_custom, creeper_json
-from src.contents.datapack import file_list as dp_file_list
+from src.contents.datapack.top import DatapackContentsGenerator as dp_generator
 
 from src.definitions import Constants, Status, DiscListContents
 from src.generator.base import VirtualGenerator
@@ -34,9 +32,12 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
+        #read datapack contents
+        dp = dp_generator.get_dp(pack_format)
+
         #following variables are not explicitly used, but are included in locals()
         #  which gets used to format template strings from contents.datapack
-        dp_version_str = f'v{self._version_major}.{self._version_minor}'
+        dp_version_str = dp.version_str
         dp_num_discs = len(entry_list.entries)
 
         #write datapack
@@ -53,24 +54,25 @@ class GeneratorV2(VirtualGenerator):
             os.makedirs(datapack_name)
 
             with self.set_directory(datapack_name):
-                #prepare 'pack.mcmeta' before writing
+                #write 'pack.mcmeta'
                 #reach into dict and set pack_format manually, since there's no str.format()
                 #  equivalent for integers
-                dp_pack_mcmeta['contents']['pack']['pack_format'] = pack_format
+                self.write_single(dp.get_pack_mcmeta(pack_format), locals())
 
-                #prepare 'creeper.json' before writing
+                #write 'creeper.json'
                 #generate JSON for music disc entries, then reach into dict and add them
                 #  to the drop pool manually
                 creeper_music_entries = []
-                creeper_music_entries.append(creeper_music_entry_base)
+                creeper_music_entries.append(dp.get_creeper_music_entry_base())
 
                 for entry in entry_list.entries:
-                    creeper_music_entries.append(self.fmt_json(creeper_music_entry_custom, locals()))
+                    creeper_music_entries.append(self.fmt_json(dp.get_creeper_music_entry_custom(), locals()))
 
-                creeper_json['contents']['pools'][1]['entries'] = creeper_music_entries
+                creeper_json = dp.get_creeper_json(creeper_music_entries)
+                self.write_single(creeper_json, locals())
 
-                #write datapack files
-                for dp_file in dp_file_list:
+                #write other datapack files
+                for dp_file in dp.contents:
                     if dp_file['repeat'] == 'single':
                         self.write_single(dp_file, locals())
                     elif dp_file['repeat'] == 'copy':
