@@ -180,6 +180,21 @@ class GeneratorV2(VirtualGenerator):
 
                 json.dump(sounds_json, sounds, indent=4)
 
+        #write items atlas
+        with self.set_directory(os.path.join('assets', 'minecraft', 'atlases')):
+            with open('blocks.json', 'w', encoding='utf-8') as blocks:
+                atlas_json = {
+                    "sources": [
+                        {
+                            "type": "directory",
+                            "source": "item",
+                            "prefix": "item/"
+                        }
+                    ]
+                }
+
+                json.dump(atlas_json, blocks, indent=4)
+
     # generate item models
     def write_item_models(self, entry_list: DiscListContents):
 
