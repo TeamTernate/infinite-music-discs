@@ -1,4 +1,4 @@
-pyffmpeg==2.3.0.2
+pyffmpeg~=2.3.0.2
 pyinstaller~=5.3
 PyQt5~=5.15.7
 mutagen~=1.45.1
