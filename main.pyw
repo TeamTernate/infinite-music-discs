@@ -12,7 +12,7 @@
 
 #TODO: can you generate disc textures automatically using armor trims?
 
-#TODO: rename mix_mono setting to something useful also default it to on
+#TODO: default mix_mono to on?
 
 import sys
 import ctypes
