@@ -13,7 +13,7 @@ import zipfile
 
 from src.contents.datapack.top import DatapackContentsGenerator as dp_generator
 
-from src.definitions import Constants, Status, DiscListContents
+from src.definitions import Constants, Status, DiscListContents, DisplayStrings
 from src.generator.base import VirtualGenerator
 
 
@@ -39,6 +39,7 @@ class GeneratorV2(VirtualGenerator):
         #  which gets used to format template strings from contents.datapack
         dp_version_str = dp.version_str
         dp_num_discs = len(entry_list.entries)
+        mix_mono_title = DisplayStrings.STR_MIXMONO_TITLE
 
         #write datapack
         try:
