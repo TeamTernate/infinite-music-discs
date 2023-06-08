@@ -40,6 +40,34 @@ placed_disc = {
 }
 }
 
+placed_jukebox = {
+    'path': ['data', '{datapack_name}', 'advancements', 'placed_jukebox.json'],
+    'repeat': 'single',
+    'contents': \
+{
+  "criteria": {
+    "placed_jukebox": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "location": [
+            {
+                "condition": "minecraft:location_check",
+                "predicate": {
+                    "block": {
+                        "blocks": [ "minecraft:jukebox" ]
+                    }
+                }
+            }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "function": "{datapack_name}:on_placed_jukebox"
+  }
+}
+}
+
 
 
 # See src.contents.datapack.v2p0 for info on this class structure
@@ -53,5 +81,6 @@ class DatapackContents_v2p1(DatapackContents_v2p0):
         super().add_contents()
 
         self.placed_disc = placed_disc
+        self.placed_jukebox = placed_jukebox
 
 
