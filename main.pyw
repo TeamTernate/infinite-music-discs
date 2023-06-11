@@ -10,9 +10,9 @@
 
 #TODO: add ffmpeg speed <-> quality double-sided slider?
 
-#TODO: consider type-annotating all functions, to clarify in/out types
-
 #TODO: can you generate disc textures automatically using armor trims?
+
+#TODO: default mix_mono to on?
 
 import sys
 import ctypes

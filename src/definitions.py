@@ -16,12 +16,12 @@ from PyQt5.QtGui import QColor
 
 import build.version as version
 
-#TODO: define some datapack strings here so they're in a known location
 
 
 #constants
 class Constants():
     MAX_DRAW_MULTI_DRAGDROP = 10
+    STATUS_MESSAGE_ANIM_TIME_MS = 300
     STATUS_MESSAGE_SHOW_TIME_MS = 10000
     LINE_EDIT_MAX_CHARS = 100
     CUSTOM_MODEL_DATA_MAX = 16777000
@@ -90,6 +90,7 @@ class Status(Enum):
     FFMPEG_CONVERT_FAIL = 16
     DUP_INTERNAL_NAME = 17
     BAD_OGG_META = 18
+    PACK_DIR_IN_USE = 19
 
 class FileExt():
     PNG = 'png'
@@ -98,8 +99,13 @@ class FileExt():
     OGG = 'ogg'
     TXT = 'txt'
 
+class SupportedFormats():
+    TEXT = [ FileExt.TXT ]
+    IMAGE = [ FileExt.PNG ]
+    AUDIO = [ FileExt.MP3, FileExt.WAV, FileExt.OGG ]
+
 class Helpers():
-    def data_path():
+    def data_path() -> str:
         #if exe, locate temp directory
         try:
             #PyQt uses '/' separator, regardless of operating system
@@ -109,13 +115,13 @@ class Helpers():
         except AttributeError:
             return './'
 
-    def natural_keys(text):
+    def natural_keys(text: str):
         return [ Helpers.atoi(c) for c in re.split(r'(\d+)', text) ]
 
-    def atoi(text):
+    def atoi(text: str):
         return int(text) if text.isdigit() else text
 
-    def to_internal_name(title):
+    def to_internal_name(title: str) -> str:
         ascii_title = unidecode.unidecode(title)                                            #transliterate unicode letters to ascii
         numname_title = ''.join([ DigitNameDict.get(i, i) for i in ascii_title.lower() ])   #convert upper to lower-case, convert numbers to words
         internal_name = ''.join([ i for i in numname_title if i.isalpha() ])                #strip non-alphabetic characters
@@ -153,7 +159,7 @@ class DisplayStrings():
     STR_VERSION_TITLE =     "Game version"
     STR_OFFSET_TITLE =      "CustomModelData offset"
     STR_ZIP_TITLE =         "Generate pack as .zip"
-    STR_MIXMONO_TITLE =     "Mix stereo tracks to mono"
+    STR_MIXMONO_TITLE =     "Play tracks from the jukebox block"
     STR_DP_VER_TITLE =      "Use legacy datapack"
     STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
 
@@ -162,7 +168,7 @@ class DisplayStrings():
     STR_VERSION_TOOLTIP =   "The version of Minecraft in which your pack will work best."
     STR_OFFSET_TOOLTIP =    "Helps prevent discs in multiple packs from colliding with each other."
     STR_ZIP_TOOLTIP =       "Packs are generated as .zip files instead of folders."
-    STR_MIXMONO_TOOLTIP =   "Tracks play near the jukebox, not 'inside your head'."
+    STR_MIXMONO_TOOLTIP =   "Mixes stereo tracks to mono. May increase generation time and reduce sound quality."
     STR_DP_VER_TOOLTIP =    "1.19.3 and earlier only supports the legacy datapack."
     STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."
 
@@ -186,7 +192,8 @@ StatusMessageDict = {
     Status.BAD_UNICODE_CHAR:        "Couldn't use track name. Try removing uncommon characters.",
     Status.FFMPEG_CONVERT_FAIL:     "FFmpeg failed while converting a track to '.ogg' format.",
     Status.DUP_INTERNAL_NAME:       "Some tracks have the same name. Try removing duplicate tracks.",
-    Status.BAD_OGG_META:            "Failed to detect ogg file length while converting."
+    Status.BAD_OGG_META:            "Failed to detect ogg file length while converting.",
+    Status.PACK_DIR_IN_USE:         "Couldn't remove pack folder. Is something else using it?"
 }
 
 #dictionary to associate Status : sticky state
@@ -209,7 +216,8 @@ StatusStickyDict = {
     Status.BAD_UNICODE_CHAR:        True,
     Status.FFMPEG_CONVERT_FAIL:     True,
     Status.DUP_INTERNAL_NAME:       True,
-    Status.BAD_OGG_META:            True
+    Status.BAD_OGG_META:            True,
+    Status.PACK_DIR_IN_USE:         True
 }
 
 #dictionary to associate digit : digit name
@@ -228,6 +236,7 @@ DigitNameDict = {
 
 #dictionary to associate game version : pack format version
 PackFormatsDict = {
+    '1.20':             {'dp':15, 'rp':15},
     '1.19.4':           {'dp':12, 'rp':13},
     '1.19.3':           {'dp':10, 'rp':12},
     '1.19 - 1.19.2':    {'dp':10, 'rp':9},
@@ -254,11 +263,12 @@ DatapackVersionDict = {
 #dataclasses to collect DiscList contents for pack generation
 @dataclass
 class DiscListEntryContents:
-    texture_file:   str = ""
-    track_file:     str = ""
-    title:          str = ""
-    internal_name:  str = ""
-    length:         int = 0
+    texture_file:       str = ""
+    track_file:         str = ""
+    title:              str = ""
+    internal_name:      str = ""
+    length:             int = 0
+    custom_model_data:  int = 0
 
 #TODO: use iter and next so you don't have to iterate over entries?
 @dataclass

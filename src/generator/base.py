@@ -8,6 +8,7 @@ import shutil
 import pyffmpeg
 import tempfile
 
+from contextlib import contextmanager
 from mutagen.mp3 import MP3, HeaderNotFoundError
 from mutagen.oggvorbis import OggVorbis
 from src.definitions import Status, GeneratorContents, DiscListEntryContents
@@ -15,11 +16,8 @@ from src.definitions import Status, GeneratorContents, DiscListEntryContents
 
 
 class VirtualGenerator():
-    def __init__(self, version_major, version_minor):
+    def __init__(self):
         self.tmp_path = None
-
-        self._version_major = version_major
-        self._version_minor = version_minor
 
     def validate(self, generator_data: GeneratorContents):
         packpng = generator_data.settings['pack']
@@ -156,6 +154,16 @@ class VirtualGenerator():
         return Status.SUCCESS, out_track
 
 
+
+    @contextmanager
+    def set_directory(self, path: str):
+        orig_dir = os.getcwd()
+        try:
+            os.chdir(path)
+            yield
+
+        finally:
+            os.chdir(orig_dir)
 
     def get_track_length(self, track_entry: DiscListEntryContents):
         try:

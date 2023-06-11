@@ -10,6 +10,8 @@ import json
 import shutil
 import zipfile
 
+import build.version as version
+
 from src.definitions import Constants, Status, DiscListContents
 from src.commands import ReplaceItemCommand, ItemSlot
 
@@ -30,7 +32,7 @@ class GeneratorV1(VirtualGenerator):
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
         datapack_name_zip = datapack_name + Constants.ZIP_SUFFIX
 
-        dp_version_str = ("v%d.%d" % (self._version_major, self._version_minor))
+        dp_version_str = ("v%d.%d" % (version.DP_LEGACY_MAJOR, version.DP_LEGACY_MINOR))
 
         try:
             #build datapack directory tree

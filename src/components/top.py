@@ -3,6 +3,8 @@
 #Infinite Music Discs top-level GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+from typing import Any
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -88,28 +90,28 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         self._label.setObjectName('GenLabel')
         self._progress.setObjectName('GenProgress')
 
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
         return QSize(350, 66)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         event.accept()
         self.setPropertyComplete(StyleProperties.PRESSED, True)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QtGui.QMouseEvent):
         event.accept()
         self.setPropertyComplete(StyleProperties.PRESSED, False)
         self.generate.emit()
 
-    def enterEvent(self, event):
+    def enterEvent(self, event: QtGui.QEnterEvent):
         event.accept()
         self.setPropertyComplete(StyleProperties.HOVER, True)
 
-    def leaveEvent(self, event):
+    def leaveEvent(self, event: QtCore.QEvent):
         event.accept()
         self.setPropertyComplete(StyleProperties.PRESSED, False)
         self.setPropertyComplete(StyleProperties.HOVER, False)
 
-    def changeEvent(self, event):
+    def changeEvent(self, event: QtCore.QEvent):
         event.accept()
 
         if event.type() == QtCore.QEvent.EnabledChange:
@@ -123,7 +125,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
                 #do entry logic
                 pass
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QtGui.QPaintEvent):
         super().paintEvent(event)
 
         #setup painter
@@ -209,7 +211,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
     #apply setProperty() to this widget and all children
     #properties are used to select different CSS styles
-    def setPropertyComplete(self, prop, value):
+    def setPropertyComplete(self, prop: StyleProperties, value: Any):
         self.setProperty(prop, value)
         self._label.setProperty(prop, value)
         self._progress.setProperty(prop, value)
@@ -235,7 +237,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
         self.currentChanged.connect(self.tabChanged)
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QtGui.QPaintEvent):
         super().paintEvent(event)
 
         selected = self.currentIndex()
@@ -254,7 +256,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
         style = self.style()
         style.drawControl(style.CE_TabBarTabLabel, tab, qp, self)
 
-    def tabChanged(self, index):
+    def tabChanged(self, index: int):
         #clear focused widget from previous tab
         focusWidget = QtWidgets.QApplication.focusWidget()
 
@@ -265,7 +267,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
         if self.animations:
             self.animations[index].start()
 
-    def tabInserted(self, index):
+    def tabInserted(self, index: int):
         super().tabInserted(index)
 
         baseRect = self.tabRect(index)
@@ -283,7 +285,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
             self._first = False
             anim.start()
 
-    def tabRemoved(self, index):
+    def tabRemoved(self, index: int):
         super().tabRemoved(index)
 
         anim = self.animations.pop(index)
@@ -291,7 +293,7 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
         anim.deleteLater()
 
     #calculate underline QRect coordinates from tab QRect coordinates
-    def getUnderlineRect(self, tabRect, hasWidth=True):
+    def getUnderlineRect(self, tabRect: QRect, hasWidth=True) -> QRect:
         ulRect = tabRect
         ulRect.setTop(tabRect.bottom() - self.UL_HEIGHT)
 
@@ -310,12 +312,15 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
 #semi-transparent popup to display errors during pack generation
 class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
-    def __init__(self, text, relativeWidget, parent = None):
+    def __init__(self, text: str, relativeWidget: QtWidgets.QWidget, parent = None):
         super().__init__(text=text, parent=parent)
 
         self._parent = parent
         self._widget = relativeWidget
+
         self._basePos = QPoint(0,0)
+        self._showRect = self.rect()
+        self._hideRect = self.rect()
 
         self.sticky = False
 
@@ -324,10 +329,19 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.setAutoFillBackground(True)
         self.setVisible(False)
 
-        #slide in/out animation
-        self.animation = QtCore.QPropertyAnimation(self, b"geometry")
-        self.animation.setDuration(300)
-        self.animation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+        #slide in/out animations
+        self.showAnimation = QtCore.QPropertyAnimation(self, b"geometry")
+        self.showAnimation.setDuration(Constants.STATUS_MESSAGE_ANIM_TIME_MS)
+        self.showAnimation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+        self.showAnimation.setStartValue(self._hideRect)
+        self.showAnimation.setEndValue(self._showRect)
+
+        self.hideAnimation = QtCore.QPropertyAnimation(self, b"geometry")
+        self.hideAnimation.setDuration(Constants.STATUS_MESSAGE_ANIM_TIME_MS)
+        self.hideAnimation.setEasingCurve(QtCore.QEasingCurve.OutQuad)
+        self.hideAnimation.setStartValue(self._showRect)
+        self.hideAnimation.setEndValue(self._hideRect)
+        self.hideAnimation.finished.connect(self.unsetVisible)
 
         #automatic hide timer
         self.timer = QtCore.QTimer(self)
@@ -335,11 +349,12 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         event.accept()
         self.hide()
 
     #widget is not part of a layout, so position has to be updated manually
+    #set animation start/end pos after widget gets its proper position
     def setBasePos(self):
         r = self.rect()
         w_pos = self._widget.mapToParent( QPoint(0,0) )
@@ -351,11 +366,11 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
             self.setGeometry(w_pos.x(), w_pos.y(), r.width(), r.height())
 
     def unsetVisible(self):
-        self.animation.finished.disconnect()
         self.setVisible(False)
 
-    def show(self, status):
+    def show(self, status: Status):
         #use status to decide text and bg color
+        #resize widget to fit text
         self.setText(StatusMessageDict.get(status, 'Unknown error.'))
         self.adjustSize()
 
@@ -365,16 +380,21 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.setProperty(StyleProperties.ERROR, (status != Status.SUCCESS) )
         self.repolish(self)
 
-        #set start and end points
+        #update start and end points now that widget has resized
         r = self.rect()
-        startRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
-        endRect = QRect(self._basePos, r.size())
+        self._showRect = QRect(self._basePos, r.size())
+        self._hideRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
 
-        #start animation and auto-hide timer
-        self.animation.stop()
-        self.animation.setStartValue(startRect)
-        self.animation.setEndValue(endRect)
-        self.animation.start()
+        self.showAnimation.setStartValue(self._hideRect)
+        self.showAnimation.setEndValue(self._showRect)
+
+        self.hideAnimation.setStartValue(self._showRect)
+        self.hideAnimation.setEndValue(self._hideRect)
+
+        #start animation and the auto-hide timer
+        self.showAnimation.stop()
+        self.hideAnimation.stop()
+        self.showAnimation.start()
 
         if not self.sticky:
             self.timer.start()
@@ -382,18 +402,12 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
         self.setVisible(True)
 
     def hide(self):
-        #set start and end points
-        r = self.rect()
-        startRect = QRect(self._basePos, r.size())
-        endRect = QRect(self._basePos - QPoint(r.width(),0), r.size())
-
-        #start animation
+        #start animation and stop the auto-hide timer
+        #widget is hiding, no need to trigger hide again
         self.timer.stop()
-        self.animation.stop()
-        self.animation.finished.connect(self.unsetVisible)
-        self.animation.setStartValue(startRect)
-        self.animation.setEndValue(endRect)
-        self.animation.start()
+        self.showAnimation.stop()
+        self.hideAnimation.stop()
+        self.hideAnimation.start()
 
 
 
@@ -470,7 +484,7 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
         btnFrame.raise_()
         self._status.raise_()
 
-    def showEvent(self, event):
+    def showEvent(self, event: QtGui.QShowEvent):
         super().showEvent(event)
 
         #setup status display bar, now that widget coordinates are determined
@@ -525,7 +539,7 @@ class GeneratePackWorker(QtCore.QObject):
         self._generator = generator_top.get_generator(generator_data.settings)
         self._data = generator_data
 
-    def emit_status_bad(self):
+    def emit_status_bad(self) -> bool:
         bad = (self._data.status != Status.SUCCESS)
 
         if(bad):
@@ -595,6 +609,7 @@ class GeneratePackWorker(QtCore.QObject):
         #finish up
         print("Successfully generated datapack and resourcepack!")
 
+        #TODO: don't emit if status ZIP was emitted? don't overwrite error message?
         self.status.emit(self._data.status)
         self.finished.emit()
 

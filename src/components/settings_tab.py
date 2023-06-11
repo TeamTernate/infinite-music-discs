@@ -2,13 +2,14 @@
 #
 #Infinite Music Discs settings-tab-specific GUI components module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
+from typing import Any
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal
 
-from src.definitions import Constants, Regexes, ButtonType, SettingType
+from src.definitions import Constants, Regexes, FileExt, ButtonType, SettingType
 from src.definitions import SettingsListContents
 from src.components.common import QSetsNameFromType, QFocusLineEdit, MultiDragDropButton
 
@@ -16,7 +17,7 @@ from src.components.common import QSetsNameFromType, QFocusLineEdit, MultiDragDr
 
 #child of QFocusLineEdit, base class for settings LineEdits with drag-drop disabled
 class QSettingLineEdit(QFocusLineEdit):
-    def supportsFileType(self, ext):
+    def supportsFileType(self, ext: FileExt):
         return False
 
 
@@ -39,28 +40,20 @@ class QPosIntLineEdit(QSettingLineEdit):
         self.editingFinished.connect(self.capTop)
         self.editingFinished.connect(self.capBottom)
 
-    def text_int(self):
+    def text_int(self) -> int:
         try:
             return int(self.text())
         except ValueError:
             return self._min
 
     def capBottom(self):
-        try:
-            i_text = int(self.text())
-            i_text = max(i_text, self._min)
-        except ValueError:
-            i_text = self._min
-
+        i_text = self.text_int(self.text())
+        i_text = max(i_text, self._min)
         self.setText(str(i_text))
 
     def capTop(self):
-        try:
-            i_text = int(self.text())
-            i_text = min(i_text, self._max)
-        except ValueError:
-            i_text = self._min
-
+        i_text = self.text_int(self.text())
+        i_text = min(i_text, self._max)
         self.setText(str(i_text))
 
 
@@ -99,7 +92,7 @@ class VirtualSettingSelector(QtWidgets.QWidget):
     def forceValue(self, value):
         raise NotImplementedError
 
-    def getWidget(self):
+    def getWidget(self) -> QtWidgets.QWidget:
         return self._widget
 
     def getValue(self):
@@ -117,7 +110,7 @@ class PackPngSettingSelector(VirtualSettingSelector):
         self._widget.multiDrop.connect(self._widget.multiDropEvent)
         self._widget.fileChanged.connect(self.changed)
 
-    def getValue(self):
+    def getValue(self) -> str:
         return self._widget.getFile()
 
 class CheckSettingSelector(VirtualSettingSelector):
@@ -129,14 +122,14 @@ class CheckSettingSelector(VirtualSettingSelector):
 
         self._widget.stateChanged.connect(self.changed)
 
-    def forceValue(self, value):
+    def forceValue(self, value: bool):
         #block value update from triggering signals, since the update
         #  came internally and not from a user interaction
         self.blockSignals(True)
         self._widget.setChecked(value)
         self.blockSignals(False)
 
-    def getValue(self):
+    def getValue(self) -> bool:
         return self._widget.isChecked()
 
 class NumEntrySettingSelector(VirtualSettingSelector):
@@ -148,7 +141,7 @@ class NumEntrySettingSelector(VirtualSettingSelector):
 
         self._widget.editingFinished.connect(self.changed)
 
-    def getValue(self):
+    def getValue(self) -> int:
         return self._widget.text_int()
 
 class TextEntrySettingSelector(VirtualSettingSelector):
@@ -161,7 +154,7 @@ class TextEntrySettingSelector(VirtualSettingSelector):
 
         self._widget.editingFinished.connect(self.changed)
 
-    def getValue(self):
+    def getValue(self) -> str:
         return self._widget.text()
 
 class VirtualDropdownSettingSelector(VirtualSettingSelector):
@@ -188,7 +181,7 @@ class DropdownDictSettingSelector(VirtualDropdownSettingSelector):
         self._dict = params
         self._widget.addItems(params.keys())
 
-    def getValue(self):
+    def getValue(self) -> Any:
         return self._dict[ self._widget.currentText() ]
 
 class DropdownListSettingSelector(VirtualDropdownSettingSelector):
@@ -197,7 +190,7 @@ class DropdownListSettingSelector(VirtualDropdownSettingSelector):
 
         self._widget.addItems(params)
 
-    def getValue(self):
+    def getValue(self) -> str:
         return self._widget.currentText()
 
 
@@ -246,14 +239,14 @@ class SettingsListEntry(QtWidgets.QFrame):
         self.setObjectName(key)
         self._label.setObjectName('SettingLabel')
 
-    def forceValue(self, value, locked):
+    def forceValue(self, value: Any, locked: bool):
         self._selector.forceValue(value)
         self.setEnabled(not locked)
 
-    def getIndex(self):
+    def getIndex(self) -> int:
         return 0
 
-    def getKeyValue(self):
+    def getKeyValue(self) -> dict:
         return {self._key : self._selector.getValue()}
 
 
@@ -322,7 +315,7 @@ class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
         elif(not dpVersionEntry.isEnabled() and gameVersion['dp'] > Constants.LEGACY_DP_LATEST_VERSION):
             dpVersionEntry.forceValue(self.dp_ver, locked=False)
 
-    def getUserSettings(self):
+    def getUserSettings(self) -> dict:
         settingsDict = {}
         for i in range(self._childLayout.count()):
             e = self._childLayout.itemAt(i).widget()

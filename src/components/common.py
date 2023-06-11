@@ -4,13 +4,14 @@
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
 import os
+from typing import List, Union
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 
-from src.definitions import Assets, Constants, ButtonType, Helpers, FileExt, StyleProperties
+from src.definitions import Assets, Constants, ButtonType, Helpers, FileExt, SupportedFormats, StyleProperties
 
 
 
@@ -24,7 +25,7 @@ class QSetsNameFromType(QtCore.QObject):
 
 #mixin class that implements a "repolish" method to refresh object styles
 class QRepolishMixin():
-    def repolish(self, obj):
+    def repolish(self, obj: QtCore.QObject):
         obj.style().unpolish(obj)
         obj.style().polish(obj)
 
@@ -32,10 +33,7 @@ class QRepolishMixin():
 
 #mixin class that implements most common drag-drop functionality
 class QDragDropMixin():
-    def dragEnterEvent(self, event):
-        if not event.mimeData().hasUrls():
-            event.ignore()
-            return
+    def dragEnterEvent(self, event: QtGui.QDragEnterEvent):
 
         for u in event.mimeData().urls():
             u = u.toLocalFile()
@@ -47,10 +45,10 @@ class QDragDropMixin():
 
         event.ignore()
 
-    def dragLeaveEvent(self, event):
+    def dragLeaveEvent(self, event: QtGui.QDragLeaveEvent):
         event.accept()
 
-    def dropEvent(self, event):
+    def dropEvent(self, event: QtGui.QDropEvent):
         if event.mimeData().hasUrls():
             event.accept()
         else:
@@ -79,7 +77,7 @@ class QMultiDragDropMixin(QDragDropMixin):
     multiDragLeave = pyqtSignal(int, int)
     multiDrop = pyqtSignal(int, list)
 
-    def dragEnterEvent(self, event):
+    def dragEnterEvent(self, event: QtGui.QDragEnterEvent):
         super().dragEnterEvent(event)
         if not event.isAccepted():
             return
@@ -87,12 +85,12 @@ class QMultiDragDropMixin(QDragDropMixin):
         f = self.getFilesFromEvent(event)
         self.multiDragEnter.emit(self._parent.getIndex(), len(f))
 
-    def dragLeaveEvent(self, event):
+    def dragLeaveEvent(self, event: QtGui.QDragLeaveEvent):
         super().dragLeaveEvent(event)
 
         self.multiDragLeave.emit(self._parent.getIndex(), Constants.MAX_DRAW_MULTI_DRAGDROP)
 
-    def dropEvent(self, event):
+    def dropEvent(self, event: QtGui.QDropEvent):
         super().dropEvent(event)
         if not event.isAccepted():
             return
@@ -100,7 +98,7 @@ class QMultiDragDropMixin(QDragDropMixin):
         f = self.getFilesFromEvent(event)
         self.multiDrop.emit(self._parent.getIndex(), f)
 
-    def multiDragEnterEvent(self, initIndex, count):
+    def multiDragEnterEvent(self, initIndex: int, count: int):
         #check if this element should be highlighted
         selfIndex = self._parent.getIndex()
         if(selfIndex < initIndex):
@@ -113,7 +111,7 @@ class QMultiDragDropMixin(QDragDropMixin):
         #if so, highlight with gradient
         self.highlightStyling(dropIndex)
 
-    def multiDragLeaveEvent(self, initIndex, count):
+    def multiDragLeaveEvent(self, initIndex: int, count: int):
         #check if this element is currently highlighted
         selfIndex = self._parent.getIndex()
         if(selfIndex < initIndex):
@@ -124,7 +122,7 @@ class QMultiDragDropMixin(QDragDropMixin):
         #if so, remove its highlight
         self.resetStyling()
 
-    def multiDropEvent(self, initIndex, files):
+    def multiDropEvent(self, initIndex: int, files: List[str]):
         #check if this element is currently highlighted
         #allow all files to drop, instead of restricting like outline render
         #return index of file dropped into this object, or -1 if N/A
@@ -141,6 +139,7 @@ class QMultiDragDropMixin(QDragDropMixin):
 
         #run implementation-specific code from inheriting classes
         self.postMultiDropEvent(dropIndex, files)
+        #TODO: doesn't return dropIndex if valid? is above comment accurate?
 
     def postMultiDropEvent(self, dropIndex, files):
         raise NotImplementedError
@@ -162,7 +161,7 @@ class QDragDropLineEdit(QDragDropMixin, QRepolishMixin, QtWidgets.QLineEdit, QSe
         self.setProperty(StyleProperties.DRAG_HELD, False)
         self.setProperty(StyleProperties.ALPHA, 10)
 
-    def getFilesFromEvent(self, event):
+    def getFilesFromEvent(self, event: Union[QtGui.QDragEnterEvent, QtGui.QDropEvent]) -> List[str]:
         urls = event.mimeData().urls()
 
         for u in urls:
@@ -175,25 +174,25 @@ class QDragDropLineEdit(QDragDropMixin, QRepolishMixin, QtWidgets.QLineEdit, QSe
 
         return []
 
-    def getLinesFromFile(self, file):
+    def getLinesFromFile(self, file: str) -> List[str]:
         with open(file, 'r', encoding='utf-8') as uf:
             return list(line.replace('\n', '') for line in uf)
 
-    def supportsFileType(self, ext):
-        return ( ext in [ FileExt.TXT ] )
+    def supportsFileType(self, ext: FileExt) -> bool:
+        return ( ext in SupportedFormats.TEXT )
 
 
 
 #child of QDragDropLineEdit with multi-drag-drop support
 class QMultiDragDropLineEdit(QMultiDragDropMixin, QDragDropLineEdit):
-    def postMultiDropEvent(self, dropIndex, files):
+    def postMultiDropEvent(self, dropIndex: int, files: List[str]):
         if dropIndex < 0:
             return
 
         #set text from line in file
         self.setText(files[dropIndex])
 
-    def highlightStyling(self, dropIndex):
+    def highlightStyling(self, dropIndex: int):
         self.setProperty(StyleProperties.DRAG_HELD, True)
         self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - dropIndex)
         self.repolish(self)
@@ -207,10 +206,10 @@ class QMultiDragDropLineEdit(QMultiDragDropMixin, QDragDropLineEdit):
 
 #child of QMultiDragDropLineEdit with text autoselect on click
 class QFocusLineEdit(QMultiDragDropLineEdit):
-    def focusInEvent(self, event):
+    def focusInEvent(self, event: QtGui.QFocusEvent):
         self._wasFocused = False
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         super().mousePressEvent(event)
 
         if not self._wasFocused:
@@ -223,7 +222,7 @@ class QFocusLineEdit(QMultiDragDropLineEdit):
 #child of QLabel with size hint specified
 #prevents NewDiscButton icon from shrinking too much on resize event
 class QImgLabel(QtWidgets.QLabel):
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
         return QSize(52, 52)
 
 
@@ -247,10 +246,10 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
     }
 
     SupportedFiletypesDict = {
-        ButtonType.IMAGE:       [ FileExt.PNG ],
-        ButtonType.PACKPNG:     [ FileExt.PNG ],
-        ButtonType.TRACK:       [ FileExt.MP3, FileExt.WAV, FileExt.OGG ],
-        ButtonType.NEW_TRACK:   [ FileExt.MP3, FileExt.WAV, FileExt.OGG ]
+        ButtonType.IMAGE:       SupportedFormats.IMAGE,
+        ButtonType.PACKPNG:     SupportedFormats.IMAGE,
+        ButtonType.TRACK:       SupportedFormats.AUDIO,
+        ButtonType.NEW_TRACK:   SupportedFormats.AUDIO
     }
 
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
@@ -273,38 +272,38 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
         self._img.setScaledContents(True)
         self.setImage(self._file)
 
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
         return QSize(80, 80)
 
     #TODO: how to reduce the number of on resize / on show handler calls?
     #widget geometry is wrong at creation, so icon pixmap gets scaled to the wrong dimensions
     #redraw icon on resize events to ensure icon is correctly scaled
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QtGui.QResizeEvent):
         event.accept()
         self.setImage(self._file)
 
     #also redraw icon on show event to handle cases where buttons are created without being resized after
-    def showEvent(self, event):
+    def showEvent(self, event: QtGui.QShowEvent):
         event.accept()
         self.setImage(self._file)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         event.accept()
 
-    def hasFile(self):
+    def hasFile(self) -> bool:
         return (self._file != None)
 
-    def getFile(self):
+    def getFile(self) -> str:
         return self._file
 
-    def setFile(self, file):
+    def setFile(self, file: str):
         self._file = file
         self.setImage(self._file)
 
-    def setImage(self, file):
+    def setImage(self, file: str):
         f = QtCore.QFileInfo(file).suffix()
 
-        if(f == FileExt.PNG):
+        if f in SupportedFormats.IMAGE:
             imgPath = self._file
         else:
             defaultIcon = self.DefaultIconDict.get(self._type, '')
@@ -313,10 +312,10 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
         if not imgPath == '':
             self._img.setPixmap(self.getScaledImage(QtGui.QPixmap(imgPath)))
 
-    def getScaledImage(self, pixmap):
+    def getScaledImage(self, pixmap: QtGui.QPixmap) -> QtGui.QPixmap:
         return pixmap.scaled(self._img.frameGeometry().width(), self._img.frameGeometry().height(), Qt.KeepAspectRatio)
 
-    def getFilesFromEvent(self, event):
+    def getFilesFromEvent(self, event: Union[QtGui.QDragEnterEvent, QtGui.QDropEvent]) -> List[str]:
         urls = event.mimeData().urls()
         f = []
 
@@ -329,7 +328,7 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
 
         return sorted(f, key=Helpers.natural_keys)
 
-    def supportsFileType(self, ext):
+    def supportsFileType(self, ext: FileExt) -> bool:
         return ( ext in self.SupportedFiletypesDict.get(self._type, []) )
 
 
@@ -361,7 +360,7 @@ class MultiDragDropButton(QMultiDragDropMixin, DragDropButton):
 
         self._childFrame.setObjectName('MultiDragDropButtonFrame')
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         super().mousePressEvent(event)
 
         #set accepted file types based on button function
@@ -381,7 +380,7 @@ class MultiDragDropButton(QMultiDragDropMixin, DragDropButton):
         #wrap file string in a list to match signal type
         self.fileChanged.emit([ f[0] ])
 
-    def postMultiDropEvent(self, dropIndex, files):
+    def postMultiDropEvent(self, dropIndex: int, files: List[str]):
         if dropIndex < 0:
             return
 
@@ -389,7 +388,7 @@ class MultiDragDropButton(QMultiDragDropMixin, DragDropButton):
         self.setFile(files[dropIndex])
         self.fileChanged.emit([ files[dropIndex] ])
 
-    def highlightStyling(self, dropIndex):
+    def highlightStyling(self, dropIndex: int):
         self.setProperty(StyleProperties.DRAG_HELD, True)
         self.setProperty(StyleProperties.ALPHA, Constants.MAX_DRAW_MULTI_DRAGDROP - dropIndex)
         self._childFrame.setProperty(StyleProperties.DRAG_HELD, True)
