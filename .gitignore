@@ -41,3 +41,6 @@ tmp/*
 .environment_setup_complete
 build/tmp/*
 build/.environment_setup_complete
+
+# virtual environment
+.venv
