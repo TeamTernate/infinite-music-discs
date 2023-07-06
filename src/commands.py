@@ -46,26 +46,42 @@ class ReplaceItemCommand:
 
     change_version = 7
 
-    # If in the future new changes are made to the command, add the new structure here.
+    # This code supports the 'replaceitem' and 'item replace' command structures.
+    # If in the future the command format changes this code can be extended to support that new format.
     def command_by_pack_format(self, pack_format: int):
-        if pack_format >= self.change_version:
-            if self.target_entity != "block":
-                return self._generate_command("item replace entity", self.target_entity, True)
-            else:
-                return self._generate_command("item replace block", self.block_pos, True)
-
+        new_format = pack_format >= self.change_version
+        if self.target_entity == "block":
+            return self._generate_command("block", self.block_pos, new_format)
         else:
-            if self.target_entity != "block":
-                return self._generate_command("replaceitem entity", self.target_entity, False)
-            else:
-                return self._generate_command("replaceitem block", self.block_pos, False)
+            return self._generate_command("entity", self.target_entity, new_format)
 
     def _generate_command(self, base: str, target: str, new_format: bool):
-        return base \
+        if new_format:
+            return self._generate_new_format_command(base, target)
+        return self._generate_old_format_command(base, target)
+
+    # Generates command according to the 'replaceitem' format
+    # See https://minecraft.fandom.com/wiki/Commands/replaceitem
+    def _generate_old_format_command(self, base: str, target: str):
+        return "replaceitem " \
+            + base \
             + " " \
             + target \
             + " " \
             + self.slot.get_value_by_pack_format(self.slot_id) \
-            + (" with " if new_format else " ") \
+            + " " \
+            + self.item \
+            + (" " + str(self.count) if self.count is not None else "")
+
+    # Generates command according to the 'item replace' format
+    # See https://minecraft.fandom.com/wiki/Commands/item
+    def _generate_new_format_command(self, base: str, target: str):
+        return "item replace " \
+            + base \
+            + " " \
+            + target \
+            + " " \
+            + self.slot.get_value_by_pack_format(self.slot_id) \
+            + " with " \
             + self.item \
             + (" " + str(self.count) if self.count is not None else "")
