@@ -6,18 +6,19 @@
 from src.contents.datapack.v2p0 import DatapackContents_v2p0
 from src.contents.datapack.v2p1 import DatapackContents_v2p1
 
-# Static factory class to select between different DatapackContents child
+# Factory to select between different DatapackContents child
 #   classes. Uses pack_format to pick which datapack version to use
-class DatapackContentsGenerator():
+# If versions is sorted in ascending order (v0 -> v1 -> v2 -> etc)
+#   then the factory will pick the latest datapack version compatible
+#   with the given pack_format
+versions = [
+    DatapackContents_v2p0,
+    DatapackContents_v2p1
+]
 
-    versions = [
-        DatapackContents_v2p0,
-        DatapackContents_v2p1
-    ]
+def get(pack_format: int):
+    for v in versions:
+        if v.min_pack_format <= pack_format:
+            sel_version = v
 
-    def get_dp(pack_format: int):
-        for v in DatapackContentsGenerator.versions:
-            if v.min_pack_format <= pack_format:
-                sel_version = v
-
-        return sel_version()
+    return sel_version()
