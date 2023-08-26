@@ -11,7 +11,7 @@ import json
 import shutil
 import zipfile
 
-import src.contents.datapack.top as dp_contents_factory
+import src.contents.datapack.factory as dp_contents_factory
 
 from src.definitions import Constants, Status, DiscListContents, DisplayStrings
 from src.generator.base import VirtualGenerator
