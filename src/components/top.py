@@ -10,7 +10,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
 
-import src.generator.top as generator_factory
+import src.generator.factory as generator_factory
 from src.definitions import Status, GeneratorContents
 from src.definitions import CSS_STYLESHEET
 
