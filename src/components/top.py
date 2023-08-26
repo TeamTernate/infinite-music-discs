@@ -10,7 +10,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
 
-import src.generator.top as generator_top
+import src.generator.top as generator_factory
 from src.definitions import Status, GeneratorContents
 from src.definitions import CSS_STYLESHEET
 
@@ -536,7 +536,7 @@ class GeneratePackWorker(QtCore.QObject):
     def __init__(self, generator_data: GeneratorContents):
         super().__init__()
 
-        self._generator = generator_top.get_generator(generator_data.settings)
+        self._generator = generator_factory.get(generator_data.settings)
         self._data = generator_data
 
     def emit_status_bad(self) -> bool:

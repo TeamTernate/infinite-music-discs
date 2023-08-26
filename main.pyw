@@ -14,6 +14,10 @@
 
 #TODO: default mix_mono to on?
 
+#TODO: test pack with 1000+ files, make sure nothing breaks
+
+#TODO: try out supported_formats for future versions
+
 import sys
 import ctypes
 import platform
@@ -64,6 +68,8 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logger.addHandler( logging.FileHandler(Constants.LOG_FILE_NAME, delay=True) )
     sys.excepthook = except_hook
+
+    #TODO: multiprocessing "spawn" doesn't work on Unix with pyinstaller, use "fork" instead
 
     #platform-specific behaviors
     sys_os = platform.system()
