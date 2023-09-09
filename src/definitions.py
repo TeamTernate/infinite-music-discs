@@ -92,6 +92,11 @@ class Status(Enum):
     BAD_OGG_META = 18
     PACK_DIR_IN_USE = 19
 
+class IMDException(Exception):
+    def __init__(self, status):
+        super().__init__(status)
+        self.status = status
+
 class FileExt():
     PNG = 'png'
     MP3 = 'mp3'

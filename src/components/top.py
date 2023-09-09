@@ -11,7 +11,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
 
 import src.generator.factory as generator_factory
-from src.definitions import Status, GeneratorContents
+from src.definitions import Status, GeneratorContents, IMDException
 from src.definitions import CSS_STYLESHEET
 
 from src.definitions import Assets, Constants, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
@@ -537,59 +537,68 @@ class GeneratePackWorker(QtCore.QObject):
         super().__init__()
 
         self._generator = generator_factory.get(generator_data.settings)
-        self._data = generator_data
 
-    def emit_status_bad(self) -> bool:
-        bad = (self._data.status != Status.SUCCESS)
+        self._entry_list = generator_data.entry_list
+        self._settings = generator_data.settings
+        self._progress = 0
 
-        if(bad):
-            self.status.emit(self._data.status)
-            self.finished.emit()
-        return bad
+    # def emit_status_bad(self) -> bool:
+    #     bad = (self._data.status != Status.SUCCESS)
+
+    #     if(bad):
+    #         self.status.emit(self._data.status)
+    #         self.finished.emit()
+    #     return bad
 
     def emit_status_zip(self):
         if(self._data.status == Status.BAD_ZIP):
             self.status.emit(self._data.status)
 
     def emit_update_progress(self):
-        self._data.progress += 1
-        self.progress.emit(self._data.progress)
+        self._progress += 1
+        self.progress.emit(self._progress)
 
     def generate(self):
+        try:
+            self.run()
+
+        except IMDException as e:
+            self.status.emit(e.status)
+        else:
+            self.status.emit(Status.SUCCESS)
+
+        finally:
+            self.finished.emit()
+
+    def run(self):
         self.started.emit()
 
         #total steps = validate + num track conversions + generate dp + generate rp
         self.min_prog.emit(0)
         self.progress.emit(0)
-        self.max_prog.emit(1 + len(self._data.entry_list) + 1 + 1)
+        self.max_prog.emit(1 + len(self._entry_list) + 1 + 1)
 
         self._data.status = Status.SUCCESS
-        self._data.progress = 0
+        self._progress = 0
 
         #make sure data is valid before continuing
-        self._data.status = self._generator.validate(self._data)
-        if self.emit_status_bad(): return
+        self._generator.validate(self._data)
         self.emit_update_progress()
         self.valid.emit()
 
         #convert track files to ogg and grab reference to converted file
         for i,e in enumerate(self._data.entry_list.entries):
-            self._data.status, ogg_track = self._generator.convert_to_ogg(e, self._data.settings, (i == 0))
+            ogg_track = self._generator.convert_to_ogg(e, self._data.settings, (i == 0))
             self._data.entry_list.entries[i].track_file = ogg_track
 
-            if self.emit_status_bad(): return
-
             #detect track length
-            self._data.status, length = self._generator.get_track_length(e)
+            length = self._generator.get_track_length(e)
             self._data.entry_list.entries[i].length = length
 
-            if self.emit_status_bad(): return
-
             #sanitize track title to be datapack-compatible
-            self._data.status, title = self._generator.sanitize(e)
+            title = self._generator.sanitize(e)
             self._data.entry_list.entries[i].title = title
 
-            if self.emit_status_bad(): return
             self.emit_update_progress()
 
         #generate datapack
