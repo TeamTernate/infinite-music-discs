@@ -69,8 +69,6 @@ if __name__ == "__main__":
     logger.addHandler( logging.FileHandler(Constants.LOG_FILE_NAME, delay=True) )
     sys.excepthook = except_hook
 
-    #TODO: multiprocessing "spawn" doesn't work on Unix with pyinstaller, use "fork" instead
-
     #platform-specific behaviors
     sys_os = platform.system()
     if sys_os == 'Windows':

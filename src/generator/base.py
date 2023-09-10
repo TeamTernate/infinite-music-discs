@@ -155,6 +155,9 @@ class VirtualGenerator():
 
 
 
+    # context manager to simplify moving around the directory
+    #   structure while generating packs. Automatically chdir's
+    #   to the original directory upon exit
     @contextmanager
     def set_directory(self, path: str):
         orig_dir = os.getcwd()
@@ -183,9 +186,10 @@ class VirtualGenerator():
 
         return length_t
 
-    #TODO: replace quote with visually similar unicode character?
+    # replace quotes with a visually similar unicode character
+    #   to prevent parsing errors in the final datapack
     def sanitize(self, track_entry: DiscListEntryContents):
-        return track_entry.title.replace('"', '')
+        return track_entry.title.replace('"', '＂')
 
     def generate_datapack(self):
         raise NotImplementedError
