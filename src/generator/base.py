@@ -169,6 +169,11 @@ class VirtualGenerator():
         finally:
             os.chdir(orig_dir)
 
+    # detect track length so that the datapack can indicate
+    #   a disc is done playing. Because IMD overrides disc "11"
+    #   we need custom logic to tell Minecraft the true length
+    #   of a playing disc. Otherwise it would assume IMD discs
+    #   are all the same length as "11"
     def get_track_length(self, track_entry: DiscListEntryContents):
         try:
             #capture track length in seconds

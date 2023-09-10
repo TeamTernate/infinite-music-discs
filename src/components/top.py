@@ -574,19 +574,11 @@ class GeneratePackWorker(QtCore.QObject):
 
         self._generator.create_tmp()
 
-        #convert track files to ogg and grab reference to converted file
-        for i,e in enumerate(self._entry_list.entries):
-            ogg_track = self._generator.convert_to_ogg(e, self._settings)
-            self._entry_list.entries[i].track_file = ogg_track
-
-            #detect track length
-            length = self._generator.get_track_length(e)
-            self._entry_list.entries[i].length = length
-
-            #sanitize track title to be datapack-compatible
-            title = self._generator.sanitize(e)
-            self._entry_list.entries[i].title = title
-
+        #process tracks individually       
+        for e in self._entry_list.entries:
+            e.track_file = self._generator.convert_to_ogg(e, self._settings)
+            e.length = self._generator.get_track_length(e)
+            e.title = self._generator.sanitize(e)
             self.emit_update_progress()
 
         #generate datapack
