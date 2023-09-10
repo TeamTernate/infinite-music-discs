@@ -206,7 +206,7 @@ class GeneratorV1(VirtualGenerator):
 
 
 
-    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
+    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}):
         texture_files = entry_list.texture_files
         track_files = entry_list.track_files
         internal_names = entry_list.internal_names
@@ -307,10 +307,5 @@ class GeneratorV1(VirtualGenerator):
 
             print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
             raise IMDException(Status.BAD_ZIP)
-
-        #cleanup temp work directory
-        if cleanup_tmp:
-            shutil.rmtree(self.tmp_path, ignore_errors=True)
-            self.tmp_path = None
 
 

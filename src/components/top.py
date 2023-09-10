@@ -572,9 +572,11 @@ class GeneratePackWorker(QtCore.QObject):
         self.emit_update_progress()
         self.valid.emit()
 
+        self._generator.create_tmp()
+
         #convert track files to ogg and grab reference to converted file
         for i,e in enumerate(self._entry_list.entries):
-            ogg_track = self._generator.convert_to_ogg(e, self._settings, (i == 0))
+            ogg_track = self._generator.convert_to_ogg(e, self._settings)
             self._entry_list.entries[i].track_file = ogg_track
 
             #detect track length
@@ -596,6 +598,7 @@ class GeneratePackWorker(QtCore.QObject):
         self.emit_update_progress()
 
         #finish up and return to generate()
+        self._generator.cleanup_tmp()
         print("Successfully generated datapack and resourcepack!")
 
 

@@ -79,20 +79,26 @@ class VirtualGenerator():
 
 
 
-    def convert_to_ogg(self, track_entry: DiscListEntryContents, settings={}, create_tmp=True, cleanup_tmp=False):
+    def create_tmp(self):
+        if self.tmp_path != None:
+            shutil.rmtree(self.tmp_path)
+
+        self.tmp_path = tempfile.mkdtemp()
+
+    def cleanup_tmp(self):
+        if self.tmp_path != None:
+            shutil.rmtree(self.tmp_path, ignore_errors=True)
+            self.tmp_path = None
+
+
+
+    def convert_to_ogg(self, track_entry: DiscListEntryContents, settings={}):
         track = track_entry.track_file
         internal_name = track_entry.internal_name
         mix_mono = settings.get('mix_mono', False)
 
         #FFmpeg object
         ffmpeg = pyffmpeg.FFmpeg()
-
-        #create temp work directory
-        if create_tmp:
-            if self.tmp_path != None:
-                shutil.rmtree(self.tmp_path)
-
-            self.tmp_path = tempfile.mkdtemp()
 
         #build FFmpeg settings
         args = ''
@@ -145,11 +151,6 @@ class VirtualGenerator():
 
         if os.path.getsize(out_track) == 0:
             raise IMDException(Status.BAD_OGG_CONVERT)
-
-        #usually won't clean up temp work directory here, wait until resource pack generation
-        if cleanup_tmp:
-            shutil.rmtree(self.tmp_path, ignore_errors=True)
-            self.tmp_path = None
 
         return out_track
 

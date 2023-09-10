@@ -90,7 +90,7 @@ class GeneratorV2(VirtualGenerator):
 
 
 
-    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp: bool = True):
+    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}):
 
         #read settings
         pack_format = user_settings.get('version').get('rp', Constants.DEFAULT_PACK_FORMAT)
@@ -127,11 +127,6 @@ class GeneratorV2(VirtualGenerator):
 
         if use_zip:
             self.zip_pack(resourcepack_name)
-
-        #cleanup temp work directory
-        if cleanup_tmp:
-            shutil.rmtree(self.tmp_path, ignore_errors=True)
-            self.tmp_path = None
 
     # generate directory structure and framework files
     def write_rp_framework(self, entry_list: DiscListContents, pack_format: int):
