@@ -11,7 +11,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
 
 import src.generator.factory as generator_factory
-from src.definitions import Status, GeneratorContents, IMDException
+from src.definitions import Status, IMDException, DiscListContents
 from src.definitions import CSS_STYLESHEET
 
 from src.definitions import Assets, Constants, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
@@ -492,14 +492,13 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
         self._status.setBasePos()
 
     def generatePacks(self):
-        generator_data = GeneratorContents()
-        generator_data.settings = self._settingsList.getUserSettings()
-        generator_data.entry_list = self._discList.getDiscEntries()
+        entry_list = self._discList.getDiscEntries()
+        settings = self._settingsList.getUserSettings()
 
         #launch worker thread to generate packs
         #   FFmpeg conversion is slow, don't want to lock up UI
         self._thread = QtCore.QThread(self)
-        self._worker = GeneratePackWorker(generator_data)
+        self._worker = GeneratePackWorker(entry_list, settings)
         self._worker.moveToThread(self._thread)
 
         self._worker.started.connect(lambda: self._btnGen.setCurrentIndex.emit(1))
@@ -533,13 +532,13 @@ class GeneratePackWorker(QtCore.QObject):
     progress = pyqtSignal(int)
     max_prog = pyqtSignal(int)
 
-    def __init__(self, generator_data: GeneratorContents):
+    def __init__(self, entry_list: DiscListContents, settings: dict):
         super().__init__()
 
-        self._generator = generator_factory.get(generator_data.settings)
+        self._generator = generator_factory.get(settings)
 
-        self._entry_list = generator_data.entry_list
-        self._settings = generator_data.settings
+        self._entry_list = entry_list
+        self._settings = settings
         self._progress = 0
 
     def emit_update_progress(self):

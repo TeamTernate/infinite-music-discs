@@ -300,13 +300,6 @@ class DiscListContents:
     def internal_names(self):
         return [entry.internal_name for entry in self.entries]
 
-@dataclass
-class GeneratorContents:
-    status: Status = Status.LIST_EMPTY
-    progress: int = 0
-    settings: dict = field(default_factory=dict)
-    entry_list: DiscListContents = field(default_factory=DiscListContents)
-
 
 
 #dataclass to collect info about SettingsList entries
