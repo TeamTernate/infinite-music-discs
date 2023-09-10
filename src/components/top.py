@@ -542,18 +542,6 @@ class GeneratePackWorker(QtCore.QObject):
         self._settings = generator_data.settings
         self._progress = 0
 
-    # def emit_status_bad(self) -> bool:
-    #     bad = (self._data.status != Status.SUCCESS)
-
-    #     if(bad):
-    #         self.status.emit(self._data.status)
-    #         self.finished.emit()
-    #     return bad
-
-    def emit_status_zip(self):
-        if(self._data.status == Status.BAD_ZIP):
-            self.status.emit(self._data.status)
-
     def emit_update_progress(self):
         self._progress += 1
         self.progress.emit(self._progress)
@@ -578,48 +566,37 @@ class GeneratePackWorker(QtCore.QObject):
         self.progress.emit(0)
         self.max_prog.emit(1 + len(self._entry_list) + 1 + 1)
 
-        self._data.status = Status.SUCCESS
         self._progress = 0
 
         #make sure data is valid before continuing
-        self._generator.validate(self._data)
+        self._generator.validate(self._entry_list, self._settings)
         self.emit_update_progress()
         self.valid.emit()
 
         #convert track files to ogg and grab reference to converted file
-        for i,e in enumerate(self._data.entry_list.entries):
-            ogg_track = self._generator.convert_to_ogg(e, self._data.settings, (i == 0))
-            self._data.entry_list.entries[i].track_file = ogg_track
+        for i,e in enumerate(self._entry_list.entries):
+            ogg_track = self._generator.convert_to_ogg(e, self._settings, (i == 0))
+            self._entry_list.entries[i].track_file = ogg_track
 
             #detect track length
             length = self._generator.get_track_length(e)
-            self._data.entry_list.entries[i].length = length
+            self._entry_list.entries[i].length = length
 
             #sanitize track title to be datapack-compatible
             title = self._generator.sanitize(e)
-            self._data.entry_list.entries[i].title = title
+            self._entry_list.entries[i].title = title
 
             self.emit_update_progress()
 
         #generate datapack
-        self._data.status = self._generator.generate_datapack(self._data.entry_list, self._data.settings)
-
-        if self.emit_status_bad(): return
-        self.emit_status_zip()
+        self._generator.generate_datapack(self._entry_list, self._settings)
         self.emit_update_progress()
 
         #generate resourcepack
-        self._data.status = self._generator.generate_resourcepack(self._data.entry_list, self._data.settings)
-
-        if self.emit_status_bad(): return
-        self.emit_status_zip()
+        self._generator.generate_resourcepack(self._entry_list, self._settings)
         self.emit_update_progress()
 
-        #finish up
+        #finish up and return to generate()
         print("Successfully generated datapack and resourcepack!")
-
-        #TODO: don't emit if status ZIP was emitted? don't overwrite error message?
-        self.status.emit(self._data.status)
-        self.finished.emit()
 
 

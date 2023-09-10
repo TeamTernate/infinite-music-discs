@@ -11,7 +11,7 @@ import tempfile
 from contextlib import contextmanager
 from mutagen.mp3 import MP3, HeaderNotFoundError
 from mutagen.oggvorbis import OggVorbis
-from src.definitions import Status, IMDException, GeneratorContents, DiscListEntryContents
+from src.definitions import Status, IMDException, DiscListContents, DiscListEntryContents
 
 
 
@@ -19,18 +19,18 @@ class VirtualGenerator():
     def __init__(self):
         self.tmp_path = None
 
-    def validate(self, generator_data: GeneratorContents):
-        packpng = generator_data.settings['pack']
+    def validate(self, entry_list: DiscListContents, settings={}):
+        packpng = settings.get('pack', '')
 
         #lists are not empty
-        if(len(generator_data.entry_list) == 0):
+        if(len(entry_list) == 0):
             raise IMDException(Status.LIST_EMPTY)
 
         #internal names are all unique
-        if( len(generator_data.entry_list.internal_names) > len(set(generator_data.entry_list.internal_names)) ):
+        if( len(entry_list.internal_names) > len(set(entry_list.internal_names)) ):
             raise IMDException(Status.DUP_INTERNAL_NAME)
 
-        for e in generator_data.entry_list.entries:
+        for e in entry_list.entries:
             #image is provided
             if(e.texture_file == ''):
                 raise IMDException(Status.IMAGE_FILE_NOT_GIVEN)
@@ -79,10 +79,10 @@ class VirtualGenerator():
 
 
 
-    def convert_to_ogg(self, track_entry: DiscListEntryContents, user_settings={}, create_tmp=True, cleanup_tmp=False):
+    def convert_to_ogg(self, track_entry: DiscListEntryContents, settings={}, create_tmp=True, cleanup_tmp=False):
         track = track_entry.track_file
         internal_name = track_entry.internal_name
-        mix_mono = user_settings.get('mix_mono', False)
+        mix_mono = settings.get('mix_mono', False)
 
         #FFmpeg object
         ffmpeg = pyffmpeg.FFmpeg()
