@@ -572,11 +572,13 @@ class GeneratePackWorker(QtCore.QObject):
         self.emit_update_progress()
         self.valid.emit()
 
+        #process tracks
         self._generator.create_tmp()
+        self._generator.convert_all_to_ogg(self._entry_list, self._settings, self.emit_update_progress)
 
-        #process tracks individually       
+        #post-process tracks individually       
         for e in self._entry_list.entries:
-            e.track_file = self._generator.convert_to_ogg(e, self._settings)
+            # e.track_file = self._generator.convert_to_ogg(e, self._settings)
             e.length = self._generator.get_track_length(e)
             e.title = self._generator.sanitize(e)
             self.emit_update_progress()

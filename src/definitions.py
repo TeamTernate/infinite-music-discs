@@ -300,6 +300,15 @@ class DiscListContents:
     def internal_names(self):
         return [entry.internal_name for entry in self.entries]
 
+#dataclass to store data to be passed to multiprocessing
+#  workers while converting files to ogg
+@dataclass
+class MpTaskContents:
+    args: str
+    src_track: str
+    tmp_track: str
+    out_track: str
+
 
 
 #dataclass to collect info about SettingsList entries

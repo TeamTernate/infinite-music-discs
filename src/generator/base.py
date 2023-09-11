@@ -7,11 +7,14 @@ import os
 import shutil
 import pyffmpeg
 import tempfile
+import multiprocessing
+
+from typing import Callable
 
 from contextlib import contextmanager
 from mutagen.mp3 import MP3, HeaderNotFoundError
 from mutagen.oggvorbis import OggVorbis
-from src.definitions import Status, IMDException, DiscListContents, DiscListEntryContents
+from src.definitions import Status, IMDException, DiscListContents, DiscListEntryContents, MpTaskContents
 
 
 
@@ -92,34 +95,47 @@ class VirtualGenerator():
 
 
 
-    def convert_to_ogg(self, track_entry: DiscListEntryContents, settings={}):
+    def convert_all_to_ogg(self, entry_list: DiscListContents, settings: dict, cb_update: Callable):
+        args: list[MpTaskContents] = []
+
+        # pre-prepare paths to reduce work and data transfer in
+        #   child threads
+        for e in entry_list.entries:
+            arg = self.prepare_for_convert(e, settings)
+            args.append(arg)
+
+        # use multiprocessing to run FFmpeg over many files in parallel
+        cpus = multiprocessing.cpu_count()
+
+        with multiprocessing.Pool(processes=cpus) as pool:
+            result = pool.imap(self.convert_to_ogg, args)
+
+            # imap yields every time a task finishes; by iterating
+            #   over the returned iterable like this we can cause
+            #   cb_update to run after each task finishes. Only works
+            #   with imap, not map or starmap
+            for r in result:
+                cb_update()
+
+        # update entry list to point to converted files
+        for (a, e) in zip(args, entry_list.entries):
+            e.track_file = a.out_track
+
+
+
+    def prepare_for_convert(self, track_entry: DiscListEntryContents, settings: dict):
         track = track_entry.track_file
         internal_name = track_entry.internal_name
-        mix_mono = settings.get('mix_mono', False)
 
-        #FFmpeg object
-        ffmpeg = pyffmpeg.FFmpeg()
-
-        #build FFmpeg settings
+        # build FFmpeg args from settings
         args = ''
 
-        if mix_mono:
+        if settings.get('mix_mono', False):
             args += ' -ac 1'
 
-        #skip files that don't need to be processed
-        #if args == '' and '.ogg' in track:
-        #    return Status.SUCCESS, track
-
-        #TODO: run ffmpeg on every file but use threadpools so it does all the files in parallel
-
-        #rename file so FFmpeg can process it
+        # prepare input file
         track_ext = track.split('/')[-1].split('.')[-1]
         tmp_track = os.path.join(self.tmp_path, internal_name + '.tmp.' + track_ext)
-
-        out_name = internal_name + '.ogg'
-        out_track = os.path.join(self.tmp_path, out_name)
-
-        #copy file to temp work directory
         shutil.copyfile(track, tmp_track)
 
         #strip any ID3 metadata from mp3
@@ -136,9 +152,22 @@ class VirtualGenerator():
         if not os.path.isfile(tmp_track):
             raise IMDException(Status.BAD_MP3_META)
 
+        # prepare output file location
+        out_name = internal_name + '.ogg'
+        out_track = os.path.join(self.tmp_path, out_name)
+
+        return MpTaskContents(args, track, tmp_track, out_track)
+
+
+
+    def convert_to_ogg(self, data: MpTaskContents):
+
+        #create FFmpeg reference
+        ffmpeg = pyffmpeg.FFmpeg()
+
         #convert file
         try:
-            ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
+            ffmpeg.options(f"-nostdin -y -i {data.tmp_track} -c:a libvorbis{data.args} {data.out_track}")
 
         except Exception as e:
             print(e)
@@ -146,13 +175,11 @@ class VirtualGenerator():
 
         #FIXME: uniquify exceptions
         #exit if file was not converted successfully
-        if not os.path.isfile(out_track):
+        if not os.path.isfile(data.out_track):
             raise IMDException(Status.BAD_OGG_CONVERT)
 
-        if os.path.getsize(out_track) == 0:
+        if os.path.getsize(data.out_track) == 0:
             raise IMDException(Status.BAD_OGG_CONVERT)
-
-        return out_track
 
 
 
