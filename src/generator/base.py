@@ -108,7 +108,7 @@ class VirtualGenerator():
         cpus = multiprocessing.cpu_count()
 
         with multiprocessing.Pool(processes=cpus) as pool:
-            result = pool.imap(self.convert_to_ogg, args)
+            result = pool.imap_unordered(self.convert_to_ogg, args)
 
             # imap yields every time a task finishes; by iterating
             #   over the returned iterable like this we can cause
@@ -164,6 +164,10 @@ class VirtualGenerator():
 
         #create FFmpeg reference
         ffmpeg = pyffmpeg.FFmpeg()
+
+        # if(".ogg" in data.tmp_track):
+        #     shutil.copyfile(data.tmp_track, data.out_track)
+        #     return
 
         #convert file
         try:
