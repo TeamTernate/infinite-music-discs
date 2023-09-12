@@ -12,6 +12,7 @@ import multiprocessing
 from typing import Callable
 
 from contextlib import contextmanager
+from mutagen import MutagenError
 from mutagen.mp3 import MP3, HeaderNotFoundError
 from mutagen.oggvorbis import OggVorbis
 from src.definitions import Status, IMDException, DiscListContents, DiscListEntryContents, MpTaskContents
@@ -95,7 +96,7 @@ class VirtualGenerator():
 
 
 
-    def convert_all_to_ogg(self, entry_list: DiscListContents, settings: dict, cb_update: Callable):
+    def convert_all_to_ogg(self, entry_list: DiscListContents, settings: dict, convert_cb: Callable):
         args: list[MpTaskContents] = []
 
         # pre-prepare paths to reduce work and data transfer in
@@ -105,17 +106,33 @@ class VirtualGenerator():
             args.append(arg)
 
         # use multiprocessing to run FFmpeg over many files in parallel
+        #
+        # have to use multiple calls to apply_async so that each task can call
+        #   the callback function. map_async() would call the callback once after
+        #   everything finishes which would leave the progress bar hanging. args
+        #   needs to be wrapped in an iterable for some reason even though
+        #   apply_async() calls a single function once; callback also needs to
+        #   accept 1 argument even if it's not used for some reason
+        # idk multiprocessing is kinda inconsistent but whatever
         cpus = multiprocessing.cpu_count()
 
         with multiprocessing.Pool(processes=cpus) as pool:
-            result = pool.imap_unordered(self.convert_to_ogg, args)
+            for a in args:
+                pool.apply_async(func=self.convert_to_ogg,
+                                 args=(a,),
+                                 callback=convert_cb)
 
-            # imap yields every time a task finishes; by iterating
-            #   over the returned iterable like this we can cause
-            #   cb_update to run after each task finishes. Only works
-            #   with imap, not map or starmap
-            for r in result:
-                cb_update()
+            pool.close()
+            pool.join()
+
+            # result = pool.imap_unordered(self.convert_to_ogg, args)
+
+            # # imap yields every time a task finishes; by iterating
+            # #   over the returned iterable like this we can cause
+            # #   cb_update to run after each task finishes. Only works
+            # #   with imap, not map or starmap
+            # for r in result:
+            #     cb_update()
 
         # update entry list to point to converted files
         for (a, e) in zip(args, entry_list.entries):
@@ -217,8 +234,10 @@ class VirtualGenerator():
             #convert from seconds to Minecraft ticks (20 t/s)
             length_t = int(length_s) * 20
 
-        except Exception as e:
-            print(e)
+        except FileNotFoundError:
+            raise IMDException(Status.BAD_OGG_CONVERT)
+        
+        except MutagenError:
             raise IMDException(Status.BAD_OGG_META)
 
         return length_t

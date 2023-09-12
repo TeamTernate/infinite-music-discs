@@ -545,6 +545,12 @@ class GeneratePackWorker(QtCore.QObject):
         self._progress += 1
         self.progress.emit(self._progress)
 
+    # multiprocessing's apply_async needs a callback
+    #   that accepts 1 argument, even if you don't do
+    #   anything with it
+    def convert_cb(self, x):
+        self.emit_update_progress()
+
     def generate(self):
         try:
             self.run()
@@ -574,7 +580,7 @@ class GeneratePackWorker(QtCore.QObject):
 
         #process tracks
         self._generator.create_tmp()
-        self._generator.convert_all_to_ogg(self._entry_list, self._settings, self.emit_update_progress)
+        self._generator.convert_all_to_ogg(self._entry_list, self._settings, self.convert_cb)
 
         #post-process tracks individually       
         for e in self._entry_list.entries:
