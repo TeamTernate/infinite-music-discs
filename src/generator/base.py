@@ -127,12 +127,12 @@ class VirtualGenerator():
 
             # result = pool.imap_unordered(self.convert_to_ogg, args)
 
-            # # imap yields every time a task finishes; by iterating
+            # # imap_unordered yields every time a task finishes; by iterating
             # #   over the returned iterable like this we can cause
             # #   cb_update to run after each task finishes. Only works
             # #   with imap, not map or starmap
             # for r in result:
-            #     cb_update()
+            #     convert_cb()
 
         # update entry list to point to converted files
         for (a, e) in zip(args, entry_list.entries):
