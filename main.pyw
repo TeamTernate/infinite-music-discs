@@ -22,6 +22,7 @@ import sys
 import ctypes
 import platform
 import logging
+import multiprocessing
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -64,6 +65,10 @@ def except_hook(cls, exception, traceback):
 
 
 if __name__ == "__main__":
+    # allow multiprocessing to work when compiled for Windows
+    # doesn't do anything on Mac or Linux
+    multiprocessing.freeze_support()
+
     # log exceptions to console and a logfile
     logger = logging.getLogger(__name__)
     logger.addHandler( logging.FileHandler(Constants.LOG_FILE_NAME, delay=True) )
