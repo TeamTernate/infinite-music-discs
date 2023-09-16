@@ -3,6 +3,7 @@
 #Infinite Music Discs constants definition module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+import os
 import re
 import sys
 import unidecode
@@ -111,7 +112,11 @@ class SupportedFormats():
 
 class Helpers():
     def data_path() -> str:
-        #if exe, locate temp directory
+        # nuitka exe
+        if "__compiled__" in globals():
+            return (os.path.dirname(__file__).replace('\\', '/') + '/../')
+
+        # pyinstaller exe
         try:
             #PyQt uses '/' separator, regardless of operating system
             return sys._MEIPASS.replace('\\', '/') + '/'
