@@ -19,14 +19,18 @@
 #TODO: try out supported_formats for future versions
 
 import sys
+from PySide6 import QtCore
+from PySide6 import QtWidgets
+
+import sys
 import ctypes
 import platform
 import logging
 import multiprocessing
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from src.definitions import Assets, Constants
 from src.components.top import CentralWidget
@@ -34,8 +38,8 @@ from src.components.top import CentralWidget
 
 
 class UI(QtWidgets.QMainWindow):
-    resized = QtCore.pyqtSignal()
-    moved = QtCore.pyqtSignal()
+    resized = QtCore.Signal()
+    moved = QtCore.Signal()
 
     def __init__(self):
         super().__init__()
@@ -97,4 +101,4 @@ if __name__ == "__main__":
     ui.setMinimumSize(400, 500)
     ui.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

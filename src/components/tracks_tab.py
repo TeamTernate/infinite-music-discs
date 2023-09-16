@@ -4,13 +4,13 @@
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 from typing import List
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal, QSize
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt, Signal, QSize
 
 from src.definitions import Assets, Constants, ButtonType, SupportedFormats, Helpers, StyleProperties, DiscListEntryContents, DiscListContents
-from src.components.common import QSetsNameFromType, QFocusLineEdit, DragDropButton, MultiDragDropButton
+from src.components.common import QFocusLineEdit, DragDropButton, MultiDragDropButton
 
 
 
@@ -23,9 +23,11 @@ class QSubtitleLabel(QtWidgets.QLabel):
 
 
 #button for removing a track list element
-class DeleteButton(QtWidgets.QPushButton, QSetsNameFromType):
+class DeleteButton(QtWidgets.QPushButton):
     def __init__(self, parent = None):
         super().__init__(parent=parent)
+
+        self.setObjectName(type(self).__name__)
 
     def sizeHint(self) -> QSize:
         return QSize(25, 25)
@@ -38,8 +40,8 @@ class DeleteButton(QtWidgets.QPushButton, QSetsNameFromType):
 
 
 #button for reordering track list elements
-class ArrowButton(QtWidgets.QPushButton, QSetsNameFromType):
-    pressed = pyqtSignal(int)
+class ArrowButton(QtWidgets.QPushButton):
+    pressed = Signal(int)
 
     #use dictionary to choose appropriate icon, based on button type and disabled status
     ImageFromButtonTypeDict = {
@@ -52,6 +54,7 @@ class ArrowButton(QtWidgets.QPushButton, QSetsNameFromType):
     def __init__(self, btnType = ButtonType.ARROW_UP, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -90,9 +93,11 @@ class ArrowButton(QtWidgets.QPushButton, QSetsNameFromType):
 
 
 
-class NewDiscButton(DragDropButton, QSetsNameFromType):
+class NewDiscButton(DragDropButton):
     def __init__(self, parent = None):
         super().__init__(btnType=ButtonType.NEW_TRACK, parent=parent)
+
+        self.setObjectName(type(self).__name__)
 
         self.setProperty(StyleProperties.DRAG_HELD, False)
 
@@ -152,10 +157,11 @@ class NewDiscButton(DragDropButton, QSetsNameFromType):
 
 #virtual class containing common code between DiscList entries
 #inherited by DiscListEntry and NewDiscEntry
-class VirtualDiscListEntry(QtWidgets.QFrame, QSetsNameFromType):
+class VirtualDiscListEntry(QtWidgets.QFrame):
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -327,25 +333,26 @@ class NewDiscEntry(VirtualDiscListEntry):
 
 
 #list of tracks
-class DiscList(QtWidgets.QWidget, QSetsNameFromType):
+class DiscList(QtWidgets.QWidget):
 
-    reordered = pyqtSignal(int)
+    reordered = Signal(int)
 
-    icon_multiDragEnter = pyqtSignal(int, int)
-    icon_multiDragLeave = pyqtSignal(int, int)
-    icon_multiDrop = pyqtSignal(int, list)
+    icon_multiDragEnter = Signal(int, int)
+    icon_multiDragLeave = Signal(int, int)
+    icon_multiDrop = Signal(int, list)
 
-    track_multiDragEnter = pyqtSignal(int, int)
-    track_multiDragLeave = pyqtSignal(int, int)
-    track_multiDrop = pyqtSignal(int, list)
+    track_multiDragEnter = Signal(int, int)
+    track_multiDragLeave = Signal(int, int)
+    track_multiDrop = Signal(int, list)
 
-    title_multiDragEnter = pyqtSignal(int, int)
-    title_multiDragLeave = pyqtSignal(int, int)
-    title_multiDrop = pyqtSignal(int, list)
+    title_multiDragEnter = Signal(int, int)
+    title_multiDragLeave = Signal(int, int)
+    title_multiDrop = Signal(int, list)
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         #create new track entry for adding new list entries

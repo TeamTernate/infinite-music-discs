@@ -5,24 +5,24 @@
 
 from typing import Any
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt, Signal, QSize, QPoint, QRect
 
 import src.generator.factory as generator_factory
 from src.definitions import Status, IMDException, DiscListContents
 from src.definitions import CSS_STYLESHEET
 
 from src.definitions import Assets, Constants, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
-from src.components.common import QSetsNameFromType, QRepolishMixin
+from src.components.common import QRepolishMixin
 from src.components.settings_tab import SettingsList
 from src.components.tracks_tab import DiscList
 
 
 
 #button for generating datapack/resourcepack
-class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
+class GenerateButton(QRepolishMixin, QtWidgets.QPushButton):
 
     BD_OUTER_WIDTH = 2
     BD_TOP_WIDTH = 4
@@ -31,12 +31,13 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
     BD_TOP_FULL_WIDTH = BD_OUTER_WIDTH + BD_TOP_WIDTH
     BD_SIDE_FULL_WIDTH = BD_OUTER_WIDTH + BD_SIDE_WIDTH
 
-    generate = pyqtSignal()
-    setCurrentIndex = pyqtSignal(int)
+    generate = Signal()
+    setCurrentIndex = Signal(int)
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         #initialize default state
@@ -130,8 +131,8 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
         #setup painter
         qp = QtGui.QPainter(self)
-        qp.setRenderHints(qp.Antialiasing)
-        qp.setRenderHints(qp.TextAntialiasing)
+        qp.setRenderHints(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHints(QtGui.QPainter.RenderHint.TextAntialiasing)
         qp.setPen(Qt.NoPen)
 
         #decide palette based on set properties
@@ -223,7 +224,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
 
 #overloaded QTabBar, with an animated underline like the Minecraft launcher
-class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
+class AnimatedTabBar(QtWidgets.QTabBar):
 
     UL_COLOR = QtGui.QColor(57, 130, 73)
     UL_HEIGHT = 3
@@ -231,6 +232,8 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
+
+        self.setObjectName(type(self).__name__)
 
         self.animations = []
         self._first = True
@@ -248,13 +251,13 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
         self.initStyleOption(tab, selected)
 
         qp = QtGui.QPainter(self)
-        qp.setRenderHints(qp.Antialiasing)
+        qp.setRenderHints(QtGui.QPainter.RenderHint.Antialiasing)
         qp.setPen(Qt.NoPen)
         qp.setBrush(QtGui.QBrush(self.UL_COLOR))
         qp.drawRect(self.animations[selected].currentValue())
 
         style = self.style()
-        style.drawControl(style.CE_TabBarTabLabel, tab, qp, self)
+        style.drawControl(QtWidgets.QStyle.CE_TabBarTabLabel, tab, qp, self)
 
     def tabChanged(self, index: int):
         #clear focused widget from previous tab
@@ -311,11 +314,13 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
 
 #semi-transparent popup to display errors during pack generation
-class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
+class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel):
     def __init__(self, text: str, relativeWidget: QtWidgets.QWidget, parent = None):
         super().__init__(text=text, parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
+
         self._widget = relativeWidget
 
         self._basePos = QPoint(0,0)
@@ -413,12 +418,13 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
 
 #TODO: standardize where size policies are set - probably inside widget's own init makes more sense
 #primary container widget
-class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
-    windowMoved = QtCore.pyqtSignal()
+class CentralWidget(QtWidgets.QWidget):
+    windowMoved = QtCore.Signal()
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         layout = QtWidgets.QVBoxLayout()
@@ -437,6 +443,7 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
         tabs = QtWidgets.QTabWidget(self)
         tabs.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
         tabs.setStyleSheet(CSS_STYLESHEET)
+        #TODO: remove this call?
 
         #set tabs background color
         tabs.setAutoFillBackground(True)
@@ -524,13 +531,13 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
 
 #worker object that generates the datapack/resourcepack in a separate QThread
 class GeneratePackWorker(QtCore.QObject):
-    started = pyqtSignal()
-    finished = pyqtSignal()
-    valid = pyqtSignal()
-    status = pyqtSignal(Status)
-    min_prog = pyqtSignal(int)
-    progress = pyqtSignal(int)
-    max_prog = pyqtSignal(int)
+    started = Signal()
+    finished = Signal()
+    valid = Signal()
+    status = Signal(Status)
+    min_prog = Signal(int)
+    progress = Signal(int)
+    max_prog = Signal(int)
 
     def __init__(self, entry_list: DiscListContents, settings: dict):
         super().__init__()
