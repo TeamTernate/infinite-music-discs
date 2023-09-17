@@ -117,22 +117,22 @@ class VirtualGenerator():
         cpus = multiprocessing.cpu_count()
 
         with multiprocessing.Pool(processes=cpus) as pool:
-            for a in args:
-                pool.apply_async(func=self.convert_to_ogg,
-                                 args=(a,),
-                                 callback=convert_cb)
+            # for a in args:
+            #     pool.apply_async(func=self.convert_to_ogg,
+            #                      args=(a,),
+            #                      callback=convert_cb)
 
-            pool.close()
-            pool.join()
+            # pool.close()
+            # pool.join()
 
-            # result = pool.imap_unordered(self.convert_to_ogg, args)
+            result = pool.imap_unordered(self.convert_to_ogg, args)
 
-            # # imap_unordered yields every time a task finishes; by iterating
-            # #   over the returned iterable like this we can cause
-            # #   cb_update to run after each task finishes. Only works
-            # #   with imap, not map or starmap
-            # for r in result:
-            #     convert_cb()
+            # imap_unordered yields every time a task finishes; by iterating
+            #   over the returned iterable like this we can cause
+            #   cb_update to run after each task finishes. Only works
+            #   with imap, not map or starmap
+            for r in result:
+                convert_cb()
 
         # update entry list to point to converted files
         for (a, e) in zip(args, entry_list.entries):
@@ -180,7 +180,7 @@ class VirtualGenerator():
     def convert_to_ogg(self, data: MpTaskContents):
 
         #create FFmpeg reference
-        ffmpeg = pyffmpeg.FFmpeg()
+        ffmpeg = pyffmpeg.FFmpeg(enable_log=False)
 
         # if(".ogg" in data.tmp_track):
         #     shutil.copyfile(data.tmp_track, data.out_track)
