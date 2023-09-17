@@ -1,5 +1,6 @@
-pyffmpeg~=2.3.0.2
-pyinstaller~=5.3
-PyQt5~=5.15.7
-mutagen~=1.45.1
-unidecode~=1.3.4
+pyinstaller~=5.13.2
+nuitka~=1.8.1
+pyffmpeg~=2.4.2.18
+PySide6~=6.5.2
+mutagen~=1.47.0
+unidecode~=1.3.6
