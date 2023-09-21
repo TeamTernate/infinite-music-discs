@@ -52,7 +52,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton):
         self._font = QtGui.QFont(font_str)
 
         #create button text and progress bar
-        shadow = QtWidgets.QGraphicsDropShadowEffect()
+        shadow = QtWidgets.QGraphicsDropShadowEffect(self)
         shadow.setOffset(0, 3)
 
         self._label = QtWidgets.QLabel("Generate", self)
