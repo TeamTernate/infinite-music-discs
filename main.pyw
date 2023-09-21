@@ -96,6 +96,11 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
 
+    #app was not designed for high DPI, round to integer
+    #  scale factor; 1.0 if possible
+    #TODO: redesign ui for high DPI?
+    app.setHighDpiScaleFactorRoundingPolicy(QtCore.Qt.Floor)
+
     ui = UI()
     ui.resize(500, 650)
     ui.setMinimumSize(400, 500)
