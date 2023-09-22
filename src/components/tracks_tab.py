@@ -62,6 +62,7 @@ class ArrowButton(QtWidgets.QPushButton):
         self._type = btnType
 
         self._img = QtWidgets.QLabel(self)
+        self._img.setObjectName("ArrowButtonImage")
         self.setImage(self._type, False)
 
         layout = QtWidgets.QVBoxLayout()

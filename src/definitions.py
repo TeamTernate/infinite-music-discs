@@ -807,12 +807,12 @@ DeleteButton:hover {
     background: url(./data/delete-btn-hover.png) no-repeat center;
 }
 
-ArrowButton {
+QLabel#ArrowButtonImage {
     border: 0;
     background-color: rgb(48, 48, 48);
 }
 
-ArrowButton:hover {
+QLabel#ArrowButtonImage:hover {
     background-color: rgb(96, 96, 96);
 }
 
