@@ -6,20 +6,21 @@
 import os
 from typing import List, Union
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal, QSize
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt, Signal, QSize
 
 from src.definitions import Assets, Constants, ButtonType, Helpers, FileExt, SupportedFormats, StyleProperties
 
 
 
 #mixin class requiring inheriting classes to use their class name as their object name
-class QSetsNameFromType(QtCore.QObject):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.setObjectName(type(self).__name__)
+#doesn't seem to work in PySide6, need to investigate
+# class QSetsNameFromType(QtCore.QObject):
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
+#         self.setObjectName(type(self).__name__)
 
 
 
@@ -73,9 +74,9 @@ class QDragDropMixin():
 
 #mixin class that implements most multi-drag-drop functionality
 class QMultiDragDropMixin(QDragDropMixin):
-    multiDragEnter = pyqtSignal(int, int)
-    multiDragLeave = pyqtSignal(int, int)
-    multiDrop = pyqtSignal(int, list)
+    multiDragEnter = Signal(int, int)
+    multiDragLeave = Signal(int, int)
+    multiDrop = Signal(int, list)
 
     def dragEnterEvent(self, event: QtGui.QDragEnterEvent):
         super().dragEnterEvent(event)
@@ -153,9 +154,11 @@ class QMultiDragDropMixin(QDragDropMixin):
 
 
 #child of QLineEdit with drag-drop text
-class QDragDropLineEdit(QDragDropMixin, QRepolishMixin, QtWidgets.QLineEdit, QSetsNameFromType):
+class QDragDropLineEdit(QDragDropMixin, QRepolishMixin, QtWidgets.QLineEdit):
     def __init__(self, text, parent = None):
         super().__init__(text=text, parent=parent)
+
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         self.setProperty(StyleProperties.DRAG_HELD, False)
@@ -228,9 +231,9 @@ class QImgLabel(QtWidgets.QLabel):
 
 
 #file selection button supporting file drag/drop
-class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
+class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton):
 
-    fileChanged = pyqtSignal(list)
+    fileChanged = Signal(list)
 
     IconDict = {
         FileExt.OGG: Assets.ICON_OGG,
@@ -255,6 +258,7 @@ class DragDropButton(QDragDropMixin, QRepolishMixin, QtWidgets.QPushButton, QSet
     def __init__(self, btnType = ButtonType.IMAGE, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         self._file = ''

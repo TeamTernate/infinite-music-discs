@@ -7,11 +7,15 @@ import os
 import shutil
 import pyffmpeg
 import tempfile
+import multiprocessing
+
+from typing import Callable
 
 from contextlib import contextmanager
+from mutagen import MutagenError
 from mutagen.mp3 import MP3, HeaderNotFoundError
 from mutagen.oggvorbis import OggVorbis
-from src.definitions import Status, GeneratorContents, DiscListEntryContents
+from src.definitions import Status, IMDException, DiscListContents, DiscListEntryContents, MpTaskContents
 
 
 
@@ -19,101 +23,136 @@ class VirtualGenerator():
     def __init__(self):
         self.tmp_path = None
 
-    def validate(self, generator_data: GeneratorContents):
-        packpng = generator_data.settings['pack']
+    def validate(self, entry_list: DiscListContents, settings={}):
+        packpng = settings.get('pack', '')
 
         #lists are not empty
-        if(len(generator_data.entry_list) == 0):
-            return Status.LIST_EMPTY
+        if(len(entry_list) == 0):
+            raise IMDException(Status.LIST_EMPTY)
 
         #internal names are all unique
-        if( len(generator_data.entry_list.internal_names) > len(set(generator_data.entry_list.internal_names)) ):
-            return Status.DUP_INTERNAL_NAME
+        if( len(entry_list.internal_names) > len(set(entry_list.internal_names)) ):
+            raise IMDException(Status.DUP_INTERNAL_NAME)
 
-        for e in generator_data.entry_list.entries:
+        for e in entry_list.entries:
             #image is provided
             if(e.texture_file == ''):
-                return Status.IMAGE_FILE_NOT_GIVEN
+                raise IMDException(Status.IMAGE_FILE_NOT_GIVEN)
 
             #image files still exist
             if(not os.path.isfile(e.texture_file)):
-                return Status.IMAGE_FILE_MISSING
+                raise IMDException(Status.IMAGE_FILE_MISSING)
 
             #images are all .png
             if(not ( '.png' in e.texture_file )):
-                return Status.BAD_IMAGE_TYPE
+                raise IMDException(Status.BAD_IMAGE_TYPE)
 
             #track is provided
             if(e.track_file == ''):
-                return Status.TRACK_FILE_NOT_GIVEN
+                raise IMDException(Status.TRACK_FILE_NOT_GIVEN)
 
             #track files still exist
             if(not os.path.isfile(e.track_file)):
-                return Status.TRACK_FILE_MISSING
+                raise IMDException(Status.TRACK_FILE_MISSING)
 
             #tracks are all .mp3, .wav, .ogg
             if(not ( '.mp3' in e.track_file or '.wav' in e.track_file or '.ogg' in e.track_file )):
-                return Status.BAD_TRACK_TYPE
+                raise IMDException(Status.BAD_TRACK_TYPE)
 
             #internal names are not empty
             if(e.internal_name == ''):
-                return Status.BAD_INTERNAL_NAME
+                raise IMDException(Status.BAD_INTERNAL_NAME)
 
             #internal names are letters-only
             if(not e.internal_name.isalpha()):
-                return Status.BAD_INTERNAL_NAME
+                raise IMDException(Status.BAD_INTERNAL_NAME)
 
             #internal names are all lowercase
             if(not e.internal_name.islower()):
-                return Status.BAD_INTERNAL_NAME
+                raise IMDException(Status.BAD_INTERNAL_NAME)
 
         #if pack icon is provided
         if(not packpng == ''):
             #image file still exists
             if(not os.path.isfile(packpng)):
-                return Status.PACK_IMAGE_MISSING
+                raise IMDException(Status.PACK_IMAGE_MISSING)
 
             #image is .png
             if(not ('.png' in packpng)):
-                return Status.BAD_PACK_IMAGE_TYPE
-
-        return Status.SUCCESS
+                raise IMDException(Status.BAD_PACK_IMAGE_TYPE)
 
 
 
-    def convert_to_ogg(self, track_entry: DiscListEntryContents, user_settings={}, create_tmp=True, cleanup_tmp=False):
+    def create_tmp(self):
+        if self.tmp_path != None:
+            shutil.rmtree(self.tmp_path)
+
+        self.tmp_path = tempfile.mkdtemp()
+
+    def cleanup_tmp(self):
+        if self.tmp_path != None:
+            shutil.rmtree(self.tmp_path, ignore_errors=True)
+            self.tmp_path = None
+
+
+
+    def convert_all_to_ogg(self, entry_list: DiscListContents, settings: dict, convert_cb: Callable):
+        args: list[MpTaskContents] = []
+
+        # pre-prepare paths to reduce work and data transfer in
+        #   child threads
+        for e in entry_list.entries:
+            arg = self.prepare_for_convert(e, settings)
+            args.append(arg)
+
+        # use multiprocessing to run FFmpeg over many files in parallel
+        #
+        # have to use multiple calls to apply_async so that each task can call
+        #   the callback function. map_async() would call the callback once after
+        #   everything finishes which would leave the progress bar hanging. args
+        #   needs to be wrapped in an iterable for some reason even though
+        #   apply_async() calls a single function once; callback also needs to
+        #   accept 1 argument even if it's not used for some reason
+        # idk multiprocessing is kinda inconsistent but whatever
+        cpus = multiprocessing.cpu_count()
+
+        with multiprocessing.Pool(processes=cpus) as pool:
+            # for a in args:
+            #     pool.apply_async(func=self.convert_to_ogg,
+            #                      args=(a,),
+            #                      callback=convert_cb)
+
+            # pool.close()
+            # pool.join()
+
+            result = pool.imap_unordered(self.convert_to_ogg, args)
+
+            # imap_unordered yields every time a task finishes; by iterating
+            #   over the returned iterable like this we can cause
+            #   cb_update to run after each task finishes. Only works
+            #   with imap, not map or starmap
+            for r in result:
+                convert_cb()
+
+        # update entry list to point to converted files
+        for (a, e) in zip(args, entry_list.entries):
+            e.track_file = a.out_track
+
+
+
+    def prepare_for_convert(self, track_entry: DiscListEntryContents, settings: dict):
         track = track_entry.track_file
         internal_name = track_entry.internal_name
-        mix_mono = user_settings.get('mix_mono', False)
 
-        #FFmpeg object
-        ffmpeg = pyffmpeg.FFmpeg()
-
-        #create temp work directory
-        if create_tmp:
-            if self.tmp_path != None:
-                shutil.rmtree(self.tmp_path)
-
-            self.tmp_path = tempfile.mkdtemp()
-
-        #build FFmpeg settings
+        # build FFmpeg args from settings
         args = ''
 
-        if mix_mono:
+        if settings.get('mix_mono', False):
             args += ' -ac 1'
 
-        #skip files that don't need to be processed
-        if args == '' and '.ogg' in track:
-            return Status.SUCCESS, track
-
-        #rename file so FFmpeg can process it
+        # prepare input file
         track_ext = track.split('/')[-1].split('.')[-1]
         tmp_track = os.path.join(self.tmp_path, internal_name + '.tmp.' + track_ext)
-
-        out_name = internal_name + '.ogg'
-        out_track = os.path.join(self.tmp_path, out_name)
-
-        #copy file to temp work directory
         shutil.copyfile(track, tmp_track)
 
         #strip any ID3 metadata from mp3
@@ -128,33 +167,48 @@ class VirtualGenerator():
 
         #exit if metadata removal failed
         if not os.path.isfile(tmp_track):
-            return Status.BAD_MP3_META, track
+            raise IMDException(Status.BAD_MP3_META)
+
+        # prepare output file location
+        out_name = internal_name + '.ogg'
+        out_track = os.path.join(self.tmp_path, out_name)
+
+        return MpTaskContents(args, track, tmp_track, out_track)
+
+
+
+    def convert_to_ogg(self, data: MpTaskContents):
+
+        #create FFmpeg reference
+        #TODO: once you update to a new version that's not broken, make sure to
+        #  add 'enable_log=False' to this constructor
+        ffmpeg = pyffmpeg.FFmpeg()
+
+        # if(".ogg" in data.tmp_track):
+        #     shutil.copyfile(data.tmp_track, data.out_track)
+        #     return
 
         #convert file
         try:
-            ffmpeg.options("-nostdin -y -i %s -c:a libvorbis%s %s" % (tmp_track, args, out_track))
+            ffmpeg.options(f"-nostdin -y -i {data.tmp_track} -c:a libvorbis{data.args} {data.out_track}")
 
         except Exception as e:
-            #TODO: how to reraise exception and also return?
             print(e)
-            return Status.FFMPEG_CONVERT_FAIL, track
+            raise IMDException(Status.FFMPEG_CONVERT_FAIL)
 
+        #FIXME: uniquify exceptions
         #exit if file was not converted successfully
-        if not os.path.isfile(out_track):
-            return Status.BAD_OGG_CONVERT, track
+        if not os.path.isfile(data.out_track):
+            raise IMDException(Status.BAD_OGG_CONVERT)
 
-        if os.path.getsize(out_track) == 0:
-            return Status.BAD_OGG_CONVERT, track
-
-        #usually won't clean up temp work directory here, wait until resource pack generation
-        if cleanup_tmp:
-            shutil.rmtree(self.tmp_path, ignore_errors=True)
-            self.tmp_path = None
-
-        return Status.SUCCESS, out_track
+        if os.path.getsize(data.out_track) == 0:
+            raise IMDException(Status.BAD_OGG_CONVERT)
 
 
 
+    # context manager to simplify moving around the directory
+    #   structure while generating packs. Automatically chdir's
+    #   to the original directory upon exit
     @contextmanager
     def set_directory(self, path: str):
         orig_dir = os.getcwd()
@@ -165,25 +219,35 @@ class VirtualGenerator():
         finally:
             os.chdir(orig_dir)
 
+    # detect track length so that the datapack can indicate
+    #   a disc is done playing. Because IMD overrides disc "11"
+    #   we need custom logic to tell Minecraft the true length
+    #   of a playing disc. Otherwise it would assume IMD discs
+    #   are all the same length as "11"
     def get_track_length(self, track_entry: DiscListEntryContents):
         try:
             #capture track length in seconds
+            #ffp = pyffmpeg.FFprobe(track_entry.track_file)
+            #print(ffp.metadata)
+            #length_s = ffp.duration
             meta_ogg = OggVorbis(track_entry.track_file)
             length_s = meta_ogg.info.length
 
             #convert from seconds to Minecraft ticks (20 t/s)
             length_t = int(length_s) * 20
 
-        except Exception as e:
-            #TODO: how to reraise exception and also return?
-            print(e)
-            return Status.BAD_OGG_META, 0
+        except FileNotFoundError:
+            raise IMDException(Status.BAD_OGG_CONVERT)
+        
+        except MutagenError:
+            raise IMDException(Status.BAD_OGG_META)
 
-        return Status.SUCCESS, length_t
+        return length_t
 
-    #TODO: replace quote with visually similar unicode character?
+    # replace quotes with a visually similar unicode character
+    #   to prevent parsing errors in the final datapack
     def sanitize(self, track_entry: DiscListEntryContents):
-        return Status.SUCCESS, track_entry.title.replace('"', '')
+        return track_entry.title.replace('"', '＂')
 
     def generate_datapack(self):
         raise NotImplementedError

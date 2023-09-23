@@ -5,24 +5,24 @@
 
 from typing import Any
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal, QSize, QPoint, QRect
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt, Signal, QSize, QPoint, QRect
 
-import src.generator.top as generator_top
-from src.definitions import Status, GeneratorContents
+import src.generator.factory as generator_factory
+from src.definitions import Status, IMDException, DiscListContents
 from src.definitions import CSS_STYLESHEET
 
 from src.definitions import Assets, Constants, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
-from src.components.common import QSetsNameFromType, QRepolishMixin
+from src.components.common import QRepolishMixin
 from src.components.settings_tab import SettingsList
 from src.components.tracks_tab import DiscList
 
 
 
 #button for generating datapack/resourcepack
-class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
+class GenerateButton(QRepolishMixin, QtWidgets.QPushButton):
 
     BD_OUTER_WIDTH = 2
     BD_TOP_WIDTH = 4
@@ -31,12 +31,13 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
     BD_TOP_FULL_WIDTH = BD_OUTER_WIDTH + BD_TOP_WIDTH
     BD_SIDE_FULL_WIDTH = BD_OUTER_WIDTH + BD_SIDE_WIDTH
 
-    generate = pyqtSignal()
-    setCurrentIndex = pyqtSignal(int)
+    generate = Signal()
+    setCurrentIndex = Signal(int)
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         #initialize default state
@@ -51,7 +52,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
         self._font = QtGui.QFont(font_str)
 
         #create button text and progress bar
-        shadow = QtWidgets.QGraphicsDropShadowEffect()
+        shadow = QtWidgets.QGraphicsDropShadowEffect(self)
         shadow.setOffset(0, 3)
 
         self._label = QtWidgets.QLabel("Generate", self)
@@ -130,8 +131,8 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
         #setup painter
         qp = QtGui.QPainter(self)
-        qp.setRenderHints(qp.Antialiasing)
-        qp.setRenderHints(qp.TextAntialiasing)
+        qp.setRenderHints(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHints(QtGui.QPainter.RenderHint.TextAntialiasing)
         qp.setPen(Qt.NoPen)
 
         #decide palette based on set properties
@@ -223,7 +224,7 @@ class GenerateButton(QRepolishMixin, QtWidgets.QPushButton, QSetsNameFromType):
 
 
 #overloaded QTabBar, with an animated underline like the Minecraft launcher
-class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
+class AnimatedTabBar(QtWidgets.QTabBar):
 
     UL_COLOR = QtGui.QColor(57, 130, 73)
     UL_HEIGHT = 3
@@ -231,6 +232,8 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
+
+        self.setObjectName(type(self).__name__)
 
         self.animations = []
         self._first = True
@@ -248,13 +251,13 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
         self.initStyleOption(tab, selected)
 
         qp = QtGui.QPainter(self)
-        qp.setRenderHints(qp.Antialiasing)
+        qp.setRenderHints(QtGui.QPainter.RenderHint.Antialiasing)
         qp.setPen(Qt.NoPen)
         qp.setBrush(QtGui.QBrush(self.UL_COLOR))
         qp.drawRect(self.animations[selected].currentValue())
 
         style = self.style()
-        style.drawControl(style.CE_TabBarTabLabel, tab, qp, self)
+        style.drawControl(QtWidgets.QStyle.CE_TabBarTabLabel, tab, qp, self)
 
     def tabChanged(self, index: int):
         #clear focused widget from previous tab
@@ -311,11 +314,13 @@ class AnimatedTabBar(QtWidgets.QTabBar, QSetsNameFromType):
 
 
 #semi-transparent popup to display errors during pack generation
-class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
+class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel):
     def __init__(self, text: str, relativeWidget: QtWidgets.QWidget, parent = None):
         super().__init__(text=text, parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
+
         self._widget = relativeWidget
 
         self._basePos = QPoint(0,0)
@@ -413,12 +418,13 @@ class StatusDisplayWidget(QRepolishMixin, QtWidgets.QLabel, QSetsNameFromType):
 
 #TODO: standardize where size policies are set - probably inside widget's own init makes more sense
 #primary container widget
-class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
-    windowMoved = QtCore.pyqtSignal()
+class CentralWidget(QtWidgets.QWidget):
+    windowMoved = QtCore.Signal()
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         layout = QtWidgets.QVBoxLayout()
@@ -437,6 +443,7 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
         tabs = QtWidgets.QTabWidget(self)
         tabs.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
         tabs.setStyleSheet(CSS_STYLESHEET)
+        #TODO: remove this call?
 
         #set tabs background color
         tabs.setAutoFillBackground(True)
@@ -492,14 +499,13 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
         self._status.setBasePos()
 
     def generatePacks(self):
-        generator_data = GeneratorContents()
-        generator_data.settings = self._settingsList.getUserSettings()
-        generator_data.entry_list = self._discList.getDiscEntries()
+        entry_list = self._discList.getDiscEntries()
+        settings = self._settingsList.getUserSettings()
 
         #launch worker thread to generate packs
         #   FFmpeg conversion is slow, don't want to lock up UI
         self._thread = QtCore.QThread(self)
-        self._worker = GeneratePackWorker(generator_data)
+        self._worker = GeneratePackWorker(entry_list, settings)
         self._worker.moveToThread(self._thread)
 
         self._worker.started.connect(lambda: self._btnGen.setCurrentIndex.emit(1))
@@ -525,92 +531,81 @@ class CentralWidget(QtWidgets.QWidget, QSetsNameFromType):
 
 #worker object that generates the datapack/resourcepack in a separate QThread
 class GeneratePackWorker(QtCore.QObject):
-    started = pyqtSignal()
-    finished = pyqtSignal()
-    valid = pyqtSignal()
-    status = pyqtSignal(Status)
-    min_prog = pyqtSignal(int)
-    progress = pyqtSignal(int)
-    max_prog = pyqtSignal(int)
+    started = Signal()
+    finished = Signal()
+    valid = Signal()
+    status = Signal(Status)
+    min_prog = Signal(int)
+    progress = Signal(int)
+    max_prog = Signal(int)
 
-    def __init__(self, generator_data: GeneratorContents):
+    def __init__(self, entry_list: DiscListContents, settings: dict):
         super().__init__()
 
-        self._generator = generator_top.get_generator(generator_data.settings)
-        self._data = generator_data
+        self._generator = generator_factory.get(settings)
 
-    def emit_status_bad(self) -> bool:
-        bad = (self._data.status != Status.SUCCESS)
-
-        if(bad):
-            self.status.emit(self._data.status)
-            self.finished.emit()
-        return bad
-
-    def emit_status_zip(self):
-        if(self._data.status == Status.BAD_ZIP):
-            self.status.emit(self._data.status)
+        self._entry_list = entry_list
+        self._settings = settings
+        self._progress = 0
 
     def emit_update_progress(self):
-        self._data.progress += 1
-        self.progress.emit(self._data.progress)
+        self._progress += 1
+        self.progress.emit(self._progress)
+
+    # multiprocessing's apply_async needs a callback
+    #   that accepts 1 argument, even if you don't do
+    #   anything with it
+    def convert_cb(self, x):
+        self.emit_update_progress()
 
     def generate(self):
+        try:
+            self.run()
+
+        except IMDException as e:
+            self.status.emit(e.status)
+        else:
+            self.status.emit(Status.SUCCESS)
+
+        finally:
+            self.finished.emit()
+
+    def run(self):
         self.started.emit()
 
         #total steps = validate + num track conversions + generate dp + generate rp
         self.min_prog.emit(0)
         self.progress.emit(0)
-        self.max_prog.emit(1 + len(self._data.entry_list) + 1 + 1)
+        self.max_prog.emit(1 + len(self._entry_list) + 1 + 1)
 
-        self._data.status = Status.SUCCESS
-        self._data.progress = 0
+        self._progress = 0
 
         #make sure data is valid before continuing
-        self._data.status = self._generator.validate(self._data)
-        if self.emit_status_bad(): return
+        self._generator.validate(self._entry_list, self._settings)
         self.emit_update_progress()
         self.valid.emit()
 
-        #convert track files to ogg and grab reference to converted file
-        for i,e in enumerate(self._data.entry_list.entries):
-            self._data.status, ogg_track = self._generator.convert_to_ogg(e, self._data.settings, (i == 0))
-            self._data.entry_list.entries[i].track_file = ogg_track
+        #process tracks
+        self._generator.create_tmp()
+        self._generator.convert_all_to_ogg(self._entry_list, self._settings, self.emit_update_progress)
 
-            if self.emit_status_bad(): return
-
-            #detect track length
-            self._data.status, length = self._generator.get_track_length(e)
-            self._data.entry_list.entries[i].length = length
-
-            if self.emit_status_bad(): return
-
-            #sanitize track title to be datapack-compatible
-            self._data.status, title = self._generator.sanitize(e)
-            self._data.entry_list.entries[i].title = title
-
-            if self.emit_status_bad(): return
+        #post-process tracks individually       
+        for e in self._entry_list.entries:
+            # e.track_file = self._generator.convert_to_ogg(e, self._settings)
+            e.length = self._generator.get_track_length(e)
+            e.title = self._generator.sanitize(e)
             self.emit_update_progress()
 
         #generate datapack
-        self._data.status = self._generator.generate_datapack(self._data.entry_list, self._data.settings)
-
-        if self.emit_status_bad(): return
-        self.emit_status_zip()
+        self._generator.generate_datapack(self._entry_list, self._settings)
         self.emit_update_progress()
 
         #generate resourcepack
-        self._data.status = self._generator.generate_resourcepack(self._data.entry_list, self._data.settings)
-
-        if self.emit_status_bad(): return
-        self.emit_status_zip()
+        self._generator.generate_resourcepack(self._entry_list, self._settings)
         self.emit_update_progress()
 
-        #finish up
+        #finish up and return to generate()
+        self._generator.cleanup_tmp()
         print("Successfully generated datapack and resourcepack!")
-
-        #TODO: don't emit if status ZIP was emitted? don't overwrite error message?
-        self.status.emit(self._data.status)
-        self.finished.emit()
 
 

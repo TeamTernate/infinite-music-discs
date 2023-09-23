@@ -4,14 +4,14 @@
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 from typing import Any
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt, Signal
 
 from src.definitions import Constants, Regexes, FileExt, ButtonType, SettingType
 from src.definitions import SettingsListContents
-from src.components.common import QSetsNameFromType, QFocusLineEdit, MultiDragDropButton
+from src.components.common import QFocusLineEdit, MultiDragDropButton
 
 
 
@@ -33,8 +33,8 @@ class QPosIntLineEdit(QSettingLineEdit):
 
         #create validator to restrict input to integers
         # QRegExpValidator is more flexible than QIntValidator
-        regexp = QtCore.QRegExp(Regexes.LE_POS_INT)
-        validator = QtGui.QRegExpValidator(regexp)
+        regexp = QtCore.QRegularExpression(Regexes.LE_POS_INT)
+        validator = QtGui.QRegularExpressionValidator(regexp)
         self.setValidator(validator)
 
         self.editingFinished.connect(self.capTop)
@@ -66,8 +66,8 @@ class QAlphaLineEdit(QSettingLineEdit):
         self._defaultText = text
 
         #create validator to restrict input to lowercase letters and underscores
-        regexp = QtCore.QRegExp(Regexes.LE_ALPHA)
-        validator = QtGui.QRegExpValidator(regexp)
+        regexp = QtCore.QRegularExpression(Regexes.LE_ALPHA)
+        validator = QtGui.QRegularExpressionValidator(regexp)
         self.setValidator(validator)
 
         self.editingFinished.connect(self.fillIfEmpty)
@@ -81,7 +81,7 @@ class QAlphaLineEdit(QSettingLineEdit):
 #TODO: instead of getWidget(), use factory model to cast return type?
 class VirtualSettingSelector(QtWidgets.QWidget):
 
-    changed = pyqtSignal()
+    changed = Signal()
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
@@ -196,8 +196,8 @@ class DropdownListSettingSelector(VirtualDropdownSettingSelector):
 
 
 class SettingsListEntry(QtWidgets.QFrame):
-    windowMoved = QtCore.pyqtSignal()
-    settingChanged = QtCore.pyqtSignal()
+    windowMoved = QtCore.Signal()
+    settingChanged = QtCore.Signal()
 
     def __init__(self, key, settingType, label, tooltip = None, params = None, parent = None):
         super().__init__(parent=parent)
@@ -251,13 +251,14 @@ class SettingsListEntry(QtWidgets.QFrame):
 
 
 
-class SettingsList(QtWidgets.QWidget, QSetsNameFromType):
-    windowMoved = QtCore.pyqtSignal()
-    settingChanged = QtCore.pyqtSignal()
+class SettingsList(QtWidgets.QWidget):
+    windowMoved = QtCore.Signal()
+    settingChanged = QtCore.Signal()
 
     def __init__(self, parent = None):
         super().__init__(parent=parent)
 
+        self.setObjectName(type(self).__name__)
         self._parent = parent
 
         #child layout, contains settings entries

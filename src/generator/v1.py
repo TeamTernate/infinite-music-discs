@@ -12,7 +12,7 @@ import zipfile
 
 import build.version as version
 
-from src.definitions import Constants, Status, DiscListContents
+from src.definitions import Constants, Status, IMDException, DiscListContents
 from src.commands import ReplaceItemCommand, ItemSlot
 
 from src.generator.base import VirtualGenerator
@@ -164,8 +164,8 @@ class GeneratorV1(VirtualGenerator):
             creeper.close()
 
 
-        except UnicodeEncodeError as e:
-            return Status.BAD_UNICODE_CHAR
+        except UnicodeEncodeError:
+            raise IMDException(Status.BAD_UNICODE_CHAR)
 
         #copy pack.png
         try:
@@ -202,13 +202,11 @@ class GeneratorV1(VirtualGenerator):
                 os.remove(datapack_name_zip)
 
             print("Error: Failed to zip datapack. Datapack has been generated as folder instead.")
-            return Status.BAD_ZIP
-
-        return Status.SUCCESS
+            raise IMDException(Status.BAD_ZIP)
 
 
 
-    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp=True):
+    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}):
         texture_files = entry_list.texture_files
         track_files = entry_list.track_files
         internal_names = entry_list.internal_names
@@ -271,7 +269,7 @@ class GeneratorV1(VirtualGenerator):
                 shutil.copyfile(texture_files[i], os.path.join(resourcepack_name, 'assets', 'minecraft', 'textures', 'item', 'music_disc_%s.png' % name))
 
         except UnicodeEncodeError:
-            return Status.BAD_UNICODE_CHAR
+            raise IMDException(Status.BAD_UNICODE_CHAR)
 
         #copy pack.png
         try:
@@ -308,13 +306,6 @@ class GeneratorV1(VirtualGenerator):
                 os.remove(resourcepack_name_zip)
 
             print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
-            return Status.BAD_ZIP
-
-        #cleanup temp work directory
-        if cleanup_tmp:
-            shutil.rmtree(self.tmp_path, ignore_errors=True)
-            self.tmp_path = None
-
-        return Status.SUCCESS
+            raise IMDException(Status.BAD_ZIP)
 
 

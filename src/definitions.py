@@ -3,6 +3,7 @@
 #Infinite Music Discs constants definition module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+import os
 import re
 import sys
 import unidecode
@@ -12,7 +13,7 @@ from datetime import datetime
 from typing import List, Any
 from dataclasses import dataclass, field
 
-from PyQt5.QtGui import QColor
+from PySide6.QtGui import QColor
 
 import build.version as version
 
@@ -92,6 +93,11 @@ class Status(Enum):
     BAD_OGG_META = 18
     PACK_DIR_IN_USE = 19
 
+class IMDException(Exception):
+    def __init__(self, status):
+        super().__init__(status)
+        self.status = status
+
 class FileExt():
     PNG = 'png'
     MP3 = 'mp3'
@@ -106,7 +112,11 @@ class SupportedFormats():
 
 class Helpers():
     def data_path() -> str:
-        #if exe, locate temp directory
+        # nuitka exe
+        if "__compiled__" in globals():
+            return (os.path.dirname(__file__).replace('\\', '/') + '/../')
+
+        # pyinstaller exe
         try:
             #PyQt uses '/' separator, regardless of operating system
             return sys._MEIPASS.replace('\\', '/') + '/'
@@ -236,7 +246,8 @@ DigitNameDict = {
 
 #dictionary to associate game version : pack format version
 PackFormatsDict = {
-    '1.20':             {'dp':15, 'rp':15},
+    '1.20.2':           {'dp':18, 'rp':18},
+    '1.20 - 1.20.1':    {'dp':15, 'rp':15},
     '1.19.4':           {'dp':12, 'rp':13},
     '1.19.3':           {'dp':10, 'rp':12},
     '1.19 - 1.19.2':    {'dp':10, 'rp':9},
@@ -294,12 +305,14 @@ class DiscListContents:
     def internal_names(self):
         return [entry.internal_name for entry in self.entries]
 
+#dataclass to store data to be passed to multiprocessing
+#  workers while converting files to ogg
 @dataclass
-class GeneratorContents:
-    status: Status = Status.LIST_EMPTY
-    progress: int = 0
-    settings: dict = field(default_factory=dict)
-    entry_list: DiscListContents = field(default_factory=DiscListContents)
+class MpTaskContents:
+    args: str
+    src_track: str
+    tmp_track: str
+    out_track: str
 
 
 
@@ -794,12 +807,12 @@ DeleteButton:hover {
     background: url(./data/delete-btn-hover.png) no-repeat center;
 }
 
-ArrowButton {
+QLabel#ArrowButtonImage {
     border: 0;
     background-color: rgb(48, 48, 48);
 }
 
-ArrowButton:hover {
+QLabel#ArrowButtonImage:hover {
     background-color: rgb(96, 96, 96);
 }
 
