@@ -19,10 +19,6 @@
 #TODO: try out supported_formats for future versions
 
 import sys
-from PySide6 import QtCore
-from PySide6 import QtWidgets
-
-import sys
 import ctypes
 import platform
 import logging
