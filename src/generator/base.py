@@ -180,7 +180,9 @@ class VirtualGenerator():
     def convert_to_ogg(self, data: MpTaskContents):
 
         #create FFmpeg reference
-        ffmpeg = pyffmpeg.FFmpeg(enable_log=False)
+        #TODO: once you update to a new version that's not broken, make sure to
+        #  add 'enable_log=False' to this constructor
+        ffmpeg = pyffmpeg.FFmpeg()
 
         # if(".ogg" in data.tmp_track):
         #     shutil.copyfile(data.tmp_track, data.out_track)
