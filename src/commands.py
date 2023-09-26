@@ -61,7 +61,7 @@ class ReplaceItemCommand:
         return self._generate_old_format_command(base, target)
 
     # Generates command according to the 'replaceitem' format
-    # See https://minecraft.fandom.com/wiki/Commands/replaceitem
+    # See https://minecraft.wiki/w/Commands/replaceitem
     def _generate_old_format_command(self, base: str, target: str):
         return "replaceitem " \
             + base \
@@ -74,7 +74,7 @@ class ReplaceItemCommand:
             + (" " + str(self.count) if self.count is not None else "")
 
     # Generates command according to the 'item replace' format
-    # See https://minecraft.fandom.com/wiki/Commands/item
+    # See https://minecraft.wiki/w/Commands/item
     def _generate_new_format_command(self, base: str, target: str):
         return "item replace " \
             + base \
