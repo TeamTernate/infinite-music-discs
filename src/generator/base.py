@@ -106,33 +106,25 @@ class VirtualGenerator():
             args.append(arg)
 
         # use multiprocessing to run FFmpeg over many files in parallel
-        #
-        # have to use multiple calls to apply_async so that each task can call
-        #   the callback function. map_async() would call the callback once after
-        #   everything finishes which would leave the progress bar hanging. args
-        #   needs to be wrapped in an iterable for some reason even though
-        #   apply_async() calls a single function once; callback also needs to
-        #   accept 1 argument even if it's not used for some reason
-        # idk multiprocessing is kinda inconsistent but whatever
-        cpus = multiprocessing.cpu_count()
-
-        with multiprocessing.Pool(processes=cpus) as pool:
-            # for a in args:
-            #     pool.apply_async(func=self.convert_to_ogg,
-            #                      args=(a,),
-            #                      callback=convert_cb)
-
-            # pool.close()
-            # pool.join()
-
-            result = pool.imap_unordered(self.convert_to_ogg, args)
-
-            # imap_unordered yields every time a task finishes; by iterating
-            #   over the returned iterable like this we can cause
-            #   cb_update to run after each task finishes. Only works
-            #   with imap, not map or starmap
-            for r in result:
+        # ...or run them one-by-one if the user prefers (multiprocessing
+        #   sometimes doesn't work for everyone)
+        if(settings.get('skip_proc', False)):
+            for a in args:
+                self.convert_to_ogg(a)
                 convert_cb()
+
+        else:
+            cpus = multiprocessing.cpu_count()
+
+            with multiprocessing.Pool(processes=cpus) as pool:
+                result = pool.imap_unordered(self.convert_to_ogg, args)
+
+                # imap_unordered yields every time a task finishes; by iterating
+                #   over the returned iterable like this we can cause
+                #   cb_update to run after each task finishes. Only works
+                #   with imap, not map or starmap
+                for r in result:
+                    convert_cb()
 
         # update entry list to point to converted files
         for (a, e) in zip(args, entry_list.entries):
