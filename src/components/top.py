@@ -442,8 +442,6 @@ class CentralWidget(QtWidgets.QWidget):
         #tabs to switch between track list and settings
         tabs = QtWidgets.QTabWidget(self)
         tabs.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
-        tabs.setStyleSheet(CSS_STYLESHEET)
-        #TODO: remove this call?
 
         #set tabs background color
         tabs.setAutoFillBackground(True)

@@ -30,7 +30,7 @@ class Constants():
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
 
-    APP_TITLE = ("IMD Datapack Generator - v%d.%d" % (version.MAJOR, version.MINOR))
+    APP_TITLE = f"IMD Datapack Generator - v{version.MAJOR}.{version.MINOR}.{version.PATCH}"
 
     TIMESTAMP = datetime.now().strftime("%m-%d-%Y_%H%M%S")
     LOG_EXC_MSG = ""
@@ -172,6 +172,7 @@ class DisplayStrings():
     STR_MIXMONO_TITLE =     "Play tracks from the jukebox block"
     STR_DP_VER_TITLE =      "Use legacy datapack"
     STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
+    STR_SKIPPROC_TITLE =    "Convert tracks to .ogg one at a time"
 
     STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you put a 'pack.png' in the same folder as the app."
     STR_PACKNAME_TOOLTIP =  "The name Minecraft will use to reference your pack."
@@ -181,6 +182,7 @@ class DisplayStrings():
     STR_MIXMONO_TOOLTIP =   "Mixes stereo tracks to mono. May increase generation time and reduce sound quality."
     STR_DP_VER_TOOLTIP =    "1.19.3 and earlier only supports the legacy datapack."
     STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."
+    STR_SKIPPROC_TOOLTIP =  "Slower, but more reliable. Try this if the parallel processing is not working."
 
 #dictionary to associate Status : status message string
 StatusMessageDict = {
@@ -335,6 +337,7 @@ SettingsListContents = [
     SettingContents(key='mix_mono',     type=SettingType.CHECK,     label=DisplayStrings.STR_MIXMONO_TITLE,     tooltip=DisplayStrings.STR_MIXMONO_TOOLTIP      ),
     SettingContents(key='legacy_dp',    type=SettingType.CHECK,     label=DisplayStrings.STR_DP_VER_TITLE,      tooltip=DisplayStrings.STR_DP_VER_TOOLTIP       ),
 #   SettingContents(key='keep_tmp',     type=SettingType.CHECK,     label=DisplayStrings.STR_KEEPTMP_TITLE,     tooltip=DisplayStrings.STR_KEEPTMP_TOOLTIP      )
+    SettingContents(key='skip_proc',    type=SettingType.CHECK,     label=DisplayStrings.STR_SKIPPROC_TITLE,    tooltip=DisplayStrings.STR_SKIPPROC_TOOLTIP     )
 ]
 
 
