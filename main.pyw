@@ -14,14 +14,19 @@
 
 #TODO: default mix_mono to on?
 
+#TODO: test pack with 1000+ files, make sure nothing breaks
+
+#TODO: try out supported_formats for future versions
+
 import sys
 import ctypes
 import platform
 import logging
+import multiprocessing
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from src.definitions import Assets, Constants
 from src.components.top import CentralWidget
@@ -29,8 +34,8 @@ from src.components.top import CentralWidget
 
 
 class UI(QtWidgets.QMainWindow):
-    resized = QtCore.pyqtSignal()
-    moved = QtCore.pyqtSignal()
+    resized = QtCore.Signal()
+    moved = QtCore.Signal()
 
     def __init__(self):
         super().__init__()
@@ -60,6 +65,10 @@ def except_hook(cls, exception, traceback):
 
 
 if __name__ == "__main__":
+    # allow multiprocessing to work when compiled for Windows
+    # doesn't do anything on Mac or Linux
+    multiprocessing.freeze_support()
+
     # log exceptions to console and a logfile
     logger = logging.getLogger(__name__)
     logger.addHandler( logging.FileHandler(Constants.LOG_FILE_NAME, delay=True) )
@@ -83,9 +92,14 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
 
+    #app was not designed for high DPI, round to integer
+    #  scale factor; 1.0 if possible
+    #TODO: redesign ui for high DPI?
+    app.setHighDpiScaleFactorRoundingPolicy(QtCore.Qt.Floor)
+
     ui = UI()
     ui.resize(500, 650)
     ui.setMinimumSize(400, 500)
     ui.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

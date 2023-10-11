@@ -3,6 +3,7 @@
 #Infinite Music Discs constants definition module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+import os
 import re
 import sys
 import unidecode
@@ -12,7 +13,7 @@ from datetime import datetime
 from typing import List, Any
 from dataclasses import dataclass, field
 
-from PyQt5.QtGui import QColor
+from PySide6.QtGui import QColor
 
 import build.version as version
 
@@ -29,7 +30,7 @@ class Constants():
     FILTER_IMAGE = "Image files (*.png)"
     FILTER_MUSIC = "Music files (*.mp3 *.wav *.ogg)"
 
-    APP_TITLE = ("IMD Datapack Generator - v%d.%d" % (version.MAJOR, version.MINOR))
+    APP_TITLE = f"IMD Datapack Generator - v{version.MAJOR}.{version.MINOR}.{version.PATCH}"
 
     TIMESTAMP = datetime.now().strftime("%m-%d-%Y_%H%M%S")
     LOG_EXC_MSG = ""
@@ -92,6 +93,11 @@ class Status(Enum):
     BAD_OGG_META = 18
     PACK_DIR_IN_USE = 19
 
+class IMDException(Exception):
+    def __init__(self, status):
+        super().__init__(status)
+        self.status = status
+
 class FileExt():
     PNG = 'png'
     MP3 = 'mp3'
@@ -106,7 +112,11 @@ class SupportedFormats():
 
 class Helpers():
     def data_path() -> str:
-        #if exe, locate temp directory
+        # nuitka exe
+        if "__compiled__" in globals():
+            return (os.path.dirname(__file__).replace('\\', '/') + '/../')
+
+        # pyinstaller exe
         try:
             #PyQt uses '/' separator, regardless of operating system
             return sys._MEIPASS.replace('\\', '/') + '/'
@@ -162,6 +172,7 @@ class DisplayStrings():
     STR_MIXMONO_TITLE =     "Play tracks from the jukebox block"
     STR_DP_VER_TITLE =      "Use legacy datapack"
     STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
+    STR_SKIPPROC_TITLE =    "Convert tracks to .ogg one at a time"
 
     STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you put a 'pack.png' in the same folder as the app."
     STR_PACKNAME_TOOLTIP =  "The name Minecraft will use to reference your pack."
@@ -171,6 +182,7 @@ class DisplayStrings():
     STR_MIXMONO_TOOLTIP =   "Mixes stereo tracks to mono. May increase generation time and reduce sound quality."
     STR_DP_VER_TOOLTIP =    "1.19.3 and earlier only supports the legacy datapack."
     STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."
+    STR_SKIPPROC_TOOLTIP =  "Slower, but more reliable. Try this if the parallel processing is not working."
 
 #dictionary to associate Status : status message string
 StatusMessageDict = {
@@ -236,7 +248,8 @@ DigitNameDict = {
 
 #dictionary to associate game version : pack format version
 PackFormatsDict = {
-    '1.20':             {'dp':15, 'rp':15},
+    '1.20.2':           {'dp':18, 'rp':18},
+    '1.20 - 1.20.1':    {'dp':15, 'rp':15},
     '1.19.4':           {'dp':12, 'rp':13},
     '1.19.3':           {'dp':10, 'rp':12},
     '1.19 - 1.19.2':    {'dp':10, 'rp':9},
@@ -294,12 +307,14 @@ class DiscListContents:
     def internal_names(self):
         return [entry.internal_name for entry in self.entries]
 
+#dataclass to store data to be passed to multiprocessing
+#  workers while converting files to ogg
 @dataclass
-class GeneratorContents:
-    status: Status = Status.LIST_EMPTY
-    progress: int = 0
-    settings: dict = field(default_factory=dict)
-    entry_list: DiscListContents = field(default_factory=DiscListContents)
+class MpTaskContents:
+    args: str
+    src_track: str
+    tmp_track: str
+    out_track: str
 
 
 
@@ -322,6 +337,7 @@ SettingsListContents = [
     SettingContents(key='mix_mono',     type=SettingType.CHECK,     label=DisplayStrings.STR_MIXMONO_TITLE,     tooltip=DisplayStrings.STR_MIXMONO_TOOLTIP      ),
     SettingContents(key='legacy_dp',    type=SettingType.CHECK,     label=DisplayStrings.STR_DP_VER_TITLE,      tooltip=DisplayStrings.STR_DP_VER_TOOLTIP       ),
 #   SettingContents(key='keep_tmp',     type=SettingType.CHECK,     label=DisplayStrings.STR_KEEPTMP_TITLE,     tooltip=DisplayStrings.STR_KEEPTMP_TOOLTIP      )
+    SettingContents(key='skip_proc',    type=SettingType.CHECK,     label=DisplayStrings.STR_SKIPPROC_TITLE,    tooltip=DisplayStrings.STR_SKIPPROC_TOOLTIP     )
 ]
 
 
@@ -794,12 +810,12 @@ DeleteButton:hover {
     background: url(./data/delete-btn-hover.png) no-repeat center;
 }
 
-ArrowButton {
+QLabel#ArrowButtonImage {
     border: 0;
     background-color: rgb(48, 48, 48);
 }
 
-ArrowButton:hover {
+QLabel#ArrowButtonImage:hover {
     background-color: rgb(96, 96, 96);
 }
 

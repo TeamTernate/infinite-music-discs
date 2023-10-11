@@ -11,9 +11,9 @@ import json
 import shutil
 import zipfile
 
-from src.contents.datapack.top import DatapackContentsGenerator as dp_generator
+import src.contents.datapack.factory as dp_contents_factory
 
-from src.definitions import Constants, Status, DiscListContents, DisplayStrings
+from src.definitions import Constants, Status, IMDException, DiscListContents, DisplayStrings
 from src.generator.base import VirtualGenerator
 
 
@@ -33,7 +33,7 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
         #read datapack contents
-        dp = dp_generator.get_dp(pack_format)
+        dp = dp_contents_factory.get(pack_format)
 
         #following variables are not explicitly used, but are included in locals()
         #  which gets used to format template strings from contents.datapack
@@ -74,10 +74,10 @@ class GeneratorV2(VirtualGenerator):
                         self.write_copy_within(dp_file, entry_list, locals())
 
         except UnicodeEncodeError:
-            return Status.BAD_UNICODE_CHAR
+            raise IMDException(Status.BAD_UNICODE_CHAR)
 
         except FileExistsError:
-            return Status.PACK_DIR_IN_USE
+            raise IMDException(Status.PACK_DIR_IN_USE)
 
         #copy pack.png
         self.copy_pack_png(datapack_name, user_settings)
@@ -86,17 +86,11 @@ class GeneratorV2(VirtualGenerator):
         use_zip = user_settings.get('zip', False)
 
         if use_zip:
-            zip_status = self.zip_pack(datapack_name)
-
-            if(zip_status != Status.SUCCESS):
-                print("Error: Failed to zip datapack. Datapack has been generated as folder instead.")
-                return zip_status
-
-        return Status.SUCCESS
+            self.zip_pack(datapack_name)
 
 
 
-    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}, cleanup_tmp: bool = True):
+    def generate_resourcepack(self, entry_list: DiscListContents, user_settings={}):
 
         #read settings
         pack_format = user_settings.get('version').get('rp', Constants.DEFAULT_PACK_FORMAT)
@@ -120,10 +114,10 @@ class GeneratorV2(VirtualGenerator):
                 self.copy_assets(entry_list)
 
         except UnicodeEncodeError:
-            return Status.BAD_UNICODE_CHAR
-        
+            raise IMDException(Status.BAD_UNICODE_CHAR)
+
         except FileExistsError:
-            return Status.PACK_DIR_IN_USE
+            raise IMDException(Status.PACK_DIR_IN_USE)
 
         #copy pack.png
         self.copy_pack_png(resourcepack_name, user_settings)
@@ -132,18 +126,7 @@ class GeneratorV2(VirtualGenerator):
         use_zip = user_settings.get('zip', False)
 
         if use_zip:
-            zip_status = self.zip_pack(resourcepack_name)
-
-            if(zip_status != Status.SUCCESS):
-                print("Error: Failed to zip resourcepack. Resourcepack has been generated as folder instead.")
-                return zip_status
-
-        #cleanup temp work directory
-        if cleanup_tmp:
-            shutil.rmtree(self.tmp_path, ignore_errors=True)
-            self.tmp_path = None
-
-        return Status.SUCCESS
+            self.zip_pack(resourcepack_name)
 
     # generate directory structure and framework files
     def write_rp_framework(self, entry_list: DiscListContents, pack_format: int):
@@ -289,9 +272,8 @@ class GeneratorV2(VirtualGenerator):
             if os.path.exists(pack_name_zip):
                 os.remove(pack_name_zip)
 
-            return Status.BAD_ZIP
-        
-        return Status.SUCCESS
+            # raise exception to alert user
+            raise IMDException(Status.BAD_ZIP)
 
     # apply string formatting to the given string
     # use ** to expand fmt_dict into kwargs for formatting
