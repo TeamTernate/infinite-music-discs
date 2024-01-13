@@ -190,14 +190,14 @@ class DiscListEntry(VirtualDiscListEntry):
         self._btnIcon = MultiDragDropButton(ButtonType.IMAGE, self)
         self._btnTrack = MultiDragDropButton(ButtonType.TRACK, self)
         self._leTitle = QFocusLineEdit("Track Title", self)
-        self._lblIName = QSubtitleLabel("internal name", self)
+        self._leIName = QFocusLineEdit("internal name", self)
         self._btnDelete = DeleteButton(self)
         self._btnUpArrow = ArrowButton(ButtonType.ARROW_UP, self)
         self._btnDownArrow = ArrowButton(ButtonType.ARROW_DOWN, self)
 
         self._leTitle.setMaxLength(Constants.LINE_EDIT_MAX_CHARS)
         self._leTitle.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
-        self._lblIName.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
+        self._leIName.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred))
 
         #container layout for icon button
         iconLayout = QtWidgets.QVBoxLayout()
@@ -213,9 +213,9 @@ class DiscListEntry(VirtualDiscListEntry):
 
         #scroll area to prevent internal name label from resizing DiscListEntry
         iNameScrollArea = QtWidgets.QScrollArea(self)
-        iNameScrollArea.setWidget(self._lblIName)
+        iNameScrollArea.setWidget(self._leIName)
         iNameScrollArea.setWidgetResizable(True)
-        iNameScrollArea.setMinimumHeight(self._lblIName.height())
+        iNameScrollArea.setMinimumHeight(self._leIName.height())
         iNameScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         iNameScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         iNameScrollArea.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Maximum))
@@ -276,7 +276,7 @@ class DiscListEntry(VirtualDiscListEntry):
         self._btnIcon.setObjectName('ImageButton')
         self._btnTrack.setObjectName('TrackButton')
         self._leTitle.setObjectName('TitleLineEdit')
-        self._lblIName.setObjectName('INameLabel')
+        self._leIName.setObjectName('INameLabel')
         self._btnDelete.setObjectName('DeleteButton')
         self._btnUpArrow.setObjectName('ArrowUp')
         self._btnDownArrow.setObjectName('ArrowDown')
@@ -300,7 +300,7 @@ class DiscListEntry(VirtualDiscListEntry):
         return DiscListEntryContents(texture_file   = self._btnIcon.getFile(),
                                      track_file     = self._btnTrack.getFile(),
                                      title          = self._leTitle.text(),
-                                     internal_name  = self._lblIName.text())
+                                     internal_name  = self._leIName.text())
 
     def setEntry(self, entry_contents: DiscListEntryContents):
         self._btnIcon.setFile(entry_contents.texture_file)
@@ -313,7 +313,7 @@ class DiscListEntry(VirtualDiscListEntry):
         self._leTitle.setText(title)
 
     def setSubtitle(self, title: str):
-        self._lblIName.setText( Helpers.to_internal_name(title) )
+        self._leIName.setText( Helpers.to_internal_name(title) )
 
 
 
