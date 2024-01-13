@@ -64,11 +64,11 @@ class VirtualGenerator():
                 raise IMDException(Status.BAD_INTERNAL_NAME)
 
             #internal names are letters-only
-            if(not e.internal_name.isalpha()):
+            if(not e.internal_name.isalnum()):
                 raise IMDException(Status.BAD_INTERNAL_NAME)
 
             #internal names are all lowercase
-            if(not e.internal_name.islower()):
+            if(not (e.internal_name.islower() or e.internal_name.isdecimal())):
                 raise IMDException(Status.BAD_INTERNAL_NAME)
 
         #if pack icon is provided

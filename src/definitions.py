@@ -134,7 +134,7 @@ class Helpers():
     def to_internal_name(title: str) -> str:
         ascii_title = unidecode.unidecode(title)                                            #transliterate unicode letters to ascii
         numname_title = ''.join([ DigitNameDict.get(i, i) for i in ascii_title.lower() ])   #convert upper to lower-case, convert numbers to words
-        internal_name = ''.join([ i for i in numname_title if i.isalpha() ])                #strip non-alphabetic characters
+        internal_name = ''.join([ i for i in numname_title if i.isalnum() ])                #strip non-alphanumeric characters
         return internal_name
 
 class Assets():
