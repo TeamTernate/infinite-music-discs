@@ -173,6 +173,8 @@ class DisplayStrings():
     STR_DP_VER_TITLE =      "Use legacy datapack"
     STR_KEEPTMP_TITLE =     "Keep intermediate converted files"
     STR_SKIPPROC_TITLE =    "Convert tracks to .ogg one at a time"
+    STR_PROC_OGG =          "Process .ogg files instead of copying"
+    # "Convert tracks with parallel processing"
 
     STR_PACKPNG_TOOLTIP =   "Optional in-game icon. Auto-fills if you put a 'pack.png' in the same folder as the app."
     STR_PACKNAME_TOOLTIP =  "The name Minecraft will use to reference your pack."
@@ -183,6 +185,8 @@ class DisplayStrings():
     STR_DP_VER_TOOLTIP =    "1.19.3 and earlier only supports the legacy datapack."
     STR_KEEPTMP_TOOLTIP =   "Save a copy of converted files so pack generation can go faster next time."
     STR_SKIPPROC_TOOLTIP =  "Slower, but more reliable. Try this if the parallel processing is not working."
+    STR_PROC_OGG_TOOLTIP =  "Sometimes fixes \"Can't detect ogg file length\" errors by removing bad header data."
+    # "Much faster, but doesn't work on some computers."
 
 #dictionary to associate Status : status message string
 StatusMessageDict = {
@@ -204,7 +208,7 @@ StatusMessageDict = {
     Status.BAD_UNICODE_CHAR:        "Couldn't use track name. Try removing uncommon characters.",
     Status.FFMPEG_CONVERT_FAIL:     "FFmpeg failed while converting a track to '.ogg' format.",
     Status.DUP_INTERNAL_NAME:       "Some tracks have the same name. Try removing duplicate tracks.",
-    Status.BAD_OGG_META:            "Failed to detect ogg file length while converting.",
+    Status.BAD_OGG_META:            "Can't detect .ogg file length while converting.",
     Status.PACK_DIR_IN_USE:         "Couldn't remove pack folder. Is something else using it?"
 }
 
@@ -338,7 +342,8 @@ SettingsListContents = [
     SettingContents(key='mix_mono',     type=SettingType.CHECK,     label=DisplayStrings.STR_MIXMONO_TITLE,     tooltip=DisplayStrings.STR_MIXMONO_TOOLTIP      ),
     SettingContents(key='legacy_dp',    type=SettingType.CHECK,     label=DisplayStrings.STR_DP_VER_TITLE,      tooltip=DisplayStrings.STR_DP_VER_TOOLTIP       ),
 #   SettingContents(key='keep_tmp',     type=SettingType.CHECK,     label=DisplayStrings.STR_KEEPTMP_TITLE,     tooltip=DisplayStrings.STR_KEEPTMP_TOOLTIP      )
-    SettingContents(key='skip_proc',    type=SettingType.CHECK,     label=DisplayStrings.STR_SKIPPROC_TITLE,    tooltip=DisplayStrings.STR_SKIPPROC_TOOLTIP     )
+    SettingContents(key='skip_proc',    type=SettingType.CHECK,     label=DisplayStrings.STR_SKIPPROC_TITLE,    tooltip=DisplayStrings.STR_SKIPPROC_TOOLTIP     ),
+    SettingContents(key='proc_ogg',     type=SettingType.CHECK,     label=DisplayStrings.STR_PROC_OGG,          tooltip=DisplayStrings.STR_PROC_OGG_TOOLTIP,    )
 ]
 
 
