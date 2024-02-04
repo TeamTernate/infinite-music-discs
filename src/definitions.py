@@ -314,9 +314,13 @@ class DiscListContents:
 
 #dataclass to store data to be passed to multiprocessing
 #  workers while converting files to ogg
+#also tells the process whether it should convert ogg files
+#  or not, TODO: redesign so that this doesn't need to contain
+#  the setting, or contains all settings
 @dataclass
 class MpTaskContents:
     args: str
+    proc_ogg: bool
     src_track: str
     tmp_track: str
     out_track: str

@@ -142,6 +142,9 @@ class VirtualGenerator():
         if settings.get('mix_mono', False):
             args += ' -ac 1'
 
+        # detect whether ogg files should be processed
+        proc_ogg = settings.get('proc_ogg', False)
+
         # prepare input file
         track_ext = track.split('/')[-1].split('.')[-1]
         tmp_track = os.path.join(self.tmp_path, internal_name + '.tmp.' + track_ext)
@@ -165,7 +168,7 @@ class VirtualGenerator():
         out_name = internal_name + '.ogg'
         out_track = os.path.join(self.tmp_path, out_name)
 
-        return MpTaskContents(args, track, tmp_track, out_track)
+        return MpTaskContents(args, proc_ogg, track, tmp_track, out_track)
 
 
 
@@ -176,9 +179,13 @@ class VirtualGenerator():
         #  add 'enable_log=False' to this constructor
         ffmpeg = pyffmpeg.FFmpeg()
 
-        # if(".ogg" in data.tmp_track):
-        #     shutil.copyfile(data.tmp_track, data.out_track)
-        #     return
+        # decide whether to convert or copy ogg source files
+        # copy by default, since FFmpeg sometimes fails to convert files,
+        #   and that causes pack generation to fail. Copying is more likely
+        #   to work
+        if(not data.proc_ogg and ".ogg" in data.tmp_track):
+            shutil.copyfile(data.tmp_track, data.out_track)
+            return
 
         #convert file
         try:
@@ -230,7 +237,7 @@ class VirtualGenerator():
 
         except FileNotFoundError:
             raise IMDException(Status.BAD_OGG_CONVERT)
-        
+
         except MutagenError:
             raise IMDException(Status.BAD_OGG_META)
 
