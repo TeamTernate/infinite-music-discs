@@ -105,15 +105,8 @@ class VirtualGenerator():
             arg = self.prepare_for_convert(e, settings)
             args.append(arg)
 
-        # use multiprocessing to run FFmpeg over many files in parallel
-        # ...or run them one-by-one if the user prefers (multiprocessing
-        #   sometimes doesn't work for everyone)
-        if(settings.get('skip_proc', False)):
-            for a in args:
-                self.convert_to_ogg(a)
-                convert_cb()
-
-        else:
+        # use multiprocessing to run FFmpeg over many files in parallel, if the user desires
+        if(settings.get('par_proc', False)):
             cpus = multiprocessing.cpu_count()
 
             with multiprocessing.Pool(processes=cpus) as pool:
@@ -125,6 +118,14 @@ class VirtualGenerator():
                 #   with imap, not map or starmap
                 for r in result:
                     convert_cb()
+
+        # otherwise, by default, run them one-by-one (multiprocessing doesn't work for
+        #   everyone and it's better to opt-in to an experimental feature than for the app
+        #   to break by default)
+        else:
+            for a in args:
+                self.convert_to_ogg(a)
+                convert_cb()
 
         # update entry list to point to converted files
         for (a, e) in zip(args, entry_list.entries):
