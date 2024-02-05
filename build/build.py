@@ -5,6 +5,7 @@
 #Script by link2_thepast
 
 import os
+import sys
 import subprocess
 import argparse
 
@@ -53,8 +54,9 @@ pyinstaller_cmd = [
 ]
 
 # Command to run nuitka
+# Command may need to change depending if this was run with 'python' or 'python3'
 nuitka_cmd = [
-    'python', '-m', 'nuitka', 'main.pyw',
+    f'{sys.executable}', '-m', 'nuitka', 'main.pyw',
     '-o', 'imd-gui.exe',
     '--output-dir=bin',
     '--remove-output',
