@@ -56,6 +56,8 @@ pyinstaller_cmd = [
 nuitka_cmd = [
     'python', '-m', 'nuitka', 'main.pyw',
     '-o', 'imd-gui.exe',
+    '--output-dir=bin',
+    '--remove-output',
     '--onefile',
     '--plugin-enable=pyside6',
     '--disable-console',
