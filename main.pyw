@@ -8,8 +8,6 @@
 #  successfully and which ones caused an error (if any)
 #TODO: display "converting track x/y" to indicate progress? necessary?
 
-#TODO: add ffmpeg speed <-> quality double-sided slider?
-
 #TODO: can you generate disc textures automatically using armor trims?
 
 #TODO: default mix_mono to on?

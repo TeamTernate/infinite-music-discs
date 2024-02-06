@@ -166,7 +166,12 @@ class VirtualDropdownSettingSelector(VirtualSettingSelector):
 
         self._parent.setObjectName("DROPDOWN")
         self._widget = QtWidgets.QComboBox(self)
-        self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
+
+        #set the minimum width of the combo box based on the length of the longest item
+        #used to just set the minimum width of the dropdown view, but then the combo
+        #  box itself sometimes cuts off the content which looks bad
+        # self._widget.view().setMinimumWidth(len(max(params, key=len) * 8))
+        self._widget.setMinimumWidth(len(max(params, key=len) * 10))
 
         self._widget.currentIndexChanged.connect(self.changed)
 
