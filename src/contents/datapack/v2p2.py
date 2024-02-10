@@ -7,7 +7,21 @@ from src.contents.datapack.v2p1 import DatapackContents_v2p1
 
 
 
-# functions
+# function tags
+tick = {
+    'path': ['data', 'minecraft', 'tags', 'functions', 'tick.json'],
+    'repeat': 'single',
+    'contents': \
+{
+    "values": [
+        "{datapack_name}:watchdog_setup_load_tick",
+        "{datapack_name}:register_players_tick",
+        "{datapack_name}:jukebox_event_tick"
+    ]
+}
+}
+
+# top-level functions
 
 help = {
     'path': ['data', '{datapack_name}', 'functions', 'help.mcfunction'],
@@ -28,6 +42,37 @@ tellraw @s [{{"text":"\\n[", "color":"gold"}}, {{"text":"i", "color":"aqua", "bo
 """
 }
 
+setup_load = {
+    'path': ['data', '{datapack_name}', 'functions', 'setup_load.mcfunction'],
+    'repeat': 'single',
+    'contents': \
+"""
+scoreboard objectives add imd_player_id dummy
+scoreboard objectives add imd_disc_id dummy
+scoreboard objectives add imd_rc_steps dummy
+scoreboard objectives add imd_play_time dummy
+scoreboard objectives add imd_stop_11_time dummy
+
+scoreboard objectives add imd_is_loaded dummy
+scoreboard players set #imd_is_loaded imd_is_loaded 1
+
+advancement revoke @a only {datapack_name}:placed_disc
+advancement revoke @a only {datapack_name}:placed_jukebox
+tellraw @a [{{"text":"Infinite Music Discs {dp_version_str} by link2_thepast", "color":"gold"}}]
+tellraw @a [{{"text":"Type ", "color":"gold"}}, {{"text":"/function {datapack_name}:help", "color":"yellow"}}, {{"text":" for help", "color":"gold"}}]
+"""
+}
+
+watchdog_setup_load_tick = {
+    'path': ['data', '{datapack_name}', 'functions', 'watchdog_setup_load_tick.mcfunction'],
+    'repeat': 'single',
+    'contents': \
+"""
+scoreboard objectives add imd_is_loaded dummy
+execute unless score #imd_is_loaded imd_is_loaded matches 1 run function {datapack_name}:setup_load
+"""
+}
+
 
 
 # See src.contents.datapack.v2p0 for info on this class structure
@@ -40,6 +85,9 @@ class DatapackContents_v2p2(DatapackContents_v2p1):
     def add_contents(self):
         super().add_contents()
 
+        self.tick = tick
         self.help = help
+        self.setup_load = setup_load
+        self.watchdog_setup_load_tick = watchdog_setup_load_tick
 
 
