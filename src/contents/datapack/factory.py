@@ -5,6 +5,7 @@
 
 from src.contents.datapack.v2p0 import DatapackContents_v2p0
 from src.contents.datapack.v2p1 import DatapackContents_v2p1
+from src.contents.datapack.v2p2 import DatapackContents_v2p2
 
 # Factory to select between different DatapackContents child
 #   classes. Uses pack_format to pick which datapack version to use
@@ -13,11 +14,13 @@ from src.contents.datapack.v2p1 import DatapackContents_v2p1
 #   with the given pack_format
 versions = [
     DatapackContents_v2p0,
-    DatapackContents_v2p1
+    DatapackContents_v2p1,
+    DatapackContents_v2p2
 ]
 
 def get(pack_format: int):
     for v in versions:
+        print(v.min_pack_format, pack_format)
         if v.min_pack_format <= pack_format:
             sel_version = v
 
