@@ -20,7 +20,6 @@ versions = [
 
 def get(pack_format: int):
     for v in versions:
-        print(v.min_pack_format, pack_format)
         if v.min_pack_format <= pack_format:
             sel_version = v
 
