@@ -7,6 +7,51 @@ from src.contents.datapack.v2p2 import DatapackContents_v2p2
 
 
 
+# top-level functions
+give_disc = {
+    'path': ['data', '{datapack_name}', 'functions', 'give_{entry.internal_name}.mcfunction'],
+    'repeat': 'copy',
+    'contents': \
+"""
+execute at @s run summon item ~ ~ ~ {{Item:{{id:"minecraft:music_disc_11", Count:1b, components:{{custom_model_data:{entry.custom_model_data}, hide_additional_tooltip:{{}}, lore:["{{\\"text\\":\\"{entry.title}\\", \\"color\\":\\"gray\\", \\"italic\\":false}}"]}}}}}}
+"""
+}
+
+jukebox_on_play = {
+    'path': ['data', '{datapack_name}', 'functions', 'jukebox_on_play.mcfunction'],
+    'repeat': 'single',
+    'contents': \
+"""
+tag @s add imd_is_playing
+execute if data block ~ ~ ~ RecordItem.components.minecraft:custom_model_data run tag @s add imd_has_custom_disc
+execute as @s[tag=imd_has_custom_disc] run function {datapack_name}:pre_play
+"""
+}
+
+pre_play = {
+    'path': ['data', '{datapack_name}', 'functions', 'pre_play.mcfunction'],
+    'repeat': 'single',
+    'contents': \
+"""
+execute store result score @s imd_disc_id run data get block ~ ~ ~ RecordItem.components.minecraft:custom_model_data
+function {datapack_name}:play_duration
+scoreboard players set @s imd_stop_11_time 3
+function {datapack_name}:watchdog_reset_tickcount
+execute as @a[distance=..64] run function {datapack_name}:register_jukebox_listener
+"""
+}
+
+set_disc_track = {
+    'path': ['data', '{datapack_name}', 'functions', 'set_disc_track.mcfunction'],
+    'repeat': 'copy_within',
+    'contents': \
+"""
+execute as @s if items entity @s weapon.mainhand minecraft:music_disc_11[custom_model_data={entry.custom_model_data}] run item replace entity @s weapon.mainhand with minecraft:music_disc_11[custom_model_data={entry.custom_model_data},hide_additional_tooltip={{}},lore=["{{\\"text\\":\\"{entry.title}\\", \\"color\\":\\"gray\\", \\"italic\\":false}}"]]
+"""
+}
+
+
+
 # See src.contents.datapack.v2p0 for info on this class structure
 class DatapackContents_v2p3(DatapackContents_v2p2):
 
@@ -16,5 +61,10 @@ class DatapackContents_v2p3(DatapackContents_v2p2):
 
     def add_contents(self):
         super().add_contents()
+
+        self.give_disc = give_disc
+        self.jukebox_on_play = jukebox_on_play
+        self.pre_play = pre_play
+        self.set_disc_track = set_disc_track
 
 
