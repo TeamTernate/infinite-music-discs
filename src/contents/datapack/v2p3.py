@@ -7,6 +7,28 @@ from src.contents.datapack.v2p2 import DatapackContents_v2p2
 
 
 
+# creeper loot table
+# custom_model_data must be specially encoded - datapack formatter
+#   will see the "(int)" prefix and cast it to an integer
+#   after string formatting
+creeper_music_entry_custom = {
+    'type':'minecraft:item',
+    'weight':1,
+    'name':'minecraft:music_disc_11',
+    'functions':[{
+        'function':'minecraft:set_components',
+        'components':{
+            'minecraft:custom_model_data':'(int){entry.custom_model_data}',
+            'minecraft:hide_additional_tooltip':{},
+            'minecraft:lore':[
+                '{{\"text\":\"{entry.title}\", \"color\":\"gray\", \"italic\":false}}'
+            ]
+        }
+    }]
+}
+
+
+
 # top-level functions
 give_disc = {
     'path': ['data', '{datapack_name}', 'functions', 'give_{entry.internal_name}.mcfunction'],
@@ -66,5 +88,9 @@ class DatapackContents_v2p3(DatapackContents_v2p2):
         self.jukebox_on_play = jukebox_on_play
         self.pre_play = pre_play
         self.set_disc_track = set_disc_track
+
+    #creeper.json
+    def get_creeper_music_entry_custom(self):
+        return creeper_music_entry_custom
 
 
