@@ -9,6 +9,7 @@ import pyffmpeg
 import tempfile
 import multiprocessing
 
+from math import ceil
 from typing import Callable
 
 from contextlib import contextmanager
@@ -234,7 +235,8 @@ class VirtualGenerator():
             length_s = meta_ogg.info.length
 
             #convert from seconds to Minecraft ticks (20 t/s)
-            length_t = int(length_s) * 20
+            #round up to avoid track getting cut off at the end
+            length_t = int(ceil(length_s * 20.0))
 
         except FileNotFoundError:
             raise IMDException(Status.BAD_OGG_CONVERT)

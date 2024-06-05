@@ -47,11 +47,6 @@ class GeneratorV2(VirtualGenerator):
             os.makedirs(datapack_name)
 
             with self.set_directory(datapack_name):
-                #write 'pack.mcmeta'
-                #reach into dict and set pack_format manually, since there's no str.format()
-                #  equivalent for integers
-                self.write_single(dp.get_pack_mcmeta(pack_format), locals())
-
                 #write 'creeper.json'
                 #generate JSON for music disc entries, then reach into dict and add them
                 #  to the drop pool manually
@@ -279,6 +274,11 @@ class GeneratorV2(VirtualGenerator):
     # use ** to expand fmt_dict into kwargs for formatting
     def fmt_str(self, str: str, fmt_dict):
         return str.format(**fmt_dict)
+    
+    # apply string formatting, but cast the result to int
+    # useful for pack_format, setting minecraft:custom_model_data, etc.
+    def fmt_int(self, int_str: str, fmt_dict):
+        return int(self.fmt_str(int_str, fmt_dict))
 
     # recursively apply string formatting to any string-type
     #   value in the given json dict or json sub-list
@@ -297,9 +297,18 @@ class GeneratorV2(VirtualGenerator):
 
         for k in iterator:
 
+            # object is a string - format
             if type(obj[k]) == str:
-                fmt_obj[k] = self.fmt_str(obj[k], fmt_dict)
+                # integer encoded as formatted string
+                if '(int){' in obj[k]:
+                    int_obj = obj[k].replace('(int){', '{')
+                    fmt_obj[k] = self.fmt_int(int_obj, fmt_dict)
 
+                # true string
+                else:
+                    fmt_obj[k] = self.fmt_str(obj[k], fmt_dict)
+
+            # object is a list or dict - continue recursing
             elif type(obj[k]) in [dict, list]:
                 fmt_obj[k] = self.fmt_json(obj[k], fmt_dict)
 

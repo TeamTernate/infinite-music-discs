@@ -8,13 +8,16 @@ from src.contents.datapack.base import VirtualDatapackContents
 
 
 # pack.mcmeta
+# pack_format must be specially encoded - datapack formatter
+#   will see the "(int)" prefix and cast it to an integer
+#   after string formatting
 pack_mcmeta = {
     'path': ['pack.mcmeta'],
     'repeat': 'single',
     'contents': \
 {
     "pack": {
-        "pack_format": -1,
+        "pack_format": '(int){pack_format}',
         "description": "Adds {dp_num_discs} custom music discs"
     }
 }
@@ -510,6 +513,7 @@ class DatapackContents_v2p0(VirtualDatapackContents):
         self.jukebox_tick_timers = jukebox_tick_timers
         self.on_placed_disc = on_placed_disc
         self.on_placed_jukebox = on_placed_jukebox
+        self.pack_mcmeta = pack_mcmeta
         self.play = play
         self.play_duration = play_duration
         self.pre_play = pre_play
@@ -532,13 +536,6 @@ class DatapackContents_v2p0(VirtualDatapackContents):
     @property
     def version_str(self):
         return f"v{self.version_major}.{self.version_minor}"
-
-    #pack.mcmeta
-    def get_pack_mcmeta(self, pack_format: int):
-        #reach inside and set pack_format manually since there's no
-        #  string formatting equivalent for integers
-        pack_mcmeta['contents']['pack']['pack_format'] = pack_format
-        return pack_mcmeta
 
     #creeper.json
     def get_creeper_music_entry_base(self):
