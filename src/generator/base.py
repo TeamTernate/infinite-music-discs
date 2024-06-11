@@ -145,7 +145,7 @@ class VirtualGenerator():
             args += ' -ac 1'
 
         # detect whether ogg files should be processed
-        proc_ogg = settings.get('proc_ogg', False)
+        proc_ogg = settings.get('proc_ogg', False) or settings.get('mix_mono', False)
 
         # prepare input file
         track_ext = track.split('/')[-1].split('.')[-1]
