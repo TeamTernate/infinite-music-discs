@@ -11,7 +11,7 @@ import json
 import shutil
 import zipfile
 
-import src.contents.datapack.v2.factory as dp_contents_factory
+import src.contents.datapack.factory as dp_contents_factory
 
 from src.definitions import Constants, Status, IMDException, DiscListContents, DisplayStrings
 from src.generator.base import VirtualGenerator
@@ -33,7 +33,8 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
 
         #read datapack contents
-        dp = dp_contents_factory.get(pack_format)
+        #FIXME: add datapack version setting or detect it from pack_format
+        dp = dp_contents_factory.get(pack_format, 2)
 
         #following variables are not explicitly used, but are included in locals()
         #  which gets used to format template strings from contents.datapack
