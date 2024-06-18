@@ -235,6 +235,12 @@ class VirtualGenerator():
             meta_ogg = OggVorbis(track_entry.track_file)
             length_s = meta_ogg.info.length
 
+            #round length so the final number isn't so ridiculous
+            #round to 4 decimal places to preserve enough information
+            #  to convert to ticks later (1 tick = 0.05 seconds, need
+            #  at least 3 decimal places to not lose precision)
+            length_s = round(length_s, 4)
+
         except FileNotFoundError:
             raise IMDException(Status.BAD_OGG_CONVERT)
 
