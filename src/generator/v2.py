@@ -310,7 +310,7 @@ class GeneratorV2(VirtualGenerator):
                     fmt_obj[k] = self.fmt_int(int_obj, fmt_dict)
 
                 # float encoded as formatted string
-                if '(float){' in obj[k]:
+                elif '(float){' in obj[k]:
                     flt_obj = obj[k].replace('(float){', '{')
                     fmt_obj[k] = self.fmt_float(flt_obj, fmt_dict)
 
