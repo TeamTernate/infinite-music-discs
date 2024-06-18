@@ -29,8 +29,8 @@ class GeneratorV2(VirtualGenerator):
         for i,entry in enumerate(entry_list.entries):
             entry.custom_model_data = i + offset + 1
 
-        datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
-        datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
+        pack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
+        datapack_name = pack_name + Constants.DATAPACK_SUFFIX
 
         #read datapack contents
         dp = dp_contents_factory.get(pack_format)
@@ -94,8 +94,8 @@ class GeneratorV2(VirtualGenerator):
         for i,entry in enumerate(entry_list.entries):
             entry.custom_model_data = i + offset + 1
 
-        resourcepack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
-        resourcepack_name = resourcepack_name + Constants.RESOURCEPACK_SUFFIX
+        pack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
+        resourcepack_name = pack_name + Constants.RESOURCEPACK_SUFFIX
 
         #write resourcepack
         try:
