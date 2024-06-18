@@ -279,6 +279,11 @@ class GeneratorV2(VirtualGenerator):
     # useful for pack_format, setting minecraft:custom_model_data, etc.
     def fmt_int(self, int_str: str, fmt_dict):
         return int(self.fmt_str(int_str, fmt_dict))
+    
+    # apply string formatting, but cast the result to float
+    # used for the data-driven jukebox "length_in_seconds"
+    def fmt_float(self, flt_str: str, fmt_dict):
+        return float(self.fmt_str(flt_str, fmt_dict))
 
     # recursively apply string formatting to any string-type
     #   value in the given json dict or json sub-list
@@ -303,6 +308,11 @@ class GeneratorV2(VirtualGenerator):
                 if '(int){' in obj[k]:
                     int_obj = obj[k].replace('(int){', '{')
                     fmt_obj[k] = self.fmt_int(int_obj, fmt_dict)
+
+                # float encoded as formatted string
+                if '(float){' in obj[k]:
+                    flt_obj = obj[k].replace('(float){', '{')
+                    fmt_obj[k] = self.fmt_float(flt_obj, fmt_dict)
 
                 # true string
                 else:

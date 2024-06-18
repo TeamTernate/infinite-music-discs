@@ -285,7 +285,8 @@ class DiscListEntryContents:
     track_file:         str = ""
     title:              str = ""
     internal_name:      str = ""
-    length:             int = 0
+    length_s:           float = 0.0
+    length_t:           int = 0
     custom_model_data:  int = 0
 
 #TODO: use iter and next so you don't have to iterate over entries?

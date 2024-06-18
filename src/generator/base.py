@@ -220,11 +220,12 @@ class VirtualGenerator():
         finally:
             os.chdir(orig_dir)
 
-    # detect track length so that the datapack can indicate
+    # detect track length so that the datapack can indicate that
     #   a disc is done playing. Because IMD overrides disc "11"
     #   we need custom logic to tell Minecraft the true length
     #   of a playing disc. Otherwise it would assume IMD discs
     #   are all the same length as "11"
+    # Returns disc length in seconds
     def get_track_length(self, track_entry: DiscListEntryContents):
         try:
             #capture track length in seconds
@@ -234,17 +235,18 @@ class VirtualGenerator():
             meta_ogg = OggVorbis(track_entry.track_file)
             length_s = meta_ogg.info.length
 
-            #convert from seconds to Minecraft ticks (20 t/s)
-            #round up to avoid track getting cut off at the end
-            length_t = int(ceil(length_s * 20.0))
-
         except FileNotFoundError:
             raise IMDException(Status.BAD_OGG_CONVERT)
 
         except MutagenError:
             raise IMDException(Status.BAD_OGG_META)
 
-        return length_t
+        return length_s
+
+    # Convert from seconds to Minecraft ticks (20t/s)
+    # Round up to avoid track getting cut off at the end
+    def seconds_to_ticks(self, length: float):
+        return int(ceil(length * 20.0))
 
     # replace quotes with a visually similar unicode character
     #   to prevent parsing errors in the final datapack

@@ -96,7 +96,7 @@ jukebox_song = {
 {
     "comparator_output": 11,
     "description": "{entry.title}",
-    "length_in_seconds": "(int){entry.length_s}",
+    "length_in_seconds": "(float){entry.length_s}",
     "sound_event": {
         "sound_id": "{resourcepack_name}:music_disc.{entry.internal_name}",
         "range": 64.0

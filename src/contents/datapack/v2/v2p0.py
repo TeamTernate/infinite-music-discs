@@ -455,7 +455,7 @@ disc_play_duration = {
     'repeat': 'copy',
     'contents': \
 """
-scoreboard players set @s imd_play_time {entry.length}
+scoreboard players set @s imd_play_time {entry.length_t}
 """
 }
 
