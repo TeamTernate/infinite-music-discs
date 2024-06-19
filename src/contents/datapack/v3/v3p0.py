@@ -101,17 +101,16 @@ creeper_json = {
 }
 
 # jukebox_song files
-#FIXME: add float/double formatting for the entry length in seconds
 jukebox_song = {
     'path': ['data', '{pack_name}', 'jukebox_song', '{entry.internal_name}.json'],
-    'repeat': 'single',
+    'repeat': 'copy',
     'contents': \
 {
     "comparator_output": 11,
     "description": "{entry.title}",
     "length_in_seconds": "(float){entry.length_s}",
     "sound_event": {
-        "sound_id": "{pack_name}:music_disc.{entry.internal_name}",
+        "sound_id": "music_disc.{entry.internal_name}",
         "range": 64.0
     }
 }
