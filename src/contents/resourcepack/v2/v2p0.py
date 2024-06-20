@@ -3,7 +3,7 @@
 #Infinite Music Discs resourcepack v1.0 contents
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-from src.contents.resourcepack.base import VirtualResourcepackContents
+from src.contents.base import VirtualPackContents
 
 
 
@@ -102,7 +102,7 @@ texture_path = ['assets', '{pack_name}', 'textures', 'item']
 
 
 # See src.contents.datapack.v2.v2p0 for info on this class structure
-class ResourcepackContents_v2p0(VirtualResourcepackContents):
+class ResourcepackContents_v2p0(VirtualPackContents):
 
     min_pack_format = 34
     version_major = 2

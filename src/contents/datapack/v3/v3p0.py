@@ -3,7 +3,7 @@
 #Infinite Music Discs datapack v3.0 contents
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-from src.contents.datapack.base import VirtualDatapackContents
+from src.contents.base import VirtualPackContents
 
 
 
@@ -157,7 +157,7 @@ execute at @s run summon item ~ ~ ~ {{Item:{{id:"minecraft:music_disc_11", Count
 
 
 # See src.contents.datapack.v2.v2p0 for info on this class structure
-class DatapackContents_v3p0(VirtualDatapackContents):
+class DatapackContents_v3p0(VirtualPackContents):
 
     min_pack_format = 48
     version_major = 3
