@@ -11,8 +11,8 @@ import json
 import shutil
 import zipfile
 
-import src.contents.datapack.factory as dp_contents_factory
-import src.contents.resourcepack.factory as rp_contents_factory
+from src.contents.datapack.factory import AbstractDatapackFactory
+from src.contents.resourcepack.factory import AbstractResourcepackFactory
 
 from src.definitions import Constants, Status, IMDException, DiscListContents, DisplayStrings
 from src.generator.base import VirtualGenerator
@@ -34,7 +34,7 @@ class GeneratorV2(VirtualGenerator):
         datapack_name = pack_name + Constants.DATAPACK_SUFFIX
 
         #read datapack contents
-        dp = dp_contents_factory.get(pack_format)
+        dp = AbstractDatapackFactory().get(pack_format)
 
         #following variables are not explicitly used, but are included in locals()
         #  which gets used to format template strings from contents.datapack
@@ -99,7 +99,7 @@ class GeneratorV2(VirtualGenerator):
         resourcepack_name = pack_name + Constants.RESOURCEPACK_SUFFIX
 
         #read pack contents
-        rp = rp_contents_factory.get(pack_format)
+        rp = AbstractResourcepackFactory().get(pack_format)
 
         #following variables are not explicitly used, but are included in locals()
         #  which gets used to format template strings from contents.resourcepack
