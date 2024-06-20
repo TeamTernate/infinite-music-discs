@@ -116,6 +116,18 @@ jukebox_song = {
 }
 }
 
+# function tags
+load = {
+    'path': ['data', 'minecraft', 'tags', 'function', 'load.json'],
+    'repeat': 'single',
+    'contents': \
+{
+    "values": [
+        "{pack_name}:setup_load"
+    ]
+}
+}
+
 # top-level functions
 give_all_discs = {
     'path': ['data', '{pack_name}', 'function', 'give_all_discs.mcfunction'],
@@ -144,6 +156,16 @@ tellraw @s [{{"text":"\\n[", "color":"gold"}}, {{"text":"i", "color":"aqua", "bo
 """
 }
 
+setup_load = {
+    'path': ['data', '{pack_name}', 'function', 'setup_load.mcfunction'],
+    'repeat': 'single',
+    'contents': \
+"""
+tellraw @a [{{"text":"Infinite Music Discs {dp_version_str} by link2_thepast", "color":"gold"}}]
+tellraw @a [{{"text":"Type ", "color":"gold"}}, {{"text":"/function {pack_name}:help", "color":"yellow"}}, {{"text":" for help", "color":"gold"}}]
+"""
+}
+
 # per-disc functions
 disc_give = {
     'path': ['data', '{pack_name}', 'function', 'give', '{entry.internal_name}.mcfunction'],
@@ -169,7 +191,9 @@ class DatapackContents_v3p0(VirtualPackContents):
         self.give_all_discs = give_all_discs
         self.help = help
         self.jukebox_song = jukebox_song
+        self.load = load
         self.pack_mcmeta = pack_mcmeta
+        self.setup_load = setup_load
         self.disc_give = disc_give
 
     @property
