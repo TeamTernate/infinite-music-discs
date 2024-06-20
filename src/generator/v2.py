@@ -112,10 +112,6 @@ class GeneratorV2(VirtualGenerator):
 
             #write resourcepack files to pack directory
             with self.set_directory(resourcepack_name):
-                # self.write_rp_framework(entry_list, pack_format)
-                # self.write_item_models(entry_list)
-                # self.copy_assets(entry_list)
-
                 # write 'sounds.json'
                 sounds_json_entries = {}
 
@@ -171,104 +167,6 @@ class GeneratorV2(VirtualGenerator):
 
         if use_zip:
             self.zip_pack(resourcepack_name)
-
-    # generate directory structure and framework files
-    def write_rp_framework(self, entry_list: DiscListContents, pack_format: int):
-
-        #build resourcepack directory tree
-        os.makedirs(os.path.join('assets', 'minecraft', 'atlases'))
-        os.makedirs(os.path.join('assets', 'minecraft', 'models', 'item'))
-        os.makedirs(os.path.join('assets', 'minecraft', 'sounds', 'records'))
-        os.makedirs(os.path.join('assets', 'minecraft', 'textures', 'item'))
-
-        #write 'pack.mcmeta'
-        with open(os.path.join('pack.mcmeta'), 'w', encoding='utf-8') as pack:
-            pack_mcmeta_json = {
-                'pack':{
-                    'pack_format':pack_format,
-                    'description':(Constants.RESOURCEPACK_DESC % len(entry_list.internal_names))
-                }
-            }
-
-            json.dump(pack_mcmeta_json, pack, indent=4)
-
-        #write 'sounds.json'
-        with self.set_directory(os.path.join('assets', 'minecraft')):
-            with open('sounds.json', 'w', encoding='utf-8') as sounds:
-                sounds_json = {}
-
-                for name in entry_list.internal_names:
-                    sound = {
-                        'sounds':[{
-                            'name':f'records/{name}',
-                            'stream':True
-                        }]
-                    }
-
-                    sounds_json[f'music_disc.{name}'] = sound
-
-                json.dump(sounds_json, sounds, indent=4)
-
-        #write items atlas
-        with self.set_directory(os.path.join('assets', 'minecraft', 'atlases')):
-            with open('blocks.json', 'w', encoding='utf-8') as blocks:
-                atlas_json = {
-                    "sources": [
-                        {
-                            "type": "directory",
-                            "source": "item",
-                            "prefix": "item/"
-                        }
-                    ]
-                }
-
-                json.dump(atlas_json, blocks, indent=4)
-
-    # generate item models
-    def write_item_models(self, entry_list: DiscListContents):
-
-        with self.set_directory(os.path.join('assets', 'minecraft', 'models', 'item')):
-
-            #write 'music_disc_11.json'
-            with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
-
-                override_list = []
-                for entry in entry_list.entries:
-
-                    override_list.append({
-                        'predicate': {'custom_model_data': entry.custom_model_data},
-                        'model': f'item/music_disc_{entry.internal_name}'
-                    })
-
-                music_disc_11_json = {
-                    'parent': 'item/generated',
-                    'textures': {'layer0': 'item/music_disc_11'},
-                    'overrides': override_list
-                }
-
-                json.dump(music_disc_11_json, music_disc_11, indent=4)
-
-            #write 'music_disc_*.json' files
-            for name in entry_list.internal_names:
-                with open(f'music_disc_{name}.json', 'w', encoding='utf-8') as music_disc:
-
-                    music_disc_json = {
-                        'parent':'item/generated',
-                        'textures':{'layer0': f'item/music_disc_{name}'}
-                    }
-
-                    json.dump(music_disc_json, music_disc, indent=4)
-
-    # generate assets dir
-    def copy_assets(self, entry_list: DiscListContents):
-
-        #copy sound and texture files
-        for entry in entry_list.entries:
-            with self.set_directory(os.path.join('assets', 'minecraft', 'sounds', 'records')):
-                shutil.copyfile(entry.track_file, f'{entry.internal_name}.ogg')
-
-            with self.set_directory(os.path.join('assets', 'minecraft', 'textures', 'item')):
-                shutil.copyfile(entry.texture_file, f'music_disc_{entry.internal_name}.png')
 
 
 
