@@ -325,10 +325,7 @@ class GeneratorV2(VirtualGenerator):
             # finally, format key and replace old key with new, formatted key
             if type(k) == str:
                 fmt_k = self.fmt_str(k, fmt_dict)
-                fmt_obj[fmt_k] = fmt_obj[k]
-
-                if(k != fmt_k):
-                    fmt_obj.pop(k)
+                fmt_obj[fmt_k] = fmt_obj.pop(k)
 
         return fmt_obj
 
