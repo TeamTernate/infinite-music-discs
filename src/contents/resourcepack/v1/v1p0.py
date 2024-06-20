@@ -92,9 +92,9 @@ music_disc_track_json = {
 }
 }
 
-# .ogg audio files and .png texture files are also copied into the resourcepack,
-#   but that isn't defined in this file
-# TODO: possible to define here to unify the resourcepack definition?
+# asset file locations
+sound_path = ['assets', 'minecraft', 'sounds', 'records']
+texture_path = ['assets', 'minecraft', 'textures', 'item']
 
 
 
@@ -133,3 +133,10 @@ class ResourcepackContents_v1p0(VirtualResourcepackContents):
     def get_music_disc_11_json(self, music_disc_11_entries: list):
         music_disc_11_json['contents']['overrides'] = music_disc_11_entries
         return music_disc_11_json
+
+    #asset file locations
+    def get_sound_path(self):
+        return sound_path
+
+    def get_texture_path(self):
+        return texture_path
