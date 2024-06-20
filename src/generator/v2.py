@@ -12,6 +12,7 @@ import shutil
 import zipfile
 
 import src.contents.datapack.factory as dp_contents_factory
+import src.contents.resourcepack.factory as rp_contents_factory
 
 from src.definitions import Constants, Status, IMDException, DiscListContents, DisplayStrings
 from src.generator.base import VirtualGenerator
@@ -97,6 +98,13 @@ class GeneratorV2(VirtualGenerator):
         pack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
         resourcepack_name = pack_name + Constants.RESOURCEPACK_SUFFIX
 
+        #read pack contents
+        rp = rp_contents_factory.get(pack_format)
+
+        #following variables are not explicitly used, but are included in locals()
+        #  which gets used to format template strings from contents.resourcepack
+        rp_num_discs = len(entry_list.entries)
+
         #write resourcepack
         try:
             self.delete_pack(resourcepack_name)
@@ -104,9 +112,50 @@ class GeneratorV2(VirtualGenerator):
 
             #write resourcepack files to pack directory
             with self.set_directory(resourcepack_name):
-                self.write_rp_framework(entry_list, pack_format)
-                self.write_item_models(entry_list)
-                self.copy_assets(entry_list)
+                # self.write_rp_framework(entry_list, pack_format)
+                # self.write_item_models(entry_list)
+                # self.copy_assets(entry_list)
+
+                # write 'sounds.json'
+                sounds_json_entries = {}
+
+                for entry in entry_list.entries:
+                    sounds_json_entries.update(self.fmt_json(rp.get_sounds_json_entry(), locals()))
+
+                sounds_json = rp.get_sounds_json(sounds_json_entries)
+                self.write_single(sounds_json, locals())
+
+                # write 'music_disc_11.json'
+                music_disc_11_entries = []
+
+                for entry in entry_list.entries:
+                    music_disc_11_entries.append(self.fmt_json(rp.get_music_disc_11_entry(), locals()))
+
+                music_disc_11_json = rp.get_music_disc_11_json(music_disc_11_entries)
+                self.write_single(music_disc_11_json, locals())
+
+                #write other data files
+                for rp_file in rp.contents:
+                    if rp_file['repeat'] == 'single':
+                        self.write_single(rp_file, locals())
+                    elif rp_file['repeat'] == 'copy':
+                        self.write_copy(rp_file, entry_list, locals())
+                    elif rp_file['repeat'] == 'copy_within':
+                        self.write_copy_within(rp_file, entry_list, locals())
+
+                #copy assets
+                sound_path = self.fmt_path(rp.get_sound_path(), locals())
+                texture_path = self.fmt_path(rp.get_texture_path(), locals())
+
+                os.makedirs(sound_path)
+                os.makedirs(texture_path)
+
+                for entry in entry_list.entries:
+                    with self.set_directory(sound_path):
+                        shutil.copyfile(entry.track_file, f'{entry.internal_name}.ogg')
+
+                    with self.set_directory(texture_path):
+                        shutil.copyfile(entry.texture_file, f'music_disc_{entry.internal_name}.png')
 
         except UnicodeEncodeError:
             raise IMDException(Status.BAD_UNICODE_CHAR)
