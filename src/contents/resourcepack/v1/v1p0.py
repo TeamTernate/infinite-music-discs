@@ -20,7 +20,6 @@ pack_mcmeta = {
 }
 }
 
-# minecraft namespace
 # atlases/blocks.json
 blocks_json = {
     'path': ['assets', 'minecraft', 'atlases', 'blocks.json'],
@@ -60,7 +59,6 @@ music_disc_11_json = {
 }
 }
 
-# pack namespace
 # sounds.json
 sounds_json_entries = {}
 
@@ -76,14 +74,14 @@ sounds_json_entry = {
 }
 
 sounds_json = {
-    'path': ['assets', '{pack_name}', 'sounds.json'],
+    'path': ['assets', 'minecraft', 'sounds.json'],
     'repeat': 'single',
     'contents': sounds_json_entries
 }
 
 # models/item/music_disc_<track>.json
 music_disc_track_json = {
-    'path': ['assets', '{pack_name}', 'models', 'item', 'music_disc_{entry.internal_name}.json'],
+    'path': ['assets', 'minecraft', 'models', 'item', 'music_disc_{entry.internal_name}.json'],
     'repeat': 'copy',
     'contents': \
 {
@@ -103,7 +101,7 @@ music_disc_track_json = {
 # See src.contents.datapack.v2.v2p0 for info on this class structure
 class ResourcepackContents_v1p0(VirtualResourcepackContents):
 
-    min_pack_format = 34
+    min_pack_format = 4
     version_major = 1
     version_minor = 0
 
