@@ -110,7 +110,7 @@ jukebox_song = {
     "description": "{entry.title}",
     "length_in_seconds": "(float){entry.length_s}",
     "sound_event": {
-        "sound_id": "music_disc.{entry.internal_name}",
+        "sound_id": "{pack_name}:music_disc.{entry.internal_name}",
         "range": 64.0
     }
 }

@@ -43,7 +43,7 @@ music_disc_11_entry = {
     "predicate": {
         "custom_model_data": '(int){entry.custom_model_data}'
     },
-    "model": "{pack_name}:item/music_disc_{entry.internal_name}"
+    "model": "item/music_disc_{entry.internal_name}"
 }
 
 music_disc_11_json = {
@@ -66,7 +66,7 @@ sounds_json_entry = {
     "music_disc.{entry.internal_name}": {
         "sounds": [
             {
-                "name": "{pack_name}:records/{entry.internal_name}",
+                "name": "records/{entry.internal_name}",
                 "stream": True
             }
         ]
@@ -87,7 +87,7 @@ music_disc_track_json = {
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "{pack_name}:item/music_disc_{entry.internal_name}"
+        "layer0": "item/music_disc_{entry.internal_name}"
     }
 }
 }
