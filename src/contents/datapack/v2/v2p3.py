@@ -3,7 +3,7 @@
 #Infinite Music Discs datapack v2.3 contents
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-from src.contents.datapack.v2p2 import DatapackContents_v2p2
+from src.contents.datapack.v2.v2p2 import DatapackContents_v2p2
 
 
 

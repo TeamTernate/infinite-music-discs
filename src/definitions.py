@@ -250,6 +250,7 @@ DigitNameDict = {
 
 #dictionary to associate game version : pack format version
 PackFormatsDict = {
+    '1.21':             {'dp':48, 'rp':34},
     '1.20.5 - 1.20.6':  {'dp':41, 'rp':32},
     '1.20.3 - 1.20.4':  {'dp':26, 'rp':22},
     '1.20.2':           {'dp':18, 'rp':18},
@@ -284,7 +285,8 @@ class DiscListEntryContents:
     track_file:         str = ""
     title:              str = ""
     internal_name:      str = ""
-    length:             int = 0
+    length_s:           float = 0.0
+    length_t:           int = 0
     custom_model_data:  int = 0
 
 #TODO: use iter and next so you don't have to iterate over entries?

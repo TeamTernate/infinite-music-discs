@@ -3,7 +3,7 @@
 #Infinite Music Discs datapack v2.0 contents
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
-from src.contents.datapack.base import VirtualDatapackContents
+from src.contents.base import VirtualPackContents
 
 
 
@@ -455,7 +455,7 @@ disc_play_duration = {
     'repeat': 'copy',
     'contents': \
 """
-scoreboard players set @s imd_play_time {entry.length}
+scoreboard players set @s imd_play_time {entry.length_t}
 """
 }
 
@@ -489,7 +489,7 @@ execute if data entity @s data.Listeners[0] run function {datapack_name}:{entry.
 #   versions. Future datapack versions may override this one if their
 #   min_pack_format requirement is met, and so on until the latest supported
 #   datapack version is found and used.
-class DatapackContents_v2p0(VirtualDatapackContents):
+class DatapackContents_v2p0(VirtualPackContents):
 
     min_pack_format = 12
     version_major = 2

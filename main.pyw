@@ -4,6 +4,9 @@
 #Infinite Music Discs datapack + resourcepack GUI execution module
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+#TODO: offer legacy datapack in 1.21+ ? some NBT paths in the jukebox block changed, may not be worth maintaining
+#TODO: consider indicating which version of the datapack/resourcepack you're going to get when you generate
+
 #TODO: tint DiscListEntries during pack generation, display pass/fail indicators showing which ones finished
 #  successfully and which ones caused an error (if any)
 #TODO: display "converting track x/y" to indicate progress? necessary?
