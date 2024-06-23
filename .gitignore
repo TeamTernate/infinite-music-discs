@@ -36,7 +36,12 @@ src/imd-tmp/*
 
 *.code-workspace
 
-#Linux build script
+# nuitka build
+main.build/*
+main.dist/*
+main.onefile-build/*
+
+# Linux build script
 tmp/*
 .environment_setup_complete
 build/tmp/*

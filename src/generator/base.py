@@ -9,6 +9,7 @@ import pyffmpeg
 import tempfile
 import multiprocessing
 
+from math import ceil
 from typing import Callable
 
 from contextlib import contextmanager
@@ -105,15 +106,8 @@ class VirtualGenerator():
             arg = self.prepare_for_convert(e, settings)
             args.append(arg)
 
-        # use multiprocessing to run FFmpeg over many files in parallel
-        # ...or run them one-by-one if the user prefers (multiprocessing
-        #   sometimes doesn't work for everyone)
-        if(settings.get('skip_proc', False)):
-            for a in args:
-                self.convert_to_ogg(a)
-                convert_cb()
-
-        else:
+        # use multiprocessing to run FFmpeg over many files in parallel, if the user desires
+        if(settings.get('par_proc', False)):
             cpus = multiprocessing.cpu_count()
 
             with multiprocessing.Pool(processes=cpus) as pool:
@@ -125,6 +119,14 @@ class VirtualGenerator():
                 #   with imap, not map or starmap
                 for r in result:
                     convert_cb()
+
+        # otherwise, by default, run them one-by-one (multiprocessing doesn't work for
+        #   everyone and it's better to opt-in to an experimental feature than for the app
+        #   to break by default)
+        else:
+            for a in args:
+                self.convert_to_ogg(a)
+                convert_cb()
 
         # update entry list to point to converted files
         for (a, e) in zip(args, entry_list.entries):
@@ -141,6 +143,9 @@ class VirtualGenerator():
 
         if settings.get('mix_mono', False):
             args += ' -ac 1'
+
+        # detect whether ogg files should be processed
+        proc_ogg = settings.get('proc_ogg', False) or settings.get('mix_mono', False)
 
         # prepare input file
         track_ext = track.split('/')[-1].split('.')[-1]
@@ -165,7 +170,7 @@ class VirtualGenerator():
         out_name = internal_name + '.ogg'
         out_track = os.path.join(self.tmp_path, out_name)
 
-        return MpTaskContents(args, track, tmp_track, out_track)
+        return MpTaskContents(args, proc_ogg, track, tmp_track, out_track)
 
 
 
@@ -176,9 +181,13 @@ class VirtualGenerator():
         #  add 'enable_log=False' to this constructor
         ffmpeg = pyffmpeg.FFmpeg()
 
-        # if(".ogg" in data.tmp_track):
-        #     shutil.copyfile(data.tmp_track, data.out_track)
-        #     return
+        # decide whether to convert or copy ogg source files
+        # copy by default, since FFmpeg sometimes fails to convert files,
+        #   and that causes pack generation to fail. Copying is more likely
+        #   to work
+        if(not data.proc_ogg and ".ogg" in data.tmp_track):
+            shutil.copyfile(data.tmp_track, data.out_track)
+            return
 
         #convert file
         try:
@@ -211,11 +220,12 @@ class VirtualGenerator():
         finally:
             os.chdir(orig_dir)
 
-    # detect track length so that the datapack can indicate
+    # detect track length so that the datapack can indicate that
     #   a disc is done playing. Because IMD overrides disc "11"
     #   we need custom logic to tell Minecraft the true length
     #   of a playing disc. Otherwise it would assume IMD discs
     #   are all the same length as "11"
+    # Returns disc length in seconds
     def get_track_length(self, track_entry: DiscListEntryContents):
         try:
             #capture track length in seconds
@@ -225,16 +235,24 @@ class VirtualGenerator():
             meta_ogg = OggVorbis(track_entry.track_file)
             length_s = meta_ogg.info.length
 
-            #convert from seconds to Minecraft ticks (20 t/s)
-            length_t = int(length_s) * 20
+            #round length so the final number isn't so ridiculous
+            #round to 4 decimal places to preserve enough information
+            #  to convert to ticks later (1 tick = 0.05 seconds, need
+            #  at least 3 decimal places to not lose precision)
+            length_s = round(length_s, 4)
 
         except FileNotFoundError:
             raise IMDException(Status.BAD_OGG_CONVERT)
-        
+
         except MutagenError:
             raise IMDException(Status.BAD_OGG_META)
 
-        return length_t
+        return length_s
+
+    # Convert from seconds to Minecraft ticks (20t/s)
+    # Round up to avoid track getting cut off at the end
+    def seconds_to_ticks(self, length: float):
+        return int(ceil(length * 20.0))
 
     # replace quotes with a visually similar unicode character
     #   to prevent parsing errors in the final datapack

@@ -1,1 +1,1 @@
-call ./build/build_wrapper_win.bat
+call ./build/build_wrapper_win.bat %*
