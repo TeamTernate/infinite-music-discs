@@ -5,20 +5,18 @@
 
 from typing import Any
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-from PySide6.QtCore import Qt, Signal, QSize, QPoint, QRect
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QPoint, QRect, QSize, Qt, Signal
 
 import src.generator.factory as generator_factory
-from src.definitions import Status, IMDException, DiscListContents
-from src.definitions import CSS_STYLESHEET
-
-from src.definitions import Assets, Constants, StyleProperties, StatusMessageDict, StatusStickyDict, GenerateButtonColorsDict
 from src.components.common import QRepolishMixin
+from src.components.save_load_tab import SaveLoadTab
 from src.components.settings_tab import SettingsList
 from src.components.tracks_tab import DiscList
-
+from src.definitions import (CSS_STYLESHEET, Assets, Constants,
+                             DiscListContents, GenerateButtonColorsDict,
+                             IMDException, Status, StatusMessageDict,
+                             StatusStickyDict, StyleProperties)
 
 
 #button for generating datapack/resourcepack
@@ -439,6 +437,9 @@ class CentralWidget(QtWidgets.QWidget):
         self._settingsList = SettingsList(self)
         self._settingsList.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
 
+        self._saveLoadTab = SaveLoadTab(self)
+        self._saveLoadTab.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+
         #tabs to switch between track list and settings
         tabs = QtWidgets.QTabWidget(self)
         tabs.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -453,6 +454,7 @@ class CentralWidget(QtWidgets.QWidget):
         tabs.setTabBar(tabBar)
         tabs.addTab(self._discList, "    Tracks    ")
         tabs.addTab(self._settingsList, "    Settings    ")
+        tabs.addTab(self._saveLoadTab, "    Save/Load    ")
         layout.addWidget(tabs, 0)
 
         #button to generate datapack/resourcepack
