@@ -11,7 +11,8 @@ import json
 import shutil
 import zipfile
 
-import src.contents.datapack.factory as dp_contents_factory
+from src.contents.datapack.factory import AbstractDatapackFactory
+from src.contents.resourcepack.factory import AbstractResourcepackFactory
 
 from src.definitions import Constants, Status, IMDException, DiscListContents, DisplayStrings
 from src.generator.base import VirtualGenerator
@@ -29,11 +30,11 @@ class GeneratorV2(VirtualGenerator):
         for i,entry in enumerate(entry_list.entries):
             entry.custom_model_data = i + offset + 1
 
-        datapack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
-        datapack_name = datapack_name + Constants.DATAPACK_SUFFIX
+        pack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
+        datapack_name = pack_name + Constants.DATAPACK_SUFFIX
 
         #read datapack contents
-        dp = dp_contents_factory.get(pack_format)
+        dp = AbstractDatapackFactory().get(pack_format)
 
         #following variables are not explicitly used, but are included in locals()
         #  which gets used to format template strings from contents.datapack
@@ -47,11 +48,6 @@ class GeneratorV2(VirtualGenerator):
             os.makedirs(datapack_name)
 
             with self.set_directory(datapack_name):
-                #write 'pack.mcmeta'
-                #reach into dict and set pack_format manually, since there's no str.format()
-                #  equivalent for integers
-                self.write_single(dp.get_pack_mcmeta(pack_format), locals())
-
                 #write 'creeper.json'
                 #generate JSON for music disc entries, then reach into dict and add them
                 #  to the drop pool manually
@@ -99,8 +95,15 @@ class GeneratorV2(VirtualGenerator):
         for i,entry in enumerate(entry_list.entries):
             entry.custom_model_data = i + offset + 1
 
-        resourcepack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
-        resourcepack_name = resourcepack_name + Constants.RESOURCEPACK_SUFFIX
+        pack_name = user_settings.get('name', Constants.DEFAULT_PACK_NAME)
+        resourcepack_name = pack_name + Constants.RESOURCEPACK_SUFFIX
+
+        #read pack contents
+        rp = AbstractResourcepackFactory().get(pack_format)
+
+        #following variables are not explicitly used, but are included in locals()
+        #  which gets used to format template strings from contents.resourcepack
+        rp_num_discs = len(entry_list.entries)
 
         #write resourcepack
         try:
@@ -109,9 +112,46 @@ class GeneratorV2(VirtualGenerator):
 
             #write resourcepack files to pack directory
             with self.set_directory(resourcepack_name):
-                self.write_rp_framework(entry_list, pack_format)
-                self.write_item_models(entry_list)
-                self.copy_assets(entry_list)
+                # write 'sounds.json'
+                sounds_json_entries = {}
+
+                for entry in entry_list.entries:
+                    sounds_json_entries.update(self.fmt_json(rp.get_sounds_json_entry(), locals()))
+
+                sounds_json = rp.get_sounds_json(sounds_json_entries)
+                self.write_single(sounds_json, locals())
+
+                # write 'music_disc_11.json'
+                music_disc_11_entries = []
+
+                for entry in entry_list.entries:
+                    music_disc_11_entries.append(self.fmt_json(rp.get_music_disc_11_entry(), locals()))
+
+                music_disc_11_json = rp.get_music_disc_11_json(music_disc_11_entries)
+                self.write_single(music_disc_11_json, locals())
+
+                #write other data files
+                for rp_file in rp.contents:
+                    if rp_file['repeat'] == 'single':
+                        self.write_single(rp_file, locals())
+                    elif rp_file['repeat'] == 'copy':
+                        self.write_copy(rp_file, entry_list, locals())
+                    elif rp_file['repeat'] == 'copy_within':
+                        self.write_copy_within(rp_file, entry_list, locals())
+
+                #copy assets
+                sound_path = self.fmt_path(rp.get_sound_path(), locals())
+                texture_path = self.fmt_path(rp.get_texture_path(), locals())
+
+                os.makedirs(sound_path)
+                os.makedirs(texture_path)
+
+                for entry in entry_list.entries:
+                    with self.set_directory(sound_path):
+                        shutil.copyfile(entry.track_file, f'{entry.internal_name}.ogg')
+
+                    with self.set_directory(texture_path):
+                        shutil.copyfile(entry.texture_file, f'music_disc_{entry.internal_name}.png')
 
         except UnicodeEncodeError:
             raise IMDException(Status.BAD_UNICODE_CHAR)
@@ -127,104 +167,6 @@ class GeneratorV2(VirtualGenerator):
 
         if use_zip:
             self.zip_pack(resourcepack_name)
-
-    # generate directory structure and framework files
-    def write_rp_framework(self, entry_list: DiscListContents, pack_format: int):
-
-        #build resourcepack directory tree
-        os.makedirs(os.path.join('assets', 'minecraft', 'atlases'))
-        os.makedirs(os.path.join('assets', 'minecraft', 'models', 'item'))
-        os.makedirs(os.path.join('assets', 'minecraft', 'sounds', 'records'))
-        os.makedirs(os.path.join('assets', 'minecraft', 'textures', 'item'))
-
-        #write 'pack.mcmeta'
-        with open(os.path.join('pack.mcmeta'), 'w', encoding='utf-8') as pack:
-            pack_mcmeta_json = {
-                'pack':{
-                    'pack_format':pack_format,
-                    'description':(Constants.RESOURCEPACK_DESC % len(entry_list.internal_names))
-                }
-            }
-
-            json.dump(pack_mcmeta_json, pack, indent=4)
-
-        #write 'sounds.json'
-        with self.set_directory(os.path.join('assets', 'minecraft')):
-            with open('sounds.json', 'w', encoding='utf-8') as sounds:
-                sounds_json = {}
-
-                for name in entry_list.internal_names:
-                    sound = {
-                        'sounds':[{
-                            'name':f'records/{name}',
-                            'stream':True
-                        }]
-                    }
-
-                    sounds_json[f'music_disc.{name}'] = sound
-
-                json.dump(sounds_json, sounds, indent=4)
-
-        #write items atlas
-        with self.set_directory(os.path.join('assets', 'minecraft', 'atlases')):
-            with open('blocks.json', 'w', encoding='utf-8') as blocks:
-                atlas_json = {
-                    "sources": [
-                        {
-                            "type": "directory",
-                            "source": "item",
-                            "prefix": "item/"
-                        }
-                    ]
-                }
-
-                json.dump(atlas_json, blocks, indent=4)
-
-    # generate item models
-    def write_item_models(self, entry_list: DiscListContents):
-
-        with self.set_directory(os.path.join('assets', 'minecraft', 'models', 'item')):
-
-            #write 'music_disc_11.json'
-            with open('music_disc_11.json', 'w', encoding='utf-8') as music_disc_11:
-
-                override_list = []
-                for entry in entry_list.entries:
-
-                    override_list.append({
-                        'predicate': {'custom_model_data': entry.custom_model_data},
-                        'model': f'item/music_disc_{entry.internal_name}'
-                    })
-
-                music_disc_11_json = {
-                    'parent': 'item/generated',
-                    'textures': {'layer0': 'item/music_disc_11'},
-                    'overrides': override_list
-                }
-
-                json.dump(music_disc_11_json, music_disc_11, indent=4)
-
-            #write 'music_disc_*.json' files
-            for name in entry_list.internal_names:
-                with open(f'music_disc_{name}.json', 'w', encoding='utf-8') as music_disc:
-
-                    music_disc_json = {
-                        'parent':'item/generated',
-                        'textures':{'layer0': f'item/music_disc_{name}'}
-                    }
-
-                    json.dump(music_disc_json, music_disc, indent=4)
-
-    # generate assets dir
-    def copy_assets(self, entry_list: DiscListContents):
-
-        #copy sound and texture files
-        for entry in entry_list.entries:
-            with self.set_directory(os.path.join('assets', 'minecraft', 'sounds', 'records')):
-                shutil.copyfile(entry.track_file, f'{entry.internal_name}.ogg')
-
-            with self.set_directory(os.path.join('assets', 'minecraft', 'textures', 'item')):
-                shutil.copyfile(entry.texture_file, f'music_disc_{entry.internal_name}.png')
 
 
 
@@ -279,6 +221,16 @@ class GeneratorV2(VirtualGenerator):
     # use ** to expand fmt_dict into kwargs for formatting
     def fmt_str(self, str: str, fmt_dict):
         return str.format(**fmt_dict)
+    
+    # apply string formatting, but cast the result to int
+    # useful for pack_format, setting minecraft:custom_model_data, etc.
+    def fmt_int(self, int_str: str, fmt_dict):
+        return int(self.fmt_str(int_str, fmt_dict))
+    
+    # apply string formatting, but cast the result to float
+    # used for the data-driven jukebox "length_in_seconds"
+    def fmt_float(self, flt_str: str, fmt_dict):
+        return float(self.fmt_str(flt_str, fmt_dict))
 
     # recursively apply string formatting to any string-type
     #   value in the given json dict or json sub-list
@@ -297,11 +249,30 @@ class GeneratorV2(VirtualGenerator):
 
         for k in iterator:
 
+            # object is a string - format
             if type(obj[k]) == str:
-                fmt_obj[k] = self.fmt_str(obj[k], fmt_dict)
+                # integer encoded as formatted string
+                if '(int){' in obj[k]:
+                    int_obj = obj[k].replace('(int){', '{')
+                    fmt_obj[k] = self.fmt_int(int_obj, fmt_dict)
 
+                # float encoded as formatted string
+                elif '(float){' in obj[k]:
+                    flt_obj = obj[k].replace('(float){', '{')
+                    fmt_obj[k] = self.fmt_float(flt_obj, fmt_dict)
+
+                # true string
+                else:
+                    fmt_obj[k] = self.fmt_str(obj[k], fmt_dict)
+
+            # object is a list or dict - continue recursing
             elif type(obj[k]) in [dict, list]:
                 fmt_obj[k] = self.fmt_json(obj[k], fmt_dict)
+
+            # finally, format key and replace old key with new, formatted key
+            if type(k) == str:
+                fmt_k = self.fmt_str(k, fmt_dict)
+                fmt_obj[fmt_k] = fmt_obj.pop(k)
 
         return fmt_obj
 

@@ -123,7 +123,7 @@ fi
 printf "%b %bBuilding package...%b\\n" "${INFO}" "${COL_LIGHT_YELLOW}"
 
 #Build the package, using the official instructions
-python3 ./build/build.py
+python3 ./build/build.py "$@"
 
 #Determine if build has succeeded or failed
 #Check exit code of previous command (0 -> succeeded)

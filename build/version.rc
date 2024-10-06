@@ -14,13 +14,13 @@ VSVersionInfo(
       [
       StringTable(
         u'040904B0',
-        [StringStruct(u'CompanyName', u'Team Ternate'),
-        StringStruct(u'FileDescription', u'Add lots of custom music discs to Minecraft'),
+        [StringStruct(u'CompanyName', u'{company_name}'),
+        StringStruct(u'FileDescription', u'{file_description}'),
         StringStruct(u'FileVersion', u'{version_literal}'),
         StringStruct(u'InternalName', u'imd-gui'),
-        StringStruct(u'LegalCopyright', u'Copyright (c) Team Ternate'),
+        StringStruct(u'LegalCopyright', u'{copyright}'),
         StringStruct(u'OriginalFilename', u'imd-gui.exe'),
-        StringStruct(u'ProductName', u'Infinite Music Discs Generator'),
+        StringStruct(u'ProductName', u'{product_name}'),
         StringStruct(u'ProductVersion', u'{version_literal}')])
       ]), 
     VarFileInfo([VarStruct(u'Translation', [1033, 1200])])

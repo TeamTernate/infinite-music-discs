@@ -590,7 +590,8 @@ class GeneratePackWorker(QtCore.QObject):
         #post-process tracks individually       
         for e in self._entry_list.entries:
             # e.track_file = self._generator.convert_to_ogg(e, self._settings)
-            e.length = self._generator.get_track_length(e)
+            e.length_s = self._generator.get_track_length(e)
+            e.length_t = self._generator.seconds_to_ticks(e.length_s)
             e.title = self._generator.sanitize(e)
             self.emit_update_progress()
 

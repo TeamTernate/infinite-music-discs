@@ -1,1 +1,1 @@
-python ./build/build.py
+python ./build/build.py %*
