@@ -19,6 +19,24 @@ execute at @s run summon item ~ ~ ~ {{Item:{{id:"minecraft:music_disc_11", Count
 
 
 
+# creeper loot table
+creeper_music_entry_custom = {
+    'type':'minecraft:item',
+    'weight':1,
+    'name':'minecraft:music_disc_11',
+    'functions':[{
+        'function':'minecraft:set_components',
+        'components':{
+            'minecraft:item_model':'{pack_name}:{entry.internal_name}',
+            'minecraft:jukebox_playable':{
+                'song':'{pack_name}:{entry.internal_name}'
+            }
+        }
+    }]
+}
+
+
+
 # See src.contents.datapack.v2.v2p0 for info on this class structure
 class DatapackContents_v3p1(DatapackContents_v3p0):
 
@@ -30,3 +48,6 @@ class DatapackContents_v3p1(DatapackContents_v3p0):
         super().add_contents()
 
         self.disc_give = disc_give
+
+    def get_creeper_music_entry_custom(self):
+        return creeper_music_entry_custom
