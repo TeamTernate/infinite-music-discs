@@ -79,7 +79,7 @@ if system == 'Windows':
         [zip.write(out_dir / f, Path('.') / f) for f in zip_files]
 
 else:
-    with tarfile.open(out_dir / zip_file_name, 'w') as zip:
+    with tarfile.open(out_dir / zip_file_name, 'w:gz') as zip:
         zip_files = ['example-disc.png', 'pack.png', bin_name, version_file_name]
         [zip.add(out_dir / f, Path('.') / f) for f in zip_files]
 
