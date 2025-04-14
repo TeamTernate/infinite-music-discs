@@ -6,12 +6,10 @@
 from src.contents.virtual_factories import VirtualPackFactory
 from src.contents.resourcepack.v2.v2p0 import ResourcepackContents_v2p0
 from src.contents.resourcepack.v2.v2p1 import ResourcepackContents_v2p1
-from src.contents.resourcepack.v2.v2p2 import ResourcepackContents_v2p2
 
 class Resourcepackv2Factory(VirtualPackFactory):
 
     versions = [
         ResourcepackContents_v2p0,
-        ResourcepackContents_v2p1,
-        ResourcepackContents_v2p2
+        ResourcepackContents_v2p1
     ]
