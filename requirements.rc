@@ -1,6 +1,6 @@
 pyinstaller~=5.13.2
 nuitka~=1.8.1
 pyffmpeg~=2.3.0.2
-PySide6==6.5.1
+PySide6>=6.5.1, <6.6.0
 mutagen~=1.47.0
 unidecode~=1.3.6
