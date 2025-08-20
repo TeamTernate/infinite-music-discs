@@ -5,7 +5,7 @@
 
 # app version
 MAJOR = 1
-MINOR = 9
+MINOR = 10
 PATCH = 0
 
 # legacy datapack version (final 1.x version)

@@ -38,9 +38,9 @@ creeper_music_entry_custom = {
 # See src.contents.datapack.v2.v2p0 for info on this class structure
 class DatapackContents_v3p2(DatapackContents_v3p1):
 
-    min_pack_format = 64
+    min_pack_format = 71
     version_major = 3
-    version_minor = 1
+    version_minor = 2
 
     def add_contents(self):
         super().add_contents()
