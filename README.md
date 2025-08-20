@@ -1,4 +1,4 @@
-![GitHub release (latest by date)](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/latest/total?label=downloads%20%28latest%29) ![GitHub all releases](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/total?label=total%20downloads) ![Static Badge](https://img.shields.io/badge/available_for-1.14_%E2%80%94_1.21-blue)
+![GitHub release (latest by date)](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/latest/total?label=downloads%20%28latest%29) ![GitHub all releases](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/total?label=total%20downloads) ![Static Badge](https://img.shields.io/badge/available_for-1.14_%E2%80%94_1.21.4-blue)
 
 # Infinite Music Discs
 A desktop app for adding lots of custom music discs to Minecraft. Use the app to create a resourcepack that adds new music tracks and disc textures, and a datapack with custom logic to play the new music discs. An example disc texture and a pack.png are provided alongside the app to get you started.
