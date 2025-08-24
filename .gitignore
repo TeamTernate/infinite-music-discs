@@ -2,6 +2,7 @@ bin/*
 build/build/*
 build/imd-gui/*
 release/*
+.venv/*
 
 *.png
 *.mp3
