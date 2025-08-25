@@ -1,4 +1,4 @@
-![GitHub release (latest by date)](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/latest/total?label=downloads%20%28latest%29) ![GitHub all releases](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/total?label=total%20downloads) ![Static Badge](https://img.shields.io/badge/available_for-1.14_%E2%80%94_1.21.4-blue)
+![GitHub release (latest by date)](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/latest/total?label=downloads%20%28latest%29) ![GitHub all releases](https://img.shields.io/github/downloads/TeamTernate/infinite-music-discs/total?label=total%20downloads) ![Static Badge](https://img.shields.io/badge/available_for-1.14_%E2%80%94_1.21.8-blue)
 
 # Infinite Music Discs
 A desktop app for adding lots of custom music discs to Minecraft. Use the app to create a resourcepack that adds new music tracks and disc textures, and a datapack with custom logic to play the new music discs. An example disc texture and a pack.png are provided alongside the app to get you started.
@@ -17,7 +17,7 @@ Written in Python with a PyQt6 frontend; compiled into runnable binaries with nu
 2. Extract the .zip to a work folder and run the executable inside.
 3. Follow the video instructions at [https://www.youtube.com/watch?v=zDXSKYvJXmg](https://www.youtube.com/watch?v=zDXSKYvJXmg) to generate a datapack/resourcepack pair. The datapack and resourcepack will be created in the same folder as the executable.
 
-### Linux:
+### Linux (Ubuntu 22.04 and compatible):
 1. Download `imd-gui-linux64.tar.gz` from the latest release, under Assets.
 2. Extract the tarball to a work folder, make `imd-gui` executable, and run it:
 ```bash
