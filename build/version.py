@@ -6,7 +6,7 @@
 # app version
 MAJOR = 1
 MINOR = 10
-PATCH = 0
+PATCH = 1
 
 # legacy datapack version (final 1.x version)
 DP_LEGACY_MAJOR = 1
