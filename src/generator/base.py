@@ -3,6 +3,7 @@
 #Infinite Music Discs generator module base class
 #Generation tool, datapack design, and resourcepack design by link2_thepast
 
+import logging
 import os
 import shutil
 import pyffmpeg
@@ -18,7 +19,7 @@ from mutagen.mp3 import MP3, HeaderNotFoundError
 from mutagen.oggvorbis import OggVorbis
 from src.definitions import Status, IMDException, DiscListContents, DiscListEntryContents, MpTaskContents
 
-
+logging.getLogger('pyffmpeg.FFmpeg').setLevel(logging.WARNING)
 
 class VirtualGenerator():
     def __init__(self):
