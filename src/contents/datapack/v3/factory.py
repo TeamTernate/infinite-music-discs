@@ -17,5 +17,6 @@ class Datapackv3Factory(VirtualPackFactory):
         DatapackContents_v3p0,
         DatapackContents_v3p1,
         DatapackContents_v3p2,
-        DatapackContents_v3p3
+        DatapackContents_v3p3,
+        DatapackContents_v3p4
     ]
