@@ -40,6 +40,7 @@ class GeneratorV2(VirtualGenerator):
         #  which gets used to format template strings from contents.datapack
         dp_version_str = dp.version_str
         dp_num_discs = len(entry_list.entries)
+        max_pack_format = getattr(dp, 'max_pack_format', Constants.DEFAULT_MAX_FORMAT)
         mix_mono_title = DisplayStrings.STR_MIXMONO_TITLE
 
         #write datapack
@@ -104,6 +105,7 @@ class GeneratorV2(VirtualGenerator):
         #following variables are not explicitly used, but are included in locals()
         #  which gets used to format template strings from contents.resourcepack
         rp_num_discs = len(entry_list.entries)
+        max_pack_format = getattr(rp, 'max_pack_format', Constants.DEFAULT_MAX_FORMAT)
 
         #write resourcepack
         try:
