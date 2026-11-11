@@ -44,6 +44,7 @@ class Constants():
     DATAPACK_DESC = 'Adds %d custom music discs'
     RESOURCEPACK_DESC = 'Adds %d custom music discs'
     DEFAULT_PACK_FORMAT = 8     #TODO: can this come from PackFormatsDict automatically?
+    DEFAULT_MAX_FORMAT = 999
 
 class Regexes():
     # QPosIntLineEdit
@@ -250,6 +251,7 @@ DigitNameDict = {
 
 #dictionary to associate game version : pack format version
 PackFormatsDict = {
+    '1.21.9 - 26.2':    {'dp':88, 'rp':69}
     '1.21.7 - 1.21.8':  {'dp':81, 'rp':64},
     '1.21.6':           {'dp':80, 'rp':63},
     '1.21.5':           {'dp':71, 'rp':55},
